@@ -1,0 +1,68 @@
+﻿<Window x:Class="Vignettes.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+   Title="Vignette Effect" Height="650" Width="790" WindowStartupLocation="CenterScreen"
+        Background="#666666" ResizeMode="NoResize">
+    <StackPanel Orientation="Horizontal">
+        <StackPanel Width="150">
+            <Button x:Name="bnOpen" Margin="10" Width="100" Height="30" Click="bnOpen_Click">Open Image</Button>
+            <Separator BorderBrush="Blue" />
+            <Label HorizontalAlignment="Left" FontWeight="Bold" Foreground="LightGoldenrodYellow">
+                Select Shape:</Label>
+            <ComboBox x:Name="comboTechnique" Margin="5 0 5 5" Width="120" 
+                      SelectionChanged="comboTechnique_SelectionChanged">
+                <ComboBoxItem>Circle</ComboBoxItem>
+                <ComboBoxItem>Ellipse</ComboBoxItem>
+                <ComboBoxItem>Diamond</ComboBoxItem>
+                <ComboBoxItem>Square</ComboBoxItem>
+                <ComboBoxItem>Rectangle</ComboBoxItem>
+            </ComboBox>
+            <Separator BorderBrush="Blue" />
+            <StackPanel x:Name="parameterGrid" Height="375">
+                <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
+               Foreground="LightGoldenrodYellow">Orientation (degrees):</Label>
+                <Slider x:Name="sliderAngle" Margin="10 0 10 0" Minimum="0" Maximum="180" Value="45"
+                TickFrequency="18" TickPlacement="TopLeft" ValueChanged="sliderAngle_ValueChanged"
+                ></Slider>
+                <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
+               Foreground="LightGoldenrodYellow">Coverage:</Label>
+                <Slider x:Name="sliderPercent" Margin="10 0 10 0" Minimum="50" Maximum="120" Value="80"
+                TickFrequency="7" TickPlacement="TopLeft" ValueChanged="sliderPercent_ValueChanged"
+                ></Slider>
+                <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
+               Foreground="LightGoldenrodYellow">Width of Blend Zone:</Label>
+                <!--Width of the band in pixels-->
+                <Slider x:Name="sliderBand" Margin="10 0 10 0" Minimum="3" Maximum="200" Value="40"
+                TickFrequency="19.8" TickPlacement="TopLeft" ValueChanged="sliderBand_ValueChanged"
+                ></Slider>
+                <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
+               Foreground="LightGoldenrodYellow">Smoothness of Blend:</Label>
+                <!--Number of steps in the blend-->
+                <Slider x:Name="sliderSteps" Margin="10 0 10 0" Minimum="4" Maximum="100" Value="40"
+                TickFrequency="10" TickPlacement="TopLeft" ValueChanged="sliderSteps_ValueChanged"
+                ></Slider>
+                <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
+               Foreground="LightGoldenrodYellow">X origin:</Label>
+                <Slider x:Name="sliderOriginX" Margin="10 0 10 0" Minimum="-100" Maximum="100" Value="0"
+                TickFrequency="20" TickPlacement="TopLeft" ValueChanged="sliderOriginX_ValueChanged"
+                ></Slider>
+                <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
+               Foreground="LightGoldenrodYellow">Y origin:</Label>
+                <Slider x:Name="sliderOriginY" Margin="10 0 10 0" Minimum="-100" Maximum="100" Value="0"
+                TickFrequency="20" TickPlacement="TopLeft" ValueChanged="sliderOriginY_ValueChanged"
+                ></Slider>
+                <Label Margin="0 5 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
+               Foreground="LightGoldenrodYellow">Vignette Color:</Label>
+                <Button x:Name="bnColour" Height="30" Width="30" Click="bnColour_Click"> </Button>
+            </StackPanel>
+            <Separator BorderBrush="Blue" />
+            <Button x:Name="bnSaveImage" Margin="10 20" Width="100" Height="30" IsEnabled="False" Click="bnSaveImage_Click">
+                Save Image</Button>
+        </StackPanel>
+        <Border Width="604" Height="604" BorderBrush="LightGoldenrodYellow" BorderThickness="2" >
+            <Image x:Name="img" Width="600" Height="600" Stretch="Uniform" VerticalAlignment="Center" 
+               HorizontalAlignment="Center" />
+        </Border>
+    </StackPanel>
+</Window>
+
