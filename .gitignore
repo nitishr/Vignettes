@@ -27,4 +27,5 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-*.sln.docstates
+*.sln.docstates*
+*.csproj.vs10x
