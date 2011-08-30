@@ -183,7 +183,7 @@ namespace Vignettes
             _imageWeights.Clear();
             _borderWeights.Clear();
 
-            double a0, b0, aLast, bLast, aEll, bEll;
+            double aEll, bEll;
             double stepSize = BandPixels * 1.0 / NumberSteps;
             double bandPixelsBy2 = 0.5 * BandPixels;
             double arguFactor = Math.PI / BandPixels;
@@ -191,8 +191,8 @@ namespace Vignettes
             double vignetteHeight = _height * Coverage / 100.0;
             double vwb2 = vignetteWidth * 0.5;
             double vhb2 = vignetteHeight * 0.5;
-            a0 = vwb2 - bandPixelsBy2;
-            b0 = vhb2 - bandPixelsBy2;
+            double a0 = vwb2 - bandPixelsBy2;
+            double b0 = vhb2 - bandPixelsBy2;
 
             // For a circle or square, both 'major' and 'minor' axes are identical
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
@@ -221,8 +221,8 @@ namespace Vignettes
             }
             else// if (Shape == VignetteShape.Diamond)
             {
-                aLast = vwb2 + bandPixelsBy2;
-                bLast = b0 * aLast / a0;
+                double aLast = vwb2 + bandPixelsBy2;
+                double bLast = b0 * aLast / a0;
                 double stepXdiamond = (aLast - a0) / NumberSteps;
                 double stepYdiamond = (bLast - b0) / NumberSteps;
 
@@ -256,13 +256,12 @@ namespace Vignettes
             // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
             //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
             //  October 1983, Pages 217-236].
-            double wei1, wei2, arg, argCosVal;
             for (int i = 0; i < NumberSteps; ++i)
             {
-                arg = arguFactor * (_midfigureMajorAxisValues[i] - a0);
-                argCosVal = Math.Cos(arg);
-                wei1 = 0.5 * (1.0 + argCosVal);
-                wei2 = 0.5 * (1.0 - argCosVal);
+                double arg = arguFactor * (_midfigureMajorAxisValues[i] - a0);
+                double argCosVal = Math.Cos(arg);
+                double wei1 = 0.5 * (1.0 + argCosVal);
+                double wei2 = 0.5 * (1.0 - argCosVal);
                 _imageWeights.Add(wei1);
                 _borderWeights.Add(wei2);
             }
@@ -273,15 +272,12 @@ namespace Vignettes
         /// </summary>
         private void ApplyEffectCircleEllipseDiamond()
         {
-            int k, el, w1, w2;
-            byte r, g, b;
+            int el;
             double wb2 = _width * 0.5 + Xcentre * _width * GeometryFactor;
             double hb2 = _height * 0.5 + Ycentre * _height * GeometryFactor;
             double thetaRadians = Angle * Math.PI / 180.0;
             double cos = Math.Cos(thetaRadians);
             double sin = Math.Sin(thetaRadians);
-            double xprime, yprime, potential1, potential2, potential;
-            double factor1, factor2, factor3, factor4;
             byte redBorder = BorderColour.R;
             byte greenBorder = BorderColour.G;
             byte blueBorder = BorderColour.B;
@@ -289,19 +285,22 @@ namespace Vignettes
             // Loop over the number of pixels
             for (el = 0; el < _height; ++el)
             {
-                w2 = _width * el;
+                int w2 = _width * el;
+                int k;
                 for (k = 0; k < _width; ++k)
                 {
                     // This is the usual rotation formula, along with translation.
                     // I could have perhaps used the Transform feature of WPF.
-                    xprime = (k - wb2) * cos + (el - hb2) * sin;
-                    yprime = -(k - wb2) * sin + (el - hb2) * cos;
+                    double xprime = (k - wb2) * cos + (el - hb2) * sin;
+                    double yprime = -(k - wb2) * sin + (el - hb2) * cos;
 
-                    factor1 = 1.0 * Math.Abs(xprime) / _majorAxisValues[0];
-                    factor2 = 1.0 * Math.Abs(yprime) / _minorAxisValues[0];
-                    factor3 = 1.0 * Math.Abs(xprime) / _majorAxisValues[NumberSteps];
-                    factor4 = 1.0 * Math.Abs(yprime) / _minorAxisValues[NumberSteps];
+                    double factor1 = 1.0 * Math.Abs(xprime) / _majorAxisValues[0];
+                    double factor2 = 1.0 * Math.Abs(yprime) / _minorAxisValues[0];
+                    double factor3 = 1.0 * Math.Abs(xprime) / _majorAxisValues[NumberSteps];
+                    double factor4 = 1.0 * Math.Abs(yprime) / _minorAxisValues[NumberSteps];
 
+                    double potential1;
+                    double potential2;
                     if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse)
                     {
                         // Equations for the circle / ellipse. 
@@ -316,8 +315,11 @@ namespace Vignettes
                         potential1 = factor1 + factor2 - 1.0;
                         potential2 = factor3 + factor4 - 1.0;
                     }
-                    w1 = w2 + k;
+                    int w1 = w2 + k;
 
+                    byte r;
+                    byte g;
+                    byte b;
                     if (potential1 <= 0.0)
                     {
                         // Point is within the inner circle / ellipse / diamond
@@ -335,13 +337,14 @@ namespace Vignettes
                     else
                     {
                         // Point is in between the outermost and innermost circles / ellipses / diamonds
-                        int j, j1;
+                        int j;
 
                         for (j = 1; j < NumberSteps; ++j)
                         {
                             factor1 = Math.Abs(xprime) / _majorAxisValues[j];
                             factor2 = Math.Abs(yprime) / _minorAxisValues[j];
 
+                            double potential;
                             if (Shape == VignetteShape.Circle ||
                                 Shape == VignetteShape.Ellipse)
                             {
@@ -353,7 +356,7 @@ namespace Vignettes
                             }
                             if (potential < 0.0) break;
                         }
-                        j1 = j - 1;
+                        int j1 = j - 1;
                         // The formulas where the weights are applied to the image, and border.
                         r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + redBorder * _borderWeights[j1]);
                         g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + greenBorder * _borderWeights[j1]);
@@ -372,16 +375,14 @@ namespace Vignettes
         private void ApplyEffectRectangleSquare()
         {
             Rect rect1 = new Rect(), rect2 = new Rect(), rect3 = new Rect();
-            Point point = new Point();
-            int k, el, w1, w2;
-            byte r, g, b;
+            var point = new Point();
+            int el;
 
             double wb2 = _width * 0.5 + Xcentre * _width * GeometryFactor;
             double hb2 = _height * 0.5 + Ycentre * _height * GeometryFactor;
             double thetaRadians = Angle * Math.PI / 180.0;
             double cos = Math.Cos(thetaRadians);
             double sin = Math.Sin(thetaRadians);
-            double xprime, yprime, potential;
             byte redBorder = BorderColour.R;
             byte greenBorder = BorderColour.G;
             byte blueBorder = BorderColour.B;
@@ -397,14 +398,15 @@ namespace Vignettes
 
             for (el = 0; el < _height; ++el)
             {
-                w2 = _width * el;
+                int w2 = _width * el;
+                int k;
                 for (k = 0; k < _width; ++k)
                 {
                     // The usual rotation-translation formula
-                    xprime = (k - wb2) * cos + (el - hb2) * sin;
-                    yprime = -(k - wb2) * sin + (el - hb2) * cos;
+                    double xprime = (k - wb2) * cos + (el - hb2) * sin;
+                    double yprime = -(k - wb2) * sin + (el - hb2) * cos;
 
-                    potential = 0.0;
+                    double potential = 0.0;
                     point.X = Math.Abs(xprime);
                     point.Y = Math.Abs(yprime);
 
@@ -416,8 +418,11 @@ namespace Vignettes
                     if (!rect2.Contains(point))
                         potential = 2.0; // Arbitrary positive number = - N1
 
-                    w1 = w2 + k;
+                    int w1 = w2 + k;
 
+                    byte r;
+                    byte g;
+                    byte b;
                     if (potential < -1.0) // Arbitrary negative number, greater than N1
                     {
                         // Point is within the inner square / rectangle,
@@ -435,7 +440,7 @@ namespace Vignettes
                     else
                     {
                         // Point is in between outermost and innermost squares / rectangles
-                        int j, j1;
+                        int j;
 
                         for (j = 1; j < NumberSteps; ++j)
                         {
@@ -447,7 +452,7 @@ namespace Vignettes
                             if (rect3.Contains(point))
                                 break;
                         }
-                        j1 = j - 1;
+                        int j1 = j - 1;
                         r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + redBorder * _borderWeights[j1]);
                         g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + greenBorder * _borderWeights[j1]);
                         b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + blueBorder * _borderWeights[j1]);
@@ -465,13 +470,13 @@ namespace Vignettes
         private void SaveImage()
         {
             // First, create the image to be saved
-            int bitsPerPixel = 24, i1;
+            const int bitsPerPixel = 24;
             int stride = (_width * bitsPerPixel + 7) / 8;
-            byte[] pixelsToWrite = new byte[stride * _height];
+            var pixelsToWrite = new byte[stride * _height];
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
-                i1 = i / 3;
+                int i1 = i / 3;
                 pixelsToWrite[i] = _pixRedModified[i1];
                 pixelsToWrite[i + 1] = _pixGreenModified[i1];
                 pixelsToWrite[i + 2] = _pixBlueModified[i1];
@@ -482,7 +487,7 @@ namespace Vignettes
 
             // Then, save the image
             string extn = Path.GetExtension(FileNameToSave);
-            FileStream fs = new FileStream(FileNameToSave, FileMode.Create);
+            var fs = new FileStream(FileNameToSave, FileMode.Create);
             if (extn == ".png")
             {
                 // Save as PNG
