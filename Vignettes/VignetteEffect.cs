@@ -43,57 +43,40 @@ namespace Vignettes
     /// </summary>
     class VignetteEffect
     {
-        List<byte> pixRedOrig;       // List of red pixels in original image.
-        List<byte> pixGreenOrig;     // List of green pixels in original image.
-        List<byte> pixBlueOrig;      // List of blue pixels in original image.
-        List<byte> pixRedModified;   // List of red pixels in modified image.
-        List<byte> pixGreenModified; // List of green pixels in modified image.
-        List<byte> pixBlueModified;  // List of blue pixels in modified image.
-        List<double> aVals;          // Major axis value of the vignette shape.
-        List<double> bVals;          // Minor axis value of the vignette shape.
-        List<double> aValsMidPoints; // Major axis of mid-figures of the vignette shape.
-        List<double> bValsMidPoints; // Minor axis of mid-figures of the vignette shape.
-        List<double> weight1;        // Weights for the original image.
-        List<double> weight2;        // Weights for the border colour.
-        int dpi;                     // DPI for the image for saving.
-        int width;                   // Width of image.
-        int height;                  // Height of image.
-        double geometryFactor;       // See note below, in the constructor.
-        ModeOfOperation mode;        // Either display mode or save mode.        
-        MainWindow mainWin;          // Main Window object.
+        // Regarding the variable "geometryFactor": 
+        // - This is not a magic number. This is the factor by which the x-Centre and 
+        //   y-Centre slider values are to be multiplied so as to cause the following:
+        //   When the x-Centre slider is at its midpoint, the vignette should be centred 
+        //   at the midpoint of the image. When the x-Centre slider is at its extreme right
+        //   point, the vignette centre should be along the right edge of the image. When the
+        //   x-Centre slider is at its extreme left point, the vignette centre should be 
+        //   along the left edge of the image. 
+        //   Similarly with the y-Centre slider.
+        //   So, the factor of multiplication is (Half-of the width)/(Maximum value of slider)
+        //    = 0.5 / 100.0
+        private const double GeometryFactor = 0.5 / 100.0;
+        private const int Dpi = 72;
+
+        List<byte> _pixRedOrig = new List<byte>();
+        List<byte> _pixGreenOrig = new List<byte>();
+        List<byte> _pixBlueOrig = new List<byte>();
+        List<byte> _pixRedModified = new List<byte>();
+        List<byte> _pixGreenModified = new List<byte>();
+        List<byte> _pixBlueModified = new List<byte>();
+        readonly List<double> _majorAxisValues = new List<double>();
+        readonly List<double> _minorAxisValues = new List<double>();
+        readonly List<double> _midfigureMajorAxisValues = new List<double>();
+        readonly List<double> _midfigureMinorAxisValues = new List<double>();
+        readonly List<double> _imageWeights = new List<double>();
+        readonly List<double> _borderWeights = new List<double>();
+        int _width;                   // Width of image.
+        int _height;                  // Height of image.
+        ModeOfOperation _mode;        // Either display mode or save mode.        
+        readonly MainWindow _mainWin;          // Main Window object.
 
         public VignetteEffect(MainWindow main)
         {
-            pixRedOrig = new List<byte>();
-            pixGreenOrig = new List<byte>();
-            pixBlueOrig = new List<byte>();
-            pixRedModified = new List<byte>();
-            pixGreenModified = new List<byte>();
-            pixBlueModified = new List<byte>();
-
-            mainWin = main;
-
-            aVals = new List<double>();
-            bVals = new List<double>();
-            aValsMidPoints = new List<double>();
-            bValsMidPoints = new List<double>();
-            weight1 = new List<double>();
-            weight2 = new List<double>();
-
-            // Regarding the variable "geometryFactor": 
-            // - This is not a magic number. This is the factor by which the x-Centre and 
-            //   y-Centre slider values are to be multiplied so as to cause the following:
-            //   When the x-Centre slider is at its midpoint, the vignette should be centred 
-            //   at the midpoint of the image. When the x-Centre slider is at its extreme right
-            //   point, the vignette centre should be along the right edge of the image. When the
-            //   x-Centre slider is at its extreme left point, the vignette centre should be 
-            //   along the left edge of the image. 
-            //   Similarly with the y-Centre slider.
-            //   So, the factor of multiplication is (Half-of the width)/(Maximum value of slider)
-            //    = 0.5 / 100.0
-            geometryFactor = 0.5/100.0;
-
-            dpi = 72; // I guess this suffices
+            _mainWin = main;
         }
 
         /// <summary>
@@ -155,15 +138,15 @@ namespace Vignettes
             ref List<byte> redModified, ref List<byte> greenModified, ref List<byte> blueModified, 
             ModeOfOperation modeOfOperation)
         {
-            pixRedOrig = redOrig;
-            pixGreenOrig = greenOrig;
-            pixBlueOrig = blueOrig;
-            width = wid;
-            height = hei;
-            pixRedModified = redModified;
-            pixGreenModified = greenModified;
-            pixBlueModified = blueModified;
-            mode = modeOfOperation;
+            _pixRedOrig = redOrig;
+            _pixGreenOrig = greenOrig;
+            _pixBlueOrig = blueOrig;
+            _width = wid;
+            _height = hei;
+            _pixRedModified = redModified;
+            _pixGreenModified = greenModified;
+            _pixBlueModified = blueModified;
+            _mode = modeOfOperation;
         }
 
         /// <summary>
@@ -178,9 +161,9 @@ namespace Vignettes
             else // if (Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
                 ApplyEffectRectangleSquare();
 
-            if (mode == ModeOfOperation.DisplayMode) // Send back the pixels to display the image.
+            if (_mode == ModeOfOperation.DisplayMode) // Send back the pixels to display the image.
             {                
-                mainWin.UpdateImage(ref pixRedModified, ref pixGreenModified, ref pixBlueModified);
+                _mainWin.UpdateImage(ref _pixRedModified, ref _pixGreenModified, ref _pixBlueModified);
             }
             else // if (mode == ModeOfOperation.SaveMode) // Save the image onto the specified file.
             {
@@ -193,19 +176,19 @@ namespace Vignettes
         /// </summary>
         private void SetupParameters()
         {
-            aVals.Clear();
-            bVals.Clear();
-            aValsMidPoints.Clear();
-            bValsMidPoints.Clear();
-            weight1.Clear();
-            weight2.Clear();
+            _majorAxisValues.Clear();
+            _minorAxisValues.Clear();
+            _midfigureMajorAxisValues.Clear();
+            _midfigureMinorAxisValues.Clear();
+            _imageWeights.Clear();
+            _borderWeights.Clear();
 
             double a0, b0, aLast, bLast, aEll, bEll;
             double stepSize = BandPixels * 1.0 / NumberSteps;
             double bandPixelsBy2 = 0.5 * BandPixels;
             double arguFactor = Math.PI / BandPixels;
-            double vignetteWidth = width * Coverage / 100.0;
-            double vignetteHeight = height * Coverage / 100.0;
+            double vignetteWidth = _width * Coverage / 100.0;
+            double vignetteHeight = _height * Coverage / 100.0;
             double vwb2 = vignetteWidth * 0.5;
             double vhb2 = vignetteHeight * 0.5;
             a0 = vwb2 - bandPixelsBy2;
@@ -225,15 +208,15 @@ namespace Vignettes
                 {
                     aEll = a0 + stepSize * i;
                     bEll = b0 + stepSize * i;
-                    aVals.Add(aEll);
-                    bVals.Add(bEll);
+                    _majorAxisValues.Add(aEll);
+                    _minorAxisValues.Add(bEll);
                 }
                 for (int i = 0; i < NumberSteps; ++i)
                 {
                     aEll = a0 + stepSize * (i + 0.5);
                     bEll = b0 + stepSize * (i + 0.5);
-                    aValsMidPoints.Add(aEll);
-                    bValsMidPoints.Add(bEll);
+                    _midfigureMajorAxisValues.Add(aEll);
+                    _midfigureMinorAxisValues.Add(bEll);
                 }
             }
             else// if (Shape == VignetteShape.Diamond)
@@ -247,15 +230,15 @@ namespace Vignettes
                 {
                     aEll = a0 + stepXdiamond * i;
                     bEll = b0 + stepYdiamond * i;
-                    aVals.Add(aEll);
-                    bVals.Add(bEll);
+                    _majorAxisValues.Add(aEll);
+                    _minorAxisValues.Add(bEll);
                 }
                 for (int i = 0; i <= NumberSteps; ++i)
                 {
                     aEll = a0 + stepXdiamond * (i + 0.5);
                     bEll = b0 + stepYdiamond * (i + 0.5);
-                    aValsMidPoints.Add(aEll);
-                    bValsMidPoints.Add(bEll);
+                    _midfigureMajorAxisValues.Add(aEll);
+                    _midfigureMinorAxisValues.Add(bEll);
                 }
             }
 
@@ -276,12 +259,12 @@ namespace Vignettes
             double wei1, wei2, arg, argCosVal;
             for (int i = 0; i < NumberSteps; ++i)
             {
-                arg = arguFactor * (aValsMidPoints[i] - a0);
+                arg = arguFactor * (_midfigureMajorAxisValues[i] - a0);
                 argCosVal = Math.Cos(arg);
                 wei1 = 0.5 * (1.0 + argCosVal);
                 wei2 = 0.5 * (1.0 - argCosVal);
-                weight1.Add(wei1);
-                weight2.Add(wei2);
+                _imageWeights.Add(wei1);
+                _borderWeights.Add(wei2);
             }
         }
 
@@ -292,8 +275,8 @@ namespace Vignettes
         {
             int k, el, w1, w2;
             byte r, g, b;
-            double wb2 = width * 0.5 + Xcentre * width * geometryFactor;
-            double hb2 = height * 0.5 + Ycentre * height * geometryFactor;
+            double wb2 = _width * 0.5 + Xcentre * _width * GeometryFactor;
+            double hb2 = _height * 0.5 + Ycentre * _height * GeometryFactor;
             double thetaRadians = Angle * Math.PI / 180.0;
             double cos = Math.Cos(thetaRadians);
             double sin = Math.Sin(thetaRadians);
@@ -304,20 +287,20 @@ namespace Vignettes
             byte blueBorder = BorderColour.B;
 
             // Loop over the number of pixels
-            for (el = 0; el < height; ++el)
+            for (el = 0; el < _height; ++el)
             {
-                w2 = width * el;
-                for (k = 0; k < width; ++k)
+                w2 = _width * el;
+                for (k = 0; k < _width; ++k)
                 {
                     // This is the usual rotation formula, along with translation.
                     // I could have perhaps used the Transform feature of WPF.
                     xprime = (k - wb2) * cos + (el - hb2) * sin;
                     yprime = -(k - wb2) * sin + (el - hb2) * cos;
 
-                    factor1 = 1.0 * Math.Abs(xprime) / aVals[0];
-                    factor2 = 1.0 * Math.Abs(yprime) / bVals[0];
-                    factor3 = 1.0 * Math.Abs(xprime) / aVals[NumberSteps];
-                    factor4 = 1.0 * Math.Abs(yprime) / bVals[NumberSteps];
+                    factor1 = 1.0 * Math.Abs(xprime) / _majorAxisValues[0];
+                    factor2 = 1.0 * Math.Abs(yprime) / _minorAxisValues[0];
+                    factor3 = 1.0 * Math.Abs(xprime) / _majorAxisValues[NumberSteps];
+                    factor4 = 1.0 * Math.Abs(yprime) / _minorAxisValues[NumberSteps];
 
                     if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse)
                     {
@@ -338,9 +321,9 @@ namespace Vignettes
                     if (potential1 <= 0.0)
                     {
                         // Point is within the inner circle / ellipse / diamond
-                        r = pixRedOrig[w1];
-                        g = pixGreenOrig[w1];
-                        b = pixBlueOrig[w1];
+                        r = _pixRedOrig[w1];
+                        g = _pixGreenOrig[w1];
+                        b = _pixBlueOrig[w1];
                     }
                     else if (potential2 >= 0.0)
                     {
@@ -356,8 +339,8 @@ namespace Vignettes
 
                         for (j = 1; j < NumberSteps; ++j)
                         {
-                            factor1 = Math.Abs(xprime) / aVals[j];
-                            factor2 = Math.Abs(yprime) / bVals[j];
+                            factor1 = Math.Abs(xprime) / _majorAxisValues[j];
+                            factor2 = Math.Abs(yprime) / _minorAxisValues[j];
 
                             if (Shape == VignetteShape.Circle ||
                                 Shape == VignetteShape.Ellipse)
@@ -372,13 +355,13 @@ namespace Vignettes
                         }
                         j1 = j - 1;
                         // The formulas where the weights are applied to the image, and border.
-                        r = (byte)(pixRedOrig[w1] * weight1[j1] + redBorder * weight2[j1]);
-                        g = (byte)(pixGreenOrig[w1] * weight1[j1] + greenBorder * weight2[j1]);
-                        b = (byte)(pixBlueOrig[w1] * weight1[j1] + blueBorder * weight2[j1]);
+                        r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + redBorder * _borderWeights[j1]);
+                        g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + greenBorder * _borderWeights[j1]);
+                        b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + blueBorder * _borderWeights[j1]);
                     }
-                    pixRedModified[w1] = r;
-                    pixGreenModified[w1] = g;
-                    pixBlueModified[w1] = b;
+                    _pixRedModified[w1] = r;
+                    _pixGreenModified[w1] = g;
+                    _pixBlueModified[w1] = b;
                 }
             }
         }
@@ -393,8 +376,8 @@ namespace Vignettes
             int k, el, w1, w2;
             byte r, g, b;
 
-            double wb2 = width * 0.5 + Xcentre * width * geometryFactor;
-            double hb2 = height * 0.5 + Ycentre * height * geometryFactor;
+            double wb2 = _width * 0.5 + Xcentre * _width * GeometryFactor;
+            double hb2 = _height * 0.5 + Ycentre * _height * GeometryFactor;
             double thetaRadians = Angle * Math.PI / 180.0;
             double cos = Math.Cos(thetaRadians);
             double sin = Math.Sin(thetaRadians);
@@ -405,17 +388,17 @@ namespace Vignettes
 
             rect1.X = 0.0;
             rect1.Y = 0.0;
-            rect1.Width = aVals[0];
-            rect1.Height = bVals[0];
+            rect1.Width = _majorAxisValues[0];
+            rect1.Height = _minorAxisValues[0];
             rect2.X = 0.0;
             rect2.Y = 0.0;
-            rect2.Width = aVals[NumberSteps];
-            rect2.Height = bVals[NumberSteps];
+            rect2.Width = _majorAxisValues[NumberSteps];
+            rect2.Height = _minorAxisValues[NumberSteps];
 
-            for (el = 0; el < height; ++el)
+            for (el = 0; el < _height; ++el)
             {
-                w2 = width * el;
-                for (k = 0; k < width; ++k)
+                w2 = _width * el;
+                for (k = 0; k < _width; ++k)
                 {
                     // The usual rotation-translation formula
                     xprime = (k - wb2) * cos + (el - hb2) * sin;
@@ -438,9 +421,9 @@ namespace Vignettes
                     if (potential < -1.0) // Arbitrary negative number, greater than N1
                     {
                         // Point is within the inner square / rectangle,
-                        r = pixRedOrig[w1];
-                        g = pixGreenOrig[w1];
-                        b = pixBlueOrig[w1];
+                        r = _pixRedOrig[w1];
+                        g = _pixGreenOrig[w1];
+                        b = _pixBlueOrig[w1];
                     }
                     else if (potential > 1.0) // Arbitrary positive number lesser than - N1
                     {
@@ -458,20 +441,20 @@ namespace Vignettes
                         {
                             rect3.X = 0.0;
                             rect3.Y = 0.0;
-                            rect3.Width = aVals[j];
-                            rect3.Height = bVals[j];
+                            rect3.Width = _majorAxisValues[j];
+                            rect3.Height = _minorAxisValues[j];
 
                             if (rect3.Contains(point))
                                 break;
                         }
                         j1 = j - 1;
-                        r = (byte)(pixRedOrig[w1] * weight1[j1] + redBorder * weight2[j1]);
-                        g = (byte)(pixGreenOrig[w1] * weight1[j1] + greenBorder * weight2[j1]);
-                        b = (byte)(pixBlueOrig[w1] * weight1[j1] + blueBorder * weight2[j1]);
+                        r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + redBorder * _borderWeights[j1]);
+                        g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + greenBorder * _borderWeights[j1]);
+                        b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + blueBorder * _borderWeights[j1]);
                     }
-                    pixRedModified[w1] = r;
-                    pixGreenModified[w1] = g;
-                    pixBlueModified[w1] = b;
+                    _pixRedModified[w1] = r;
+                    _pixGreenModified[w1] = g;
+                    _pixBlueModified[w1] = b;
                 }
             }
         }
@@ -483,18 +466,18 @@ namespace Vignettes
         {
             // First, create the image to be saved
             int bitsPerPixel = 24, i1;
-            int stride = (width * bitsPerPixel + 7) / 8;
-            byte[] pixelsToWrite = new byte[stride * height];
+            int stride = (_width * bitsPerPixel + 7) / 8;
+            byte[] pixelsToWrite = new byte[stride * _height];
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
                 i1 = i / 3;
-                pixelsToWrite[i] = pixRedModified[i1];
-                pixelsToWrite[i + 1] = pixGreenModified[i1];
-                pixelsToWrite[i + 2] = pixBlueModified[i1];
+                pixelsToWrite[i] = _pixRedModified[i1];
+                pixelsToWrite[i + 1] = _pixGreenModified[i1];
+                pixelsToWrite[i + 2] = _pixBlueModified[i1];
             }
 
-            BitmapSource imageToSave = BitmapSource.Create(width, height, dpi, dpi, PixelFormats.Rgb24,
+            BitmapSource imageToSave = BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24,
                 null, pixelsToWrite, stride);
 
             // Then, save the image
