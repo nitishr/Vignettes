@@ -163,13 +163,10 @@ namespace Vignettes
 
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    _majorAxisValues.Add(a0 + stepXdiamond * i);
-                    _minorAxisValues.Add(b0 + stepYdiamond * i);
-                }
-                for (int i = 0; i <= NumberOfGradationSteps; ++i)
-                {
-                    _midfigureMajorAxisValues.Add(a0 + stepXdiamond * (i + 0.5));
-                    _midfigureMinorAxisValues.Add(b0 + stepYdiamond * (i + 0.5));
+                    AddDiamondAxisValue(_majorAxisValues, a0, stepXdiamond, i);
+                    AddDiamondAxisValue(_minorAxisValues, b0, stepYdiamond, i);
+                    AddDiamondAxisValue(_midfigureMajorAxisValues, a0, stepXdiamond, i + 0.5);
+                    AddDiamondAxisValue(_midfigureMinorAxisValues, b0, stepYdiamond, i + 0.5);
                 }
             }
 
@@ -192,6 +189,11 @@ namespace Vignettes
                 _imageWeights.Add(0.5 * (1.0 + ArgCosVal(a0, i)));
                 _borderWeights.Add(0.5 * (1.0 - ArgCosVal(a0, i)));
             }
+        }
+
+        private static void AddDiamondAxisValue(List<double> axisValues, double axisValue, double step, double stepMultiplier)
+        {
+            axisValues.Add(axisValue + step*stepMultiplier);
         }
 
         private void AddAxisValue(List<double> axisValues, double axisValue, double stepSizeMultiplier)
