@@ -207,11 +207,7 @@ namespace Vignettes
 
         private double HalfOfBandWidthInPixels
         {
-            get
-            {
-                double bandPixelsBy2 = 0.5*BandWidthInPixels;
-                return bandPixelsBy2;
-            }
+            get { return 0.5*BandWidthInPixels; }
         }
 
         private void ApplyEffectCircleEllipseDiamond()
