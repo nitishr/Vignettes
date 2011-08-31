@@ -13,9 +13,6 @@ using System.IO;
 
 namespace Vignettes
 {
-    /// <summary>
-    /// Enum for the vignette shape. There are five possible vignette shapes.
-    /// </summary>
     enum VignetteShape
     {
         Circle, 
@@ -25,22 +22,12 @@ namespace Vignettes
         Rectangle
     };
 
-    /// <summary>
-    /// Enum for the mode of operation of the vignette. There are two modes:
-    ///  Display Mode - To improve the application response, we do all visible vignette operations 
-    ///  on a scaled image (max dimensions 600 x 600).
-    ///  Save Mode - Here, we perform the vignette operations on the original image (with original 
-    ///  dimensions), and save the image. 
-    /// </summary>
     internal enum ModeOfOperation
     {
         DisplayMode,
         SaveMode
     };
 
-    /// <summary>
-    /// Class to implement the vignette effect. 
-    /// </summary>
     class VignetteEffect
     {
         // Regarding the variable "geometryFactor": 
@@ -70,69 +57,34 @@ namespace Vignettes
         readonly List<double> _midfigureMinorAxisValues = new List<double>();
         readonly List<double> _imageWeights = new List<double>();
         readonly List<double> _borderWeights = new List<double>();
-        int _width;                   // Width of image.
-        int _height;                  // Height of image.
-        ModeOfOperation _mode;        // Either display mode or save mode.        
-        readonly MainWindow _mainWin;          // Main Window object.
+        int _width;
+        int _height;
+        ModeOfOperation _mode;
+        readonly MainWindow _mainWin;
 
         public VignetteEffect(MainWindow main)
         {
             _mainWin = main;
         }
 
-        /// <summary>
-        /// Orientation of the Ellipse, Diamond, Square or Rectangle in degrees. 
-        /// This parameter is not of relevance for the Circle vignette.
-        /// </summary>
-        public double Angle { get; set; }
+        public double OrientationInDegrees { get; set; } // This parameter is not of relevance for the Circle vignette.
 
-        /// <summary>
-        /// Coverage of the vignette in percentage of the image dimension (width or height).
-        /// </summary>
-        public double Coverage { get; set; }
+        public double CoveragePercent { get; set; }
 
-        /// <summary>
-        /// Width of the "band" between the inner "original image" region and the outer
-        /// "border" region. This width is measured in pixels.
-        /// </summary>
-        public int BandPixels { get; set; }
+        public int BandWidthInPixels { get; set; }
 
-        /// <summary>
-        /// Number of steps of "gradation" to be accommodated within the above parameter BandPixels.
-        /// This is just a number, and has no units.
-        /// </summary>
-        public int NumberSteps { get; set; }
+        public int NumberOfGradationSteps { get; set; }
 
-        /// <summary>
-        /// X Offset of the centre of rotation in terms of percentage with respect to half the 
-        /// width of the image.
-        /// </summary>
-        public int Xcentre { get; set; }
+        public int CenterXOffsetPercent { get; set; } // with respect to half the width of the image.
 
-        /// <summary>
-        /// Y Offset of the centre of rotation in terms of percentage with respect to half the 
-        /// height of the image.
-        /// </summary>
-        public int Ycentre { get; set; }
+        public int CenterYOffsetPercent { get; set; } // with respect to half the height of the image.
 
-        /// <summary>
-        /// Border Colour of the vignette. We consider only R, G, B values here. Alpha value is ignored.
-        /// </summary>
-        public Color BorderColour { get; set; }
+        public Color BorderColor { get; set; } // We consider only R, G, B values here. Alpha value is ignored.
 
-        /// <summary>
-        /// Shape of the Vignette - one of Circle, Ellipse, Diamond, Rectangle or Square.
-        /// </summary>
         public VignetteShape Shape { get; set; }
 
-        /// <summary>
-        /// Name of the file for saving.
-        /// </summary>
         public string FileNameToSave { get; set; }
 
-        /// <summary>
-        /// Method to transfer pixels from the main window to the vignette class.
-        /// </summary>
         public void TransferImagePixels(
             ref List<byte> redOrig, ref List<byte> greenOrig, ref List<byte> blueOrig,
             int wid, int hei,
@@ -150,9 +102,6 @@ namespace Vignettes
             _mode = modeOfOperation;
         }
 
-        /// <summary>
-        /// Method to apply the vignette.
-        /// </summary>
         public void ApplyEffect()
         {
             SetupParameters();
@@ -172,9 +121,6 @@ namespace Vignettes
             }
         }
 
-        /// <summary>
-        /// Set up the different parameters.
-        /// </summary>
         private void SetupParameters()
         {
             _majorAxisValues.Clear();
@@ -185,11 +131,11 @@ namespace Vignettes
             _borderWeights.Clear();
 
             double aEll, bEll;
-            double stepSize = BandPixels * 1.0 / NumberSteps;
-            double bandPixelsBy2 = 0.5 * BandPixels;
-            double arguFactor = Math.PI / BandPixels;
-            double vignetteWidth = _width * Coverage / 100.0;
-            double vignetteHeight = _height * Coverage / 100.0;
+            double stepSize = BandWidthInPixels * 1.0 / NumberOfGradationSteps;
+            double bandPixelsBy2 = 0.5 * BandWidthInPixels;
+            double arguFactor = Math.PI / BandWidthInPixels;
+            double vignetteWidth = _width * CoveragePercent / 100.0;
+            double vignetteHeight = _height * CoveragePercent / 100.0;
             double vwb2 = vignetteWidth * 0.5;
             double vhb2 = vignetteHeight * 0.5;
             double a0 = vwb2 - bandPixelsBy2;
@@ -205,14 +151,14 @@ namespace Vignettes
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                 Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
             {
-                for (int i = 0; i <= NumberSteps; ++i)
+                for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
                     aEll = a0 + stepSize * i;
                     bEll = b0 + stepSize * i;
                     _majorAxisValues.Add(aEll);
                     _minorAxisValues.Add(bEll);
                 }
-                for (int i = 0; i < NumberSteps; ++i)
+                for (int i = 0; i < NumberOfGradationSteps; ++i)
                 {
                     aEll = a0 + stepSize * (i + 0.5);
                     bEll = b0 + stepSize * (i + 0.5);
@@ -224,17 +170,17 @@ namespace Vignettes
             {
                 double aLast = vwb2 + bandPixelsBy2;
                 double bLast = b0 * aLast / a0;
-                double stepXdiamond = (aLast - a0) / NumberSteps;
-                double stepYdiamond = (bLast - b0) / NumberSteps;
+                double stepXdiamond = (aLast - a0) / NumberOfGradationSteps;
+                double stepYdiamond = (bLast - b0) / NumberOfGradationSteps;
 
-                for (int i = 0; i <= NumberSteps; ++i)
+                for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
                     aEll = a0 + stepXdiamond * i;
                     bEll = b0 + stepYdiamond * i;
                     _majorAxisValues.Add(aEll);
                     _minorAxisValues.Add(bEll);
                 }
-                for (int i = 0; i <= NumberSteps; ++i)
+                for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
                     aEll = a0 + stepXdiamond * (i + 0.5);
                     bEll = b0 + stepYdiamond * (i + 0.5);
@@ -257,7 +203,7 @@ namespace Vignettes
             // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
             //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
             //  October 1983, Pages 217-236].
-            for (int i = 0; i < NumberSteps; ++i)
+            for (int i = 0; i < NumberOfGradationSteps; ++i)
             {
                 double arg = arguFactor * (_midfigureMajorAxisValues[i] - a0);
                 double argCosVal = Math.Cos(arg);
@@ -268,20 +214,17 @@ namespace Vignettes
             }
         }
 
-        /// <summary>
-        /// Method to apply the Circular, Elliptical or Diamond-shaped vignette on an image.
-        /// </summary>
         private void ApplyEffectCircleEllipseDiamond()
         {
             int el;
-            double wb2 = _width * 0.5 + Xcentre * _width * GeometryFactor;
-            double hb2 = _height * 0.5 + Ycentre * _height * GeometryFactor;
-            double thetaRadians = Angle * Math.PI / 180.0;
+            double wb2 = _width * 0.5 + CenterXOffsetPercent * _width * GeometryFactor;
+            double hb2 = _height * 0.5 + CenterYOffsetPercent * _height * GeometryFactor;
+            double thetaRadians = OrientationInDegrees * Math.PI / 180.0;
             double cos = Math.Cos(thetaRadians);
             double sin = Math.Sin(thetaRadians);
-            byte redBorder = BorderColour.R;
-            byte greenBorder = BorderColour.G;
-            byte blueBorder = BorderColour.B;
+            byte redBorder = BorderColor.R;
+            byte greenBorder = BorderColor.G;
+            byte blueBorder = BorderColor.B;
 
             // Loop over the number of pixels
             for (el = 0; el < _height; ++el)
@@ -297,8 +240,8 @@ namespace Vignettes
 
                     double factor1 = 1.0 * Math.Abs(xprime) / _majorAxisValues[0];
                     double factor2 = 1.0 * Math.Abs(yprime) / _minorAxisValues[0];
-                    double factor3 = 1.0 * Math.Abs(xprime) / _majorAxisValues[NumberSteps];
-                    double factor4 = 1.0 * Math.Abs(yprime) / _minorAxisValues[NumberSteps];
+                    double factor3 = 1.0 * Math.Abs(xprime) / _majorAxisValues[NumberOfGradationSteps];
+                    double factor4 = 1.0 * Math.Abs(yprime) / _minorAxisValues[NumberOfGradationSteps];
 
                     double potential1;
                     double potential2;
@@ -340,7 +283,7 @@ namespace Vignettes
                         // Point is in between the outermost and innermost circles / ellipses / diamonds
                         int j;
 
-                        for (j = 1; j < NumberSteps; ++j)
+                        for (j = 1; j < NumberOfGradationSteps; ++j)
                         {
                             factor1 = Math.Abs(xprime) / _majorAxisValues[j];
                             factor2 = Math.Abs(yprime) / _minorAxisValues[j];
@@ -370,23 +313,20 @@ namespace Vignettes
             }
         }
 
-        /// <summary>
-        /// Method to apply the Rectangular or Square-shaped vignette on an image.
-        /// </summary>
         private void ApplyEffectRectangleSquare()
         {
             Rect rect1 = new Rect(), rect2 = new Rect(), rect3 = new Rect();
             var point = new Point();
             int el;
 
-            double wb2 = _width * 0.5 + Xcentre * _width * GeometryFactor;
-            double hb2 = _height * 0.5 + Ycentre * _height * GeometryFactor;
-            double thetaRadians = Angle * Math.PI / 180.0;
+            double wb2 = _width * 0.5 + CenterXOffsetPercent * _width * GeometryFactor;
+            double hb2 = _height * 0.5 + CenterYOffsetPercent * _height * GeometryFactor;
+            double thetaRadians = OrientationInDegrees * Math.PI / 180.0;
             double cos = Math.Cos(thetaRadians);
             double sin = Math.Sin(thetaRadians);
-            byte redBorder = BorderColour.R;
-            byte greenBorder = BorderColour.G;
-            byte blueBorder = BorderColour.B;
+            byte redBorder = BorderColor.R;
+            byte greenBorder = BorderColor.G;
+            byte blueBorder = BorderColor.B;
 
             rect1.X = 0.0;
             rect1.Y = 0.0;
@@ -394,8 +334,8 @@ namespace Vignettes
             rect1.Height = _minorAxisValues[0];
             rect2.X = 0.0;
             rect2.Y = 0.0;
-            rect2.Width = _majorAxisValues[NumberSteps];
-            rect2.Height = _minorAxisValues[NumberSteps];
+            rect2.Width = _majorAxisValues[NumberOfGradationSteps];
+            rect2.Height = _minorAxisValues[NumberOfGradationSteps];
 
             for (el = 0; el < _height; ++el)
             {
@@ -443,7 +383,7 @@ namespace Vignettes
                         // Point is in between outermost and innermost squares / rectangles
                         int j;
 
-                        for (j = 1; j < NumberSteps; ++j)
+                        for (j = 1; j < NumberOfGradationSteps; ++j)
                         {
                             rect3.X = 0.0;
                             rect3.Y = 0.0;
@@ -465,9 +405,6 @@ namespace Vignettes
             }
         }
 
-        /// <summary>
-        /// Function to save the modified image onto a file
-        /// </summary>
         private void SaveImage()
         {
             // First, create the image to be saved

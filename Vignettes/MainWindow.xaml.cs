@@ -17,9 +17,6 @@ using Microsoft.Win32;
 
 namespace Vignettes
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow
     {
         private const int ViewportWidthHeight = 600;
@@ -71,9 +68,6 @@ namespace Vignettes
             _vignette = null;
         }
 
-        /// <summary>
-        /// Method to read in an image.
-        /// </summary>
         private bool ReadImage(string fn, string fileNameOnly)
         {
             bool retVal = false;
@@ -101,10 +95,6 @@ namespace Vignettes
             return retVal;
         }
 
-        /// <summary>
-        /// Method to scale the original image to 600 x 600.
-        /// This should preserve the aspect ratio of the original image.
-        /// </summary>
         void ScaleImage()
         {
             double fac1 = Convert.ToDouble(_scaledWidth / (1.0 * _originalWidth));
@@ -122,10 +112,6 @@ namespace Vignettes
             _scaledImage.CopyPixels(Int32Rect.Empty, _scaledPixels, stride, 0);
         }
 
-        /// <summary>
-        /// Computes the scaled width and height of the image, so as to 
-        /// maintain the aspect ratio of original image.
-        /// </summary>
         private void ComputeScaledWidthAndHeight()
         {
             if (_originalWidth > _originalHeight)
@@ -140,9 +126,6 @@ namespace Vignettes
             }
         }
 
-        /// <summary>
-        /// Method to fill in the different pixel arrays from the original and scaled images.
-        /// </summary>
         private void PopulatePixelsOriginalAndScaled()
         {
             int bitsPerPixel = _originalImage.Format.BitsPerPixel;
@@ -285,20 +268,17 @@ namespace Vignettes
             }
         }
 
-        /// <summary>
-        /// Method to apply the vignette
-        /// </summary>
         private void ApplyVignette()
         {
             _vignette = new VignetteEffect(this)
                             {
-                                Angle = sliderAngle.Value,
-                                Coverage = sliderPercent.Value,
-                                BandPixels = Convert.ToInt32(sliderBand.Value),
-                                NumberSteps = Convert.ToInt32(sliderSteps.Value),
-                                Xcentre = Convert.ToInt32(sliderOriginX.Value),
-                                Ycentre = Convert.ToInt32(sliderOriginY.Value),
-                                BorderColour = _borderColor,
+                                OrientationInDegrees = sliderAngle.Value,
+                                CoveragePercent = sliderPercent.Value,
+                                BandWidthInPixels = Convert.ToInt32(sliderBand.Value),
+                                NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value),
+                                CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value),
+                                CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value),
+                                BorderColor = _borderColor,
                                 Shape = _shape
                             };
             _vignette.TransferImagePixels(ref _pixels8RedScaled, ref _pixels8GreenScaled, ref _pixels8BlueScaled,
@@ -308,10 +288,6 @@ namespace Vignettes
             _vignette.ApplyEffect();
         }
 
-        /// <summary>
-        /// Method to update the image. The Vignette class computes the modified colours and transfers
-        /// these colours to the main window.
-        /// </summary>
         public void UpdateImage(ref List<byte> pixels8RedScaledModified,
             ref List<byte> pixels8GreenScaledModified, 
             ref List<byte> pixels8BlueScaledModified)
@@ -396,7 +372,7 @@ namespace Vignettes
 
                 if (_vignette != null)
                 {
-                    _vignette.BorderColour = _borderColor;
+                    _vignette.BorderColor = _borderColor;
                     _vignette.ApplyEffect();
                 }
             }
@@ -406,7 +382,7 @@ namespace Vignettes
         {
             if( _vignette != null )
             {
-                _vignette.Angle = sliderAngle.Value;
+                _vignette.OrientationInDegrees = sliderAngle.Value;
                 _vignette.ApplyEffect();
             }
         }
@@ -415,7 +391,7 @@ namespace Vignettes
         {
             if (_vignette != null)
             {
-                _vignette.Coverage = sliderPercent.Value;
+                _vignette.CoveragePercent = sliderPercent.Value;
                 _vignette.ApplyEffect();
             }
         }
@@ -424,7 +400,7 @@ namespace Vignettes
         {
             if (_vignette != null)
             {
-                _vignette.BandPixels = Convert.ToInt32(sliderBand.Value);
+                _vignette.BandWidthInPixels = Convert.ToInt32(sliderBand.Value);
                 _vignette.ApplyEffect();
             }
         }
@@ -433,7 +409,7 @@ namespace Vignettes
         {
             if (_vignette != null)
             {
-                _vignette.Xcentre = Convert.ToInt32(sliderOriginX.Value);
+                _vignette.CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value);
                 _vignette.ApplyEffect();
             }
         }
@@ -442,7 +418,7 @@ namespace Vignettes
         {
             if (_vignette != null)
             {
-                _vignette.Ycentre = Convert.ToInt32(sliderOriginY.Value);
+                _vignette.CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value);
                 _vignette.ApplyEffect();
             }
         }
@@ -451,7 +427,7 @@ namespace Vignettes
         {
             if (_vignette != null)
             {
-                _vignette.NumberSteps = Convert.ToInt32(sliderSteps.Value);
+                _vignette.NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value);
                 _vignette.ApplyEffect();
             }
         }
@@ -478,13 +454,13 @@ namespace Vignettes
                     // within a try-catch block, just in case things go out of control.
                     var vig = new VignetteEffect(this)
                                   {
-                                      Angle = sliderAngle.Value,
-                                      Coverage = sliderPercent.Value,
-                                      BandPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
-                                      NumberSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
-                                      Xcentre = Convert.ToInt32(sliderOriginX.Value),
-                                      Ycentre = Convert.ToInt32(sliderOriginY.Value),
-                                      BorderColour = _borderColor,
+                                      OrientationInDegrees = sliderAngle.Value,
+                                      CoveragePercent = sliderPercent.Value,
+                                      BandWidthInPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
+                                      NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
+                                      CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value),
+                                      CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value),
+                                      BorderColor = _borderColor,
                                       Shape = _shape
                                   };
                     string fileToSave = dlg.FileName;
@@ -515,11 +491,6 @@ namespace Vignettes
             }
         }
 
-        /// <summary>
-        /// Function to compute the new filename with _ appended to the original filename.
-        /// </summary>
-        /// <param name="fileForSaving">Old file name</param>
-        /// <returns>New file name</returns>
         private string GetNewFileName(string fileForSaving)
         {            
             string fileOnly = Path.GetFileNameWithoutExtension(fileForSaving);
