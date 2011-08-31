@@ -56,6 +56,7 @@ namespace Vignettes
         //    = 0.5 / 100.0
         private const double GeometryFactor = 0.5 / 100.0;
         private const int Dpi = 72;
+        public const int BitsPerPixel = 24;
 
         List<byte> _pixRedOrig = new List<byte>();
         List<byte> _pixGreenOrig = new List<byte>();
@@ -470,8 +471,7 @@ namespace Vignettes
         private void SaveImage()
         {
             // First, create the image to be saved
-            const int bitsPerPixel = 24;
-            int stride = (_width * bitsPerPixel + 7) / 8;
+            int stride = (_width * BitsPerPixel + 7) / 8;
             var pixelsToWrite = new byte[stride * _height];
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)

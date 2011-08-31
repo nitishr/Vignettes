@@ -316,14 +316,12 @@ namespace Vignettes
             ref List<byte> pixels8GreenScaledModified, 
             ref List<byte> pixels8BlueScaledModified)
         {
-            int bitsPerPixel = 24;
-            int stride = (_scaledWidth * bitsPerPixel + 7) / 8;
+            int stride = (_scaledWidth * VignetteEffect.BitsPerPixel + 7) / 8;
             var pixelsToWrite = new byte[stride * _scaledHeight];
-            int i1;
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
-                i1 = i / 3;
+                int i1 = i / 3;
                 pixelsToWrite[i] = pixels8RedScaledModified[i1];
                 pixelsToWrite[i + 1] = pixels8GreenScaledModified[i1];
                 pixelsToWrite[i + 2] = pixels8BlueScaledModified[i1];
