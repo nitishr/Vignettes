@@ -145,13 +145,13 @@ namespace Vignettes
             {
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    _majorAxisValues.Add(AxisValue(a0, i));
-                    _minorAxisValues.Add(AxisValue(b0, i));
+                    AddAxisValue(_majorAxisValues, a0, i);
+                    AddAxisValue(_minorAxisValues, b0, i);
                 }
                 for (int i = 0; i < NumberOfGradationSteps; ++i)
                 {
-                    _midfigureMajorAxisValues.Add(AxisValue(a0, i + 0.5));
-                    _midfigureMinorAxisValues.Add(AxisValue(b0, i + 0.5));
+                    AddAxisValue(_midfigureMajorAxisValues, a0, i + 0.5);
+                    AddAxisValue(_midfigureMinorAxisValues, b0, i + 0.5);
                 }
             }
             else// if (Shape == VignetteShape.Diamond)
@@ -194,9 +194,9 @@ namespace Vignettes
             }
         }
 
-        private double AxisValue(double axisValue, double stepSizeMultiplier)
+        private void AddAxisValue(List<double> axisValues, double axisValue, double stepSizeMultiplier)
         {
-            return axisValue + stepSizeMultiplier*BandWidthInPixels/NumberOfGradationSteps;
+            axisValues.Add(axisValue + stepSizeMultiplier*BandWidthInPixels/NumberOfGradationSteps);
         }
 
         private double CoverageRatio
