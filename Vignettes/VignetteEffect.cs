@@ -30,18 +30,6 @@ namespace Vignettes
 
     class VignetteEffect
     {
-        // Regarding the variable "geometryFactor": 
-        // - This is not a magic number. This is the factor by which the x-Centre and 
-        //   y-Centre slider values are to be multiplied so as to cause the following:
-        //   When the x-Centre slider is at its midpoint, the vignette should be centred 
-        //   at the midpoint of the image. When the x-Centre slider is at its extreme right
-        //   point, the vignette centre should be along the right edge of the image. When the
-        //   x-Centre slider is at its extreme left point, the vignette centre should be 
-        //   along the left edge of the image. 
-        //   Similarly with the y-Centre slider.
-        //   So, the factor of multiplication is (Half-of the width)/(Maximum value of slider)
-        //    = 0.5 / 100.0
-        private const double GeometryFactor = 0.5 / 100.0;
         private const int Dpi = 72;
         public const int BitsPerPixel = 24;
 
@@ -308,12 +296,12 @@ namespace Vignettes
 
         private double Hb2
         {
-            get { return _height*(0.5 + CenterYOffsetPercent*GeometryFactor); }
+            get { return (1 + CenterYOffsetPercent/100.0)*_height*0.5; }
         }
 
         private double Wb2
         {
-            get { return _width*(0.5 + CenterXOffsetPercent*GeometryFactor); }
+            get { return (1 + CenterXOffsetPercent/100.0)*_width*0.5; }
         }
 
         private void ApplyEffectRectangleSquare()
