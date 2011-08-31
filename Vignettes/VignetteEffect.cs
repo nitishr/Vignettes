@@ -129,9 +129,8 @@ namespace Vignettes
             _midfigureMinorAxisValues.Clear();
             _imageWeights.Clear();
             _borderWeights.Clear();
-
-            double a0 = (_width*CoverageRatio - BandWidthInPixels)*0.5;
-            double b0 = (_height*CoverageRatio - BandWidthInPixels)*0.5;
+            double a0 = AxisValue(_width, -1);
+            double b0 = AxisValue(_height, -1);
 
             // For a circle or square, both 'major' and 'minor' axes are identical
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
@@ -148,7 +147,7 @@ namespace Vignettes
             }
             else// if (Shape == VignetteShape.Diamond)
             {
-                double aLast = (_width*CoverageRatio + BandWidthInPixels)*0.5;
+                double aLast = AxisValue(_width, 1);
                 double bLast = b0 * aLast / a0;
                 AddAxisValues(a0, (aLast - a0) / NumberOfGradationSteps, b0, (bLast - b0) / NumberOfGradationSteps);
             }
@@ -174,6 +173,11 @@ namespace Vignettes
             }
         }
 
+        private double AxisValue(int length, int multiplier)
+        {
+            return (length*CoveragePercent/100.0 + multiplier*BandWidthInPixels)*0.5;
+        }
+
         private double Weight(int multiplier, int i, double a0)
         {
             return 0.5 * (1.0 + multiplier*Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0)));
@@ -188,11 +192,6 @@ namespace Vignettes
                 _midfigureMajorAxisValues.Add(a0 + (i + 0.5)*stepX);
                 _midfigureMinorAxisValues.Add(b0 + (i + 0.5)*stepY);
             }
-        }
-
-        private double CoverageRatio
-        {
-            get { return (CoveragePercent/100.0); }
         }
 
         private void ApplyEffectCircleEllipseDiamond()
