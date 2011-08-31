@@ -130,14 +130,13 @@ namespace Vignettes
             _imageWeights.Clear();
             _borderWeights.Clear();
 
-            double bandPixelsBy2 = 0.5 * BandWidthInPixels;
             double arguFactor = Math.PI / BandWidthInPixels;
             double vignetteWidth = _width * CoveragePercent / 100.0;
             double vignetteHeight = _height * CoveragePercent / 100.0;
             double vwb2 = vignetteWidth * 0.5;
             double vhb2 = vignetteHeight * 0.5;
-            double a0 = vwb2 - bandPixelsBy2;
-            double b0 = vhb2 - bandPixelsBy2;
+            double a0 = vwb2 - HalfOfBandWidthInPixels;
+            double b0 = vhb2 - HalfOfBandWidthInPixels;
 
             // For a circle or square, both 'major' and 'minor' axes are identical
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
@@ -164,7 +163,7 @@ namespace Vignettes
             }
             else// if (Shape == VignetteShape.Diamond)
             {
-                double aLast = vwb2 + bandPixelsBy2;
+                double aLast = vwb2 + HalfOfBandWidthInPixels;
                 double bLast = b0 * aLast / a0;
                 double stepXdiamond = (aLast - a0) / NumberOfGradationSteps;
                 double stepYdiamond = (bLast - b0) / NumberOfGradationSteps;
@@ -203,6 +202,15 @@ namespace Vignettes
                 double wei2 = 0.5 * (1.0 - argCosVal);
                 _imageWeights.Add(wei1);
                 _borderWeights.Add(wei2);
+            }
+        }
+
+        private double HalfOfBandWidthInPixels
+        {
+            get
+            {
+                double bandPixelsBy2 = 0.5*BandWidthInPixels;
+                return bandPixelsBy2;
             }
         }
 
