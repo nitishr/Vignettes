@@ -169,9 +169,14 @@ namespace Vignettes
             //  October 1983, Pages 217-236].
             for (int i = 0; i < NumberOfGradationSteps; ++i)
             {
-                _imageWeights.Add(0.5 * (1.0 + ArgCosVal(a0, i)));
-                _borderWeights.Add(0.5 * (1.0 - ArgCosVal(a0, i)));
+                _imageWeights.Add(Weight(1, i, a0));
+                _borderWeights.Add(Weight(-1, i, a0));
             }
+        }
+
+        private double Weight(int weightMultiplier, int i, double a0)
+        {
+            return 0.5 * (1.0 + weightMultiplier*Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0)));
         }
 
         private void AddAxisValues(double a0, double stepX, double b0, double stepY)
@@ -188,11 +193,6 @@ namespace Vignettes
         private double CoverageRatio
         {
             get { return (CoveragePercent/100.0); }
-        }
-
-        private double ArgCosVal(double a0, int i)
-        {
-            return Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0));
         }
 
         private void ApplyEffectCircleEllipseDiamond()
