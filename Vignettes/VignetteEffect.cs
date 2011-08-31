@@ -143,17 +143,15 @@ namespace Vignettes
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                 Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
             {
-                double stepSize = BandWidthInPixels * 1.0 / NumberOfGradationSteps;
-
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    _majorAxisValues.Add(a0 + stepSize * i);
-                    _minorAxisValues.Add(b0 + stepSize * i);
+                    _majorAxisValues.Add(a0 + StepSizeTimes(i));
+                    _minorAxisValues.Add(b0 + StepSizeTimes(i));
                 }
                 for (int i = 0; i < NumberOfGradationSteps; ++i)
                 {
-                    _midfigureMajorAxisValues.Add(a0 + stepSize * (i + 0.5));
-                    _midfigureMinorAxisValues.Add(b0 + stepSize * (i + 0.5));
+                    _midfigureMajorAxisValues.Add(a0 + StepSizeTimes(i + 0.5));
+                    _midfigureMinorAxisValues.Add(b0 + StepSizeTimes(i + 0.5));
                 }
             }
             else// if (Shape == VignetteShape.Diamond)
@@ -194,6 +192,11 @@ namespace Vignettes
                 _imageWeights.Add(0.5 * (1.0 + ArgCosVal(a0, i)));
                 _borderWeights.Add(0.5 * (1.0 - ArgCosVal(a0, i)));
             }
+        }
+
+        private double StepSizeTimes(double i)
+        {
+            return i*BandWidthInPixels/NumberOfGradationSteps;
         }
 
         private double CoverageRatio
