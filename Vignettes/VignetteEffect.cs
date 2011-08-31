@@ -196,10 +196,6 @@ namespace Vignettes
 
         private void ApplyEffectCircleEllipseDiamond()
         {
-            byte redBorder = BorderColor.R;
-            byte greenBorder = BorderColor.G;
-            byte blueBorder = BorderColor.B;
-
             // Loop over the number of pixels
             for (int el = 0; el < _height; ++el)
             {
@@ -246,9 +242,9 @@ namespace Vignettes
                     else if (potential2 >= 0.0)
                     {
                         // Point is outside the outer circle / ellipse / diamond
-                        r = redBorder;
-                        g = greenBorder;
-                        b = blueBorder;
+                        r = BorderColor.R;
+                        g = BorderColor.G;
+                        b = BorderColor.B;
                     }
                     else
                     {
@@ -274,9 +270,9 @@ namespace Vignettes
                         }
                         int j1 = j - 1;
                         // The formulas where the weights are applied to the image, and border.
-                        r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + redBorder * _borderWeights[j1]);
-                        g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + greenBorder * _borderWeights[j1]);
-                        b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + blueBorder * _borderWeights[j1]);
+                        r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + BorderColor.R * _borderWeights[j1]);
+                        g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + BorderColor.G * _borderWeights[j1]);
+                        b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + BorderColor.B * _borderWeights[j1]);
                     }
                     _pixRedModified[w1] = r;
                     _pixGreenModified[w1] = g;
