@@ -130,7 +130,6 @@ namespace Vignettes
             _imageWeights.Clear();
             _borderWeights.Clear();
 
-            double stepSize = BandWidthInPixels * 1.0 / NumberOfGradationSteps;
             double bandPixelsBy2 = 0.5 * BandWidthInPixels;
             double arguFactor = Math.PI / BandWidthInPixels;
             double vignetteWidth = _width * CoveragePercent / 100.0;
@@ -150,6 +149,8 @@ namespace Vignettes
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                 Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
             {
+                double stepSize = BandWidthInPixels * 1.0 / NumberOfGradationSteps;
+
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
                     _majorAxisValues.Add(a0 + stepSize * i);
