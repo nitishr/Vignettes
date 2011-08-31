@@ -130,12 +130,8 @@ namespace Vignettes
             _imageWeights.Clear();
             _borderWeights.Clear();
 
-            double vignetteWidth = _width * CoveragePercent / 100.0;
-            double vignetteHeight = _height * CoveragePercent / 100.0;
-            double vwb2 = vignetteWidth * 0.5;
-            double vhb2 = vignetteHeight * 0.5;
-            double a0 = vwb2 - HalfOfBandWidthInPixels;
-            double b0 = vhb2 - HalfOfBandWidthInPixels;
+            double a0 = (_width*CoveragePercent/100.0 - BandWidthInPixels)*0.5;
+            double b0 = (_height*CoveragePercent/100.0 - BandWidthInPixels)*0.5;
 
             // For a circle or square, both 'major' and 'minor' axes are identical
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
@@ -162,7 +158,7 @@ namespace Vignettes
             }
             else// if (Shape == VignetteShape.Diamond)
             {
-                double aLast = vwb2 + HalfOfBandWidthInPixels;
+                double aLast = (_width*CoveragePercent/100.0 + BandWidthInPixels)*0.5;
                 double bLast = b0 * aLast / a0;
                 double stepXdiamond = (aLast - a0) / NumberOfGradationSteps;
                 double stepYdiamond = (bLast - b0) / NumberOfGradationSteps;
@@ -203,11 +199,6 @@ namespace Vignettes
         private double ArgCosVal(double a0, int i)
         {
             return Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0));
-        }
-
-        private double HalfOfBandWidthInPixels
-        {
-            get { return 0.5*BandWidthInPixels; }
         }
 
         private void ApplyEffectCircleEllipseDiamond()
