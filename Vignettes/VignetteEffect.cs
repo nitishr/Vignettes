@@ -130,7 +130,6 @@ namespace Vignettes
             _imageWeights.Clear();
             _borderWeights.Clear();
 
-            double aEll, bEll;
             double stepSize = BandWidthInPixels * 1.0 / NumberOfGradationSteps;
             double bandPixelsBy2 = 0.5 * BandWidthInPixels;
             double arguFactor = Math.PI / BandWidthInPixels;
@@ -153,17 +152,13 @@ namespace Vignettes
             {
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    aEll = a0 + stepSize * i;
-                    bEll = b0 + stepSize * i;
-                    _majorAxisValues.Add(aEll);
-                    _minorAxisValues.Add(bEll);
+                    _majorAxisValues.Add(a0 + stepSize * i);
+                    _minorAxisValues.Add(b0 + stepSize * i);
                 }
                 for (int i = 0; i < NumberOfGradationSteps; ++i)
                 {
-                    aEll = a0 + stepSize * (i + 0.5);
-                    bEll = b0 + stepSize * (i + 0.5);
-                    _midfigureMajorAxisValues.Add(aEll);
-                    _midfigureMinorAxisValues.Add(bEll);
+                    _midfigureMajorAxisValues.Add(a0 + stepSize * (i + 0.5));
+                    _midfigureMinorAxisValues.Add(b0 + stepSize * (i + 0.5));
                 }
             }
             else// if (Shape == VignetteShape.Diamond)
@@ -175,17 +170,13 @@ namespace Vignettes
 
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    aEll = a0 + stepXdiamond * i;
-                    bEll = b0 + stepYdiamond * i;
-                    _majorAxisValues.Add(aEll);
-                    _minorAxisValues.Add(bEll);
+                    _majorAxisValues.Add(a0 + stepXdiamond * i);
+                    _minorAxisValues.Add(b0 + stepYdiamond * i);
                 }
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    aEll = a0 + stepXdiamond * (i + 0.5);
-                    bEll = b0 + stepYdiamond * (i + 0.5);
-                    _midfigureMajorAxisValues.Add(aEll);
-                    _midfigureMinorAxisValues.Add(bEll);
+                    _midfigureMajorAxisValues.Add(a0 + stepXdiamond * (i + 0.5));
+                    _midfigureMinorAxisValues.Add(b0 + stepYdiamond * (i + 0.5));
                 }
             }
 
