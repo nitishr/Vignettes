@@ -78,7 +78,7 @@ namespace Vignettes
         {
             bool retVal = false;
             // Open the image
-            Uri imageUri = new Uri(fn, UriKind.RelativeOrAbsolute);
+            var imageUri = new Uri(fn, UriKind.RelativeOrAbsolute);
             _originalImage = new BitmapImage(imageUri);
             int stride = (_originalImage.PixelWidth * _originalImage.Format.BitsPerPixel + 7) / 8;
             _originalWidth = _originalImage.PixelWidth;
@@ -248,10 +248,12 @@ namespace Vignettes
             // Read in the image
             // Scale the image to 600 x 600, maintaining aspect ratio
             // Populate the lists pixels8RedScaled, pixels8GreenScaled, pixels8BlueScaled
-            OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog();
-            ofd.Filter =
-                "All Image Files(*.bmp;*.png;*.tif;*.jpg)|*.bmp;*.png;*.tif;*.jpg|24-Bit Bitmap(*.bmp)|*.bmp|PNG(*.png)|*.png|TIFF(*.tif)|*.tif|JPEG(*.jpg)|*.jpg";
-            Nullable<bool> result = ofd.ShowDialog();
+            var ofd = new OpenFileDialog
+                          {
+                              Filter =
+                                  "All Image Files(*.bmp;*.png;*.tif;*.jpg)|*.bmp;*.png;*.tif;*.jpg|24-Bit Bitmap(*.bmp)|*.bmp|PNG(*.png)|*.png|TIFF(*.tif)|*.tif|JPEG(*.jpg)|*.jpg"
+                          };
+            bool? result = ofd.ShowDialog();
 
             try
             {
@@ -314,7 +316,7 @@ namespace Vignettes
         {
             int bitsPerPixel = 24;
             int stride = (_scaledWidth * bitsPerPixel + 7) / 8;
-            byte[] pixelsToWrite = new byte[stride * _scaledHeight];
+            var pixelsToWrite = new byte[stride * _scaledHeight];
             int i1;
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
@@ -368,20 +370,23 @@ namespace Vignettes
             // I know that CodeProject has some colour picker dialogs available, but I choose the 
             // plain vanilla one from Microsoft, since our focus in this code is on providing a 
             // vignette effect, and not a fancy colour dialog application.
-            ColorPickerDialog cPicker = new ColorPickerDialog();
-            cPicker.WindowStartupLocation = WindowStartupLocation.Manual;
-            cPicker.Top = this.Top + 200;
-            cPicker.Left = this.Width;
+            var cPicker = new ColorPickerDialog
+                              {
+                                  WindowStartupLocation = WindowStartupLocation.Manual,
+                                  Top = Top + 200,
+                                  Left = Width,
+                                  Height = 169,
+                                  ResizeMode = ResizeMode.NoResize,
+                                  StartingColor = _borderColor,
+                                  Owner = this
+                              };
 
             // I deliberately set the height to be this, so as not to show the Opacity and other 
             // colour text boxes in the dialog. I currently don't have the facility to change the 
             // opacity of the image, and therefore I don't want users to change the opacity, and hence
             // report a bug saying that "opacity is not working". So, I don't show the opacity button at all
             // and further, I don't allow this colour picker dialog to be resized.
-            cPicker.Height = 169; 
-            cPicker.ResizeMode = ResizeMode.NoResize;
-            cPicker.StartingColor = _borderColor;
-            cPicker.Owner = this;
+
 
             bool? dialogResult = cPicker.ShowDialog();
             if (dialogResult != null && (bool)dialogResult == true)
@@ -453,11 +458,11 @@ namespace Vignettes
 
         private void bnSaveImage_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "PNG Images (.png)|*.png|JPG Images (.jpg)|*.jpg|BMP Images (.bmp)|*.bmp";
+            var dlg = new SaveFileDialog
+                          {Filter = "PNG Images (.png)|*.png|JPG Images (.jpg)|*.jpg|BMP Images (.bmp)|*.bmp"};
 
             // Show save file dialog box
-            Nullable<bool> result = dlg.ShowDialog();
+            bool? result = dlg.ShowDialog();
 
             try
             {
@@ -465,21 +470,23 @@ namespace Vignettes
                 if (result == true)
                 {
                     // Save image
-                    VignetteEffect vig = new VignetteEffect(this);
-                    vig.Angle = sliderAngle.Value;
-                    vig.Coverage = sliderPercent.Value;
                     // While all other parameters are percentages, and are independent of image 
                     // dimensions, two parameters - Width of the band, and Number of Steps need 
                     // to be scaled depending upon the image dimensions.
                     // Here, the variable scaleFactor comes in handy to perform such scaling.
                     // Though scaleFactor can never be zero, we enclose the entire saving code 
                     // within a try-catch block, just in case things go out of control.
-                    vig.BandPixels = Convert.ToInt32(sliderBand.Value / _scaleFactor);
-                    vig.NumberSteps = Convert.ToInt32(sliderSteps.Value / _scaleFactor);
-                    vig.Xcentre = Convert.ToInt32(sliderOriginX.Value);
-                    vig.Ycentre = Convert.ToInt32(sliderOriginY.Value);
-                    vig.BorderColour = _borderColor;
-                    vig.Shape = _shape;
+                    var vig = new VignetteEffect(this)
+                                  {
+                                      Angle = sliderAngle.Value,
+                                      Coverage = sliderPercent.Value,
+                                      BandPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
+                                      NumberSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
+                                      Xcentre = Convert.ToInt32(sliderOriginX.Value),
+                                      Ycentre = Convert.ToInt32(sliderOriginY.Value),
+                                      BorderColour = _borderColor,
+                                      Shape = _shape
+                                  };
                     string fileToSave = dlg.FileName;
                     // I don't want the original file to be overwritten, since the vignetting operation
                     // is a lossy one (where some pixels of the original image may be lost).
