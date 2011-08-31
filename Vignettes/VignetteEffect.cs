@@ -67,7 +67,7 @@ namespace Vignettes
             _mainWin = main;
         }
 
-        public double OrientationInDegrees { get; set; } // This parameter is not of relevance for the Circle vignette.
+        public double OrientationInDegrees { private get; set; } // This parameter is not of relevance for the Circle vignette.
 
         public double CoveragePercent { private get; set; }
 
@@ -196,27 +196,19 @@ namespace Vignettes
 
         private void ApplyEffectCircleEllipseDiamond()
         {
-            int el;
-            double wb2 = _width * 0.5 + CenterXOffsetPercent * _width * GeometryFactor;
-            double hb2 = _height * 0.5 + CenterYOffsetPercent * _height * GeometryFactor;
-            double thetaRadians = OrientationInDegrees * Math.PI / 180.0;
-            double cos = Math.Cos(thetaRadians);
-            double sin = Math.Sin(thetaRadians);
             byte redBorder = BorderColor.R;
             byte greenBorder = BorderColor.G;
             byte blueBorder = BorderColor.B;
 
             // Loop over the number of pixels
-            for (el = 0; el < _height; ++el)
+            for (int el = 0; el < _height; ++el)
             {
-                int w2 = _width * el;
-                int k;
-                for (k = 0; k < _width; ++k)
+                for (int k = 0; k < _width; ++k)
                 {
                     // This is the usual rotation formula, along with translation.
                     // I could have perhaps used the Transform feature of WPF.
-                    double xprime = (k - wb2) * cos + (el - hb2) * sin;
-                    double yprime = -(k - wb2) * sin + (el - hb2) * cos;
+                    double xprime = (k - Wb2) * CosOrientation + (el - Hb2) * SinOrientation;
+                    double yprime = -(k - Wb2) * SinOrientation + (el - Hb2) * CosOrientation;
 
                     double factor1 = 1.0 * Math.Abs(xprime) / _majorAxisValues[0];
                     double factor2 = 1.0 * Math.Abs(yprime) / _minorAxisValues[0];
@@ -239,7 +231,7 @@ namespace Vignettes
                         potential1 = factor1 + factor2 - 1.0;
                         potential2 = factor3 + factor4 - 1.0;
                     }
-                    int w1 = w2 + k;
+                    int w1 = _width * el + k;
 
                     byte r;
                     byte g;
@@ -291,6 +283,31 @@ namespace Vignettes
                     _pixBlueModified[w1] = b;
                 }
             }
+        }
+
+        private double SinOrientation
+        {
+            get { return Math.Sin(OrientationInRadians); }
+        }
+
+        private double CosOrientation
+        {
+            get { return Math.Cos(OrientationInRadians); }
+        }
+
+        private double OrientationInRadians
+        {
+            get { return OrientationInDegrees*Math.PI/180.0; }
+        }
+
+        private double Hb2
+        {
+            get { return _height*(0.5 + CenterYOffsetPercent*GeometryFactor); }
+        }
+
+        private double Wb2
+        {
+            get { return _width*(0.5 + CenterXOffsetPercent*GeometryFactor); }
         }
 
         private void ApplyEffectRectangleSquare()
