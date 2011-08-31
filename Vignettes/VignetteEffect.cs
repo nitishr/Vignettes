@@ -140,20 +140,6 @@ namespace Vignettes
                 AddAxisValues(a0, (aLast - a0) / NumberOfGradationSteps, b0, (bLast - b0) / NumberOfGradationSteps);
             }
 
-            // The weight functions given below form the crux of the code. It was a struggle after which 
-            // I got these weighting functions. 
-            // Initially, I tried linear interpolation, and the effect was not so pleasing. The 
-            // linear interpolation function is C0-continuous at the boundary, and therefore shows 
-            // a distinct border.
-            // Later, upon searching, I found a paper by Burt and Adelson on Mosaics. Though I did 
-            // not use the formulas given there, one of the initial figures in that paper set me thinking
-            // on using the cosine function. This function is C1-continuous at the boundary, and therefore
-            // the effect is pleasing on the eye. Yields quite a nice blending effect. The cosine 
-            // functions are incorporated into the wei1 and wei2 definitions below.
-            //
-            // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
-            //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
-            //  October 1983, Pages 217-236].
             for (int i = 0; i < NumberOfGradationSteps; ++i)
             {
                 _imageWeights.Add(Weight(1, i, a0));
@@ -166,6 +152,20 @@ namespace Vignettes
             return (length*CoveragePercent/100.0 + multiplier*BandWidthInPixels)*0.5;
         }
 
+        // The weight functions given below form the crux of the code. It was a struggle after which 
+        // I got these weighting functions. 
+        // Initially, I tried linear interpolation, and the effect was not so pleasing. The 
+        // linear interpolation function is C0-continuous at the boundary, and therefore shows 
+        // a distinct border.
+        // Later, upon searching, I found a paper by Burt and Adelson on Mosaics. Though I did 
+        // not use the formulas given there, one of the initial figures in that paper set me thinking
+        // on using the cosine function. This function is C1-continuous at the boundary, and therefore
+        // the effect is pleasing on the eye. Yields quite a nice blending effect. The cosine 
+        // functions are incorporated into the wei1 and wei2 definitions below.
+        //
+        // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
+        //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
+        //  October 1983, Pages 217-236].
         private double Weight(int multiplier, int i, double a0)
         {
             return 0.5 * (1.0 + multiplier*Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0)));
@@ -310,21 +310,8 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    // The usual rotation-translation formula
-                    double xprime = XPrime(el, k);
-                    double yprime = YPrime(el, k);
-
-                    double potential = 0.0;
-                    var point = new Point(Math.Abs(xprime), Math.Abs(yprime));
-
-                    // For a rectangle, we can use the Rect.Contains(Point) method to determine
-                    //  whether the point is in the rectangle or not
-                    if (new Rect(0, 0, _majorAxisValues[0], _minorAxisValues[0]).Contains(point))
-                        potential = -2.0; // Arbitrary negative number N1
-
-                    if (!new Rect(0, 0, _majorAxisValues[NumberOfGradationSteps],
-                                  _minorAxisValues[NumberOfGradationSteps]).Contains(point))
-                        potential = 2.0; // Arbitrary positive number = - N1
+                    var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
+                    var potential = Potential(point);
 
                     int w1 = _width * el + k;
 
@@ -365,6 +352,18 @@ namespace Vignettes
                     _pixBlueModified[w1] = b;
                 }
             }
+        }
+
+        private double Potential(Point point)
+        {
+            double potential = 0.0;
+            if (new Rect(0, 0, _majorAxisValues[0], _minorAxisValues[0]).Contains(point))
+                potential = -2.0; // Arbitrary negative number N1
+
+            if (new Rect(0, 0, _majorAxisValues[NumberOfGradationSteps],
+                         _minorAxisValues[NumberOfGradationSteps]).Contains(point)) return potential;
+            potential = 2.0; // Arbitrary positive number = - N1
+            return potential;
         }
 
         private void SaveImage()
