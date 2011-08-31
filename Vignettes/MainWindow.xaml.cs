@@ -174,9 +174,9 @@ namespace Vignettes
                     {
                         // In a 24-bit per pixel image, the bytes are stored in the order 
                         // BGR - Blue Green Red order.
-                        blue = (byte)(_scaledPixels[i]);
-                        green = (byte)(_scaledPixels[i + 1]);
-                        red = (byte)(_scaledPixels[i + 2]);
+                        blue = _scaledPixels[i];
+                        green = _scaledPixels[i + 1];
+                        red = _scaledPixels[i + 2];
 
                         _pixels8RedScaled.Add(red);
                         _pixels8GreenScaled.Add(green);
@@ -191,9 +191,9 @@ namespace Vignettes
                     {
                         // In a 24-bit per pixel image, the bytes are stored in the order 
                         // BGR - Blue Green Red order.
-                        blue = (byte)(_originalPixels[i]);
-                        green = (byte)(_originalPixels[i + 1]);
-                        red = (byte)(_originalPixels[i + 2]);
+                        blue = _originalPixels[i];
+                        green = _originalPixels[i + 1];
+                        red = _originalPixels[i + 2];
 
                         _pixels8Red.Add(red);
                         _pixels8Green.Add(green);
@@ -210,9 +210,9 @@ namespace Vignettes
                     {
                         // In a 32-bit per pixel image, the bytes are stored in the order 
                         // BGR - Blue Green Red Alpha order.
-                        blue = (byte)(_scaledPixels[i]);
-                        green = (byte)(_scaledPixels[i + 1]);
-                        red = (byte)(_scaledPixels[i + 2]);
+                        blue = _scaledPixels[i];
+                        green = _scaledPixels[i + 1];
+                        red = _scaledPixels[i + 2];
 
                         _pixels8RedScaled.Add(red);
                         _pixels8GreenScaled.Add(green);
@@ -227,9 +227,9 @@ namespace Vignettes
                     {
                         // In a 32-bit per pixel image, the bytes are stored in the order 
                         // BGR - Blue Green Red Alpha order.
-                        blue = (byte)(_originalPixels[i]);
-                        green = (byte)(_originalPixels[i + 1]);
-                        red = (byte)(_originalPixels[i + 2]);
+                        blue = _originalPixels[i];
+                        green = _originalPixels[i + 1];
+                        red = _originalPixels[i + 2];
 
                         _pixels8Red.Add(red);
                         _pixels8Green.Add(green);
@@ -261,7 +261,7 @@ namespace Vignettes
                 {
                     _fileName = ofd.FileName;
                     Mouse.OverrideCursor = Cursors.Wait;
-                    if (ReadImage(_fileName, ofd.SafeFileName) == true)
+                    if (ReadImage(_fileName, ofd.SafeFileName))
                     {
                         bnSaveImage.IsEnabled = true;
                         ComputeScaledWidthAndHeight();
@@ -391,7 +391,7 @@ namespace Vignettes
 
 
             bool? dialogResult = cPicker.ShowDialog();
-            if (dialogResult != null && (bool)dialogResult == true)
+            if (dialogResult != null && (bool)dialogResult)
             {
                 _borderColor = cPicker.SelectedColor;
                 bnColour.Background = new SolidColorBrush(_borderColor);
