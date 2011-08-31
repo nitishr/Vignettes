@@ -290,15 +290,17 @@ namespace Vignettes
         /// </summary>
         private void ApplyVignette()
         {
-            _vignette = new VignetteEffect(this);
-            _vignette.Angle = sliderAngle.Value;
-            _vignette.Coverage = sliderPercent.Value;
-            _vignette.BandPixels = Convert.ToInt32(sliderBand.Value);
-            _vignette.NumberSteps = Convert.ToInt32(sliderSteps.Value);
-            _vignette.Xcentre = Convert.ToInt32(sliderOriginX.Value);
-            _vignette.Ycentre = Convert.ToInt32(sliderOriginY.Value);
-            _vignette.BorderColour = _borderColor;
-            _vignette.Shape = _shape;
+            _vignette = new VignetteEffect(this)
+                            {
+                                Angle = sliderAngle.Value,
+                                Coverage = sliderPercent.Value,
+                                BandPixels = Convert.ToInt32(sliderBand.Value),
+                                NumberSteps = Convert.ToInt32(sliderSteps.Value),
+                                Xcentre = Convert.ToInt32(sliderOriginX.Value),
+                                Ycentre = Convert.ToInt32(sliderOriginY.Value),
+                                BorderColour = _borderColor,
+                                Shape = _shape
+                            };
             _vignette.TransferImagePixels(ref _pixels8RedScaled, ref _pixels8GreenScaled, ref _pixels8BlueScaled,
                     _scaledWidth, _scaledHeight,
                     ref _pixels8RedScaledModified, ref _pixels8GreenScaledModified, ref _pixels8BlueScaledModified,
