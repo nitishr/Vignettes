@@ -130,7 +130,6 @@ namespace Vignettes
             _imageWeights.Clear();
             _borderWeights.Clear();
 
-            double arguFactor = Math.PI / BandWidthInPixels;
             double vignetteWidth = _width * CoveragePercent / 100.0;
             double vignetteHeight = _height * CoveragePercent / 100.0;
             double vwb2 = vignetteWidth * 0.5;
@@ -196,13 +195,14 @@ namespace Vignettes
             //  October 1983, Pages 217-236].
             for (int i = 0; i < NumberOfGradationSteps; ++i)
             {
-                double arg = arguFactor * (_midfigureMajorAxisValues[i] - a0);
-                double argCosVal = Math.Cos(arg);
-                double wei1 = 0.5 * (1.0 + argCosVal);
-                double wei2 = 0.5 * (1.0 - argCosVal);
-                _imageWeights.Add(wei1);
-                _borderWeights.Add(wei2);
+                _imageWeights.Add(0.5 * (1.0 + ArgCosVal(a0, i)));
+                _borderWeights.Add(0.5 * (1.0 - ArgCosVal(a0, i)));
             }
+        }
+
+        private double ArgCosVal(double a0, int i)
+        {
+            return Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0));
         }
 
         private double HalfOfBandWidthInPixels
