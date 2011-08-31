@@ -174,9 +174,9 @@ namespace Vignettes
             }
         }
 
-        private double Weight(int weightMultiplier, int i, double a0)
+        private double Weight(int multiplier, int i, double a0)
         {
-            return 0.5 * (1.0 + weightMultiplier*Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0)));
+            return 0.5 * (1.0 + multiplier*Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0)));
         }
 
         private void AddAxisValues(double a0, double stepX, double b0, double stepY)
