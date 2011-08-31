@@ -69,7 +69,7 @@ namespace Vignettes
 
         public double OrientationInDegrees { get; set; } // This parameter is not of relevance for the Circle vignette.
 
-        public double CoveragePercent { get; set; }
+        public double CoveragePercent { private get; set; }
 
         public int BandWidthInPixels { get; set; }
 
@@ -130,8 +130,8 @@ namespace Vignettes
             _imageWeights.Clear();
             _borderWeights.Clear();
 
-            double a0 = (_width*CoveragePercent/100.0 - BandWidthInPixels)*0.5;
-            double b0 = (_height*CoveragePercent/100.0 - BandWidthInPixels)*0.5;
+            double a0 = (_width*CoverageRatio - BandWidthInPixels)*0.5;
+            double b0 = (_height*CoverageRatio - BandWidthInPixels)*0.5;
 
             // For a circle or square, both 'major' and 'minor' axes are identical
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
@@ -158,7 +158,7 @@ namespace Vignettes
             }
             else// if (Shape == VignetteShape.Diamond)
             {
-                double aLast = (_width*CoveragePercent/100.0 + BandWidthInPixels)*0.5;
+                double aLast = (_width*CoverageRatio + BandWidthInPixels)*0.5;
                 double bLast = b0 * aLast / a0;
                 double stepXdiamond = (aLast - a0) / NumberOfGradationSteps;
                 double stepYdiamond = (bLast - b0) / NumberOfGradationSteps;
@@ -194,6 +194,11 @@ namespace Vignettes
                 _imageWeights.Add(0.5 * (1.0 + ArgCosVal(a0, i)));
                 _borderWeights.Add(0.5 * (1.0 - ArgCosVal(a0, i)));
             }
+        }
+
+        private double CoverageRatio
+        {
+            get { return (CoveragePercent/100.0); }
         }
 
         private double ArgCosVal(double a0, int i)
