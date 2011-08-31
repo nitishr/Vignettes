@@ -203,8 +203,8 @@ namespace Vignettes
                 {
                     // This is the usual rotation formula, along with translation.
                     // I could have perhaps used the Transform feature of WPF.
-                    double xprime = (k - Wb2) * CosOrientation + (el - Hb2) * SinOrientation;
-                    double yprime = -(k - Wb2) * SinOrientation + (el - Hb2) * CosOrientation;
+                    var xprime = XPrime(el, k);
+                    var yprime = YPrime(el, k);
 
                     double factor1 = 1.0 * Math.Abs(xprime) / _majorAxisValues[0];
                     double factor2 = 1.0 * Math.Abs(yprime) / _minorAxisValues[0];
@@ -281,6 +281,16 @@ namespace Vignettes
             }
         }
 
+        private double YPrime(int el, int k)
+        {
+            return -(k - Wb2)*SinOrientation + (el - Hb2)*CosOrientation;
+        }
+
+        private double XPrime(int el, int k)
+        {
+            return (k - Wb2)*CosOrientation + (el - Hb2)*SinOrientation;
+        }
+
         private double SinOrientation
         {
             get { return Math.Sin(OrientationInRadians); }
@@ -308,51 +318,27 @@ namespace Vignettes
 
         private void ApplyEffectRectangleSquare()
         {
-            Rect rect1 = new Rect(), rect2 = new Rect(), rect3 = new Rect();
-            var point = new Point();
-            int el;
-
-            double wb2 = _width * 0.5 + CenterXOffsetPercent * _width * GeometryFactor;
-            double hb2 = _height * 0.5 + CenterYOffsetPercent * _height * GeometryFactor;
-            double thetaRadians = OrientationInDegrees * Math.PI / 180.0;
-            double cos = Math.Cos(thetaRadians);
-            double sin = Math.Sin(thetaRadians);
-            byte redBorder = BorderColor.R;
-            byte greenBorder = BorderColor.G;
-            byte blueBorder = BorderColor.B;
-
-            rect1.X = 0.0;
-            rect1.Y = 0.0;
-            rect1.Width = _majorAxisValues[0];
-            rect1.Height = _minorAxisValues[0];
-            rect2.X = 0.0;
-            rect2.Y = 0.0;
-            rect2.Width = _majorAxisValues[NumberOfGradationSteps];
-            rect2.Height = _minorAxisValues[NumberOfGradationSteps];
-
-            for (el = 0; el < _height; ++el)
+            for (int el = 0; el < _height; ++el)
             {
-                int w2 = _width * el;
-                int k;
-                for (k = 0; k < _width; ++k)
+                for (int k = 0; k < _width; ++k)
                 {
                     // The usual rotation-translation formula
-                    double xprime = (k - wb2) * cos + (el - hb2) * sin;
-                    double yprime = -(k - wb2) * sin + (el - hb2) * cos;
+                    double xprime = XPrime(el, k);
+                    double yprime = YPrime(el, k);
 
                     double potential = 0.0;
-                    point.X = Math.Abs(xprime);
-                    point.Y = Math.Abs(yprime);
+                    var point = new Point(Math.Abs(xprime), Math.Abs(yprime));
 
                     // For a rectangle, we can use the Rect.Contains(Point) method to determine
                     //  whether the point is in the rectangle or not
-                    if (rect1.Contains(point))
+                    if (new Rect(0, 0, _majorAxisValues[0], _minorAxisValues[0]).Contains(point))
                         potential = -2.0; // Arbitrary negative number N1
 
-                    if (!rect2.Contains(point))
+                    if (!new Rect(0, 0, _majorAxisValues[NumberOfGradationSteps],
+                                  _minorAxisValues[NumberOfGradationSteps]).Contains(point))
                         potential = 2.0; // Arbitrary positive number = - N1
 
-                    int w1 = w2 + k;
+                    int w1 = _width * el + k;
 
                     byte r;
                     byte g;
@@ -367,9 +353,9 @@ namespace Vignettes
                     else if (potential > 1.0) // Arbitrary positive number lesser than - N1
                     {
                         // Point is outside the outer square / rectangle
-                        r = redBorder;
-                        g = greenBorder;
-                        b = blueBorder;
+                        r = BorderColor.R;
+                        g = BorderColor.G;
+                        b = BorderColor.B;
                     }
                     else
                     {
@@ -378,18 +364,13 @@ namespace Vignettes
 
                         for (j = 1; j < NumberOfGradationSteps; ++j)
                         {
-                            rect3.X = 0.0;
-                            rect3.Y = 0.0;
-                            rect3.Width = _majorAxisValues[j];
-                            rect3.Height = _minorAxisValues[j];
-
-                            if (rect3.Contains(point))
+                            if (new Rect(0, 0, _majorAxisValues[j], _minorAxisValues[j]).Contains(point))
                                 break;
                         }
                         int j1 = j - 1;
-                        r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + redBorder * _borderWeights[j1]);
-                        g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + greenBorder * _borderWeights[j1]);
-                        b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + blueBorder * _borderWeights[j1]);
+                        r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + BorderColor.R * _borderWeights[j1]);
+                        g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + BorderColor.G * _borderWeights[j1]);
+                        b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + BorderColor.B * _borderWeights[j1]);
                     }
                     _pixRedModified[w1] = r;
                     _pixGreenModified[w1] = g;
