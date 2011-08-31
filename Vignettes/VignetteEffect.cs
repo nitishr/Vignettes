@@ -144,28 +144,13 @@ namespace Vignettes
                 Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
             {
                 double step = ((double)BandWidthInPixels/NumberOfGradationSteps);
-                for (int i = 0; i <= NumberOfGradationSteps; ++i)
-                {
-                    AddAxisValue(_majorAxisValues, a0, step, i);
-                    AddAxisValue(_minorAxisValues, b0, step, i);
-                    AddAxisValue(_midfigureMajorAxisValues, a0, step, i + 0.5);
-                    AddAxisValue(_midfigureMinorAxisValues, b0, step, i + 0.5);
-                }
+                AddAxisValues(a0, step, b0, step);
             }
             else// if (Shape == VignetteShape.Diamond)
             {
                 double aLast = (_width*CoverageRatio + BandWidthInPixels)*0.5;
                 double bLast = b0 * aLast / a0;
-                double stepXdiamond = (aLast - a0) / NumberOfGradationSteps;
-                double stepYdiamond = (bLast - b0) / NumberOfGradationSteps;
-
-                for (int i = 0; i <= NumberOfGradationSteps; ++i)
-                {
-                    AddAxisValue(_majorAxisValues, a0, stepXdiamond, i);
-                    AddAxisValue(_minorAxisValues, b0, stepYdiamond, i);
-                    AddAxisValue(_midfigureMajorAxisValues, a0, stepXdiamond, i + 0.5);
-                    AddAxisValue(_midfigureMinorAxisValues, b0, stepYdiamond, i + 0.5);
-                }
+                AddAxisValues(a0, (aLast - a0) / NumberOfGradationSteps, b0, (bLast - b0) / NumberOfGradationSteps);
             }
 
             // The weight functions given below form the crux of the code. It was a struggle after which 
@@ -189,9 +174,15 @@ namespace Vignettes
             }
         }
 
-        private void AddAxisValue(List<double> axisValues, double axisValue, double step, double stepMultiplier)
+        private void AddAxisValues(double a0, double stepX, double b0, double stepY)
         {
-            axisValues.Add(axisValue + stepMultiplier*step);
+            for (int i = 0; i <= NumberOfGradationSteps; ++i)
+            {
+                _majorAxisValues.Add(a0 + i*stepX);
+                _minorAxisValues.Add(b0 + i*stepY);
+                _midfigureMajorAxisValues.Add(a0 + (i + 0.5)*stepX);
+                _midfigureMinorAxisValues.Add(b0 + (i + 0.5)*stepY);
+            }
         }
 
         private double CoverageRatio
