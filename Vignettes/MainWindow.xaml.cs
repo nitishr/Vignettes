@@ -130,99 +130,95 @@ namespace Vignettes
         {
             int bitsPerPixel = _originalImage.Format.BitsPerPixel;
 
-            if (bitsPerPixel == 24 || bitsPerPixel == 32)
+            if (bitsPerPixel != 24 && bitsPerPixel != 32) return;
+            byte red, green, blue;
+
+            _pixels8Red.Clear();
+            _pixels8Green.Clear();
+            _pixels8Blue.Clear();
+
+            _pixels8RedModified.Clear();
+            _pixels8GreenModified.Clear();
+            _pixels8BlueModified.Clear();
+
+            _pixels8RedScaled.Clear();
+            _pixels8GreenScaled.Clear();
+            _pixels8BlueScaled.Clear();
+
+            _pixels8RedScaledModified.Clear();
+            _pixels8GreenScaledModified.Clear();
+            _pixels8BlueScaledModified.Clear();                
+
+            // Populate the Red, Green and Blue lists.
+            if (bitsPerPixel == 24) // 24 bits per pixel
             {
-                byte red, green, blue;
-
-                _pixels8Red.Clear();
-                _pixels8Green.Clear();
-                _pixels8Blue.Clear();
-
-                _pixels8RedModified.Clear();
-                _pixels8GreenModified.Clear();
-                _pixels8BlueModified.Clear();
-
-                _pixels8RedScaled.Clear();
-                _pixels8GreenScaled.Clear();
-                _pixels8BlueScaled.Clear();
-
-                _pixels8RedScaledModified.Clear();
-                _pixels8GreenScaledModified.Clear();
-                _pixels8BlueScaledModified.Clear();                
-
-                // Populate the Red, Green and Blue lists.
-                if (bitsPerPixel == 24) // 24 bits per pixel
+                for (int i = 0; i < _scaledPixels.Count(); i += 3)
                 {
-                    for (int i = 0; i < _scaledPixels.Count(); i += 3)
-                    {
-                        // In a 24-bit per pixel image, the bytes are stored in the order 
-                        // BGR - Blue Green Red order.
-                        blue = _scaledPixels[i];
-                        green = _scaledPixels[i + 1];
-                        red = _scaledPixels[i + 2];
+                    // In a 24-bit per pixel image, the bytes are stored in the order 
+                    // BGR - Blue Green Red order.
+                    blue = _scaledPixels[i];
+                    green = _scaledPixels[i + 1];
+                    red = _scaledPixels[i + 2];
 
-                        _pixels8RedScaled.Add(red);
-                        _pixels8GreenScaled.Add(green);
-                        _pixels8BlueScaled.Add(blue);
+                    _pixels8RedScaled.Add(red);
+                    _pixels8GreenScaled.Add(green);
+                    _pixels8BlueScaled.Add(blue);
 
-                        _pixels8RedScaledModified.Add(red);
-                        _pixels8GreenScaledModified.Add(green);
-                        _pixels8BlueScaledModified.Add(blue);
-                    }
-
-                    for (int i = 0; i < _originalPixels.Count(); i += 3)
-                    {
-                        // In a 24-bit per pixel image, the bytes are stored in the order 
-                        // BGR - Blue Green Red order.
-                        blue = _originalPixels[i];
-                        green = _originalPixels[i + 1];
-                        red = _originalPixels[i + 2];
-
-                        _pixels8Red.Add(red);
-                        _pixels8Green.Add(green);
-                        _pixels8Blue.Add(blue);
-
-                        _pixels8RedModified.Add(red);
-                        _pixels8GreenModified.Add(green);
-                        _pixels8BlueModified.Add(blue);
-                    }
+                    _pixels8RedScaledModified.Add(red);
+                    _pixels8GreenScaledModified.Add(green);
+                    _pixels8BlueScaledModified.Add(blue);
                 }
-                if (bitsPerPixel == 32) // 32 bits per pixel
+
+                for (int i = 0; i < _originalPixels.Count(); i += 3)
                 {
-                    for (int i = 0; i < _scaledPixels.Count(); i += 4)
-                    {
-                        // In a 32-bit per pixel image, the bytes are stored in the order 
-                        // BGR - Blue Green Red Alpha order.
-                        blue = _scaledPixels[i];
-                        green = _scaledPixels[i + 1];
-                        red = _scaledPixels[i + 2];
+                    // In a 24-bit per pixel image, the bytes are stored in the order 
+                    // BGR - Blue Green Red order.
+                    blue = _originalPixels[i];
+                    green = _originalPixels[i + 1];
+                    red = _originalPixels[i + 2];
 
-                        _pixels8RedScaled.Add(red);
-                        _pixels8GreenScaled.Add(green);
-                        _pixels8BlueScaled.Add(blue);
+                    _pixels8Red.Add(red);
+                    _pixels8Green.Add(green);
+                    _pixels8Blue.Add(blue);
 
-                        _pixels8RedScaledModified.Add(red);
-                        _pixels8GreenScaledModified.Add(green);
-                        _pixels8BlueScaledModified.Add(blue);
-                    }
-
-                    for (int i = 0; i < _originalPixels.Count(); i += 4)
-                    {
-                        // In a 32-bit per pixel image, the bytes are stored in the order 
-                        // BGR - Blue Green Red Alpha order.
-                        blue = _originalPixels[i];
-                        green = _originalPixels[i + 1];
-                        red = _originalPixels[i + 2];
-
-                        _pixels8Red.Add(red);
-                        _pixels8Green.Add(green);
-                        _pixels8Blue.Add(blue);
-
-                        _pixels8RedModified.Add(red);
-                        _pixels8GreenModified.Add(green);
-                        _pixels8BlueModified.Add(blue);
-                    }
+                    _pixels8RedModified.Add(red);
+                    _pixels8GreenModified.Add(green);
+                    _pixels8BlueModified.Add(blue);
                 }
+            }
+            if (bitsPerPixel != 32) return;
+            for (int i = 0; i < _scaledPixels.Count(); i += 4)
+            {
+                // In a 32-bit per pixel image, the bytes are stored in the order 
+                // BGR - Blue Green Red Alpha order.
+                blue = _scaledPixels[i];
+                green = _scaledPixels[i + 1];
+                red = _scaledPixels[i + 2];
+
+                _pixels8RedScaled.Add(red);
+                _pixels8GreenScaled.Add(green);
+                _pixels8BlueScaled.Add(blue);
+
+                _pixels8RedScaledModified.Add(red);
+                _pixels8GreenScaledModified.Add(green);
+                _pixels8BlueScaledModified.Add(blue);
+            }
+
+            for (int i = 0; i < _originalPixels.Count(); i += 4)
+            {
+                // In a 32-bit per pixel image, the bytes are stored in the order 
+                // BGR - Blue Green Red Alpha order.
+                blue = _originalPixels[i];
+                green = _originalPixels[i + 1];
+                red = _originalPixels[i + 2];
+
+                _pixels8Red.Add(red);
+                _pixels8Green.Add(green);
+                _pixels8Blue.Add(blue);
+
+                _pixels8RedModified.Add(red);
+                _pixels8GreenModified.Add(green);
+                _pixels8BlueModified.Add(blue);
             }
         }
 
@@ -311,33 +307,29 @@ namespace Vignettes
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
         {            
             sliderAngle.IsEnabled = true;
-            if (comboTechnique.SelectedIndex == 0)
+            switch (comboTechnique.SelectedIndex)
             {
-                _shape = VignetteShape.Circle;
-                sliderAngle.IsEnabled = false;
-            }
-            else if (comboTechnique.SelectedIndex == 1)
-            {
-                _shape = VignetteShape.Ellipse;
-            }
-            else if (comboTechnique.SelectedIndex == 2)
-            {
-                _shape = VignetteShape.Diamond;
-            }
-            else if (comboTechnique.SelectedIndex == 3)
-            {
-                _shape = VignetteShape.Square;
-            }
-            else //if(comboTechnique.SelectedIndex == 4)
-            {
-                _shape = VignetteShape.Rectangle;
+                case 0:
+                    _shape = VignetteShape.Circle;
+                    sliderAngle.IsEnabled = false;
+                    break;
+                case 1:
+                    _shape = VignetteShape.Ellipse;
+                    break;
+                case 2:
+                    _shape = VignetteShape.Diamond;
+                    break;
+                case 3:
+                    _shape = VignetteShape.Square;
+                    break;
+                default:
+                    _shape = VignetteShape.Rectangle;
+                    break;
             }
 
-            if (_vignette != null)
-            {
-                _vignette.Shape = _shape;
-                _vignette.ApplyEffect();
-            }
+            if (_vignette == null) return;
+            _vignette.Shape = _shape;
+            _vignette.ApplyEffect();
         }
 
         private void BnColourClick(object sender, RoutedEventArgs e)
@@ -365,71 +357,55 @@ namespace Vignettes
 
 
             bool? dialogResult = cPicker.ShowDialog();
-            if (dialogResult != null && (bool)dialogResult)
-            {
-                _borderColor = cPicker.SelectedColor;
-                bnColour.Background = new SolidColorBrush(_borderColor);
+            if (dialogResult == null || !((bool) dialogResult)) return;
+            _borderColor = cPicker.SelectedColor;
+            bnColour.Background = new SolidColorBrush(_borderColor);
 
-                if (_vignette != null)
-                {
-                    _vignette.BorderColor = _borderColor;
-                    _vignette.ApplyEffect();
-                }
-            }
+            if (_vignette == null) return;
+            _vignette.BorderColor = _borderColor;
+            _vignette.ApplyEffect();
         }
 
         private void SliderAngleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if( _vignette != null )
-            {
-                _vignette.OrientationInDegrees = sliderAngle.Value;
-                _vignette.ApplyEffect();
-            }
+            if (_vignette == null) return;
+            _vignette.OrientationInDegrees = sliderAngle.Value;
+            _vignette.ApplyEffect();
         }
 
         private void SliderPercentValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette != null)
-            {
-                _vignette.CoveragePercent = sliderPercent.Value;
-                _vignette.ApplyEffect();
-            }
+            if (_vignette == null) return;
+            _vignette.CoveragePercent = sliderPercent.Value;
+            _vignette.ApplyEffect();
         }
 
         private void SliderBandValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette != null)
-            {
-                _vignette.BandWidthInPixels = Convert.ToInt32(sliderBand.Value);
-                _vignette.ApplyEffect();
-            }
+            if (_vignette == null) return;
+            _vignette.BandWidthInPixels = Convert.ToInt32(sliderBand.Value);
+            _vignette.ApplyEffect();
         }
 
         private void SliderOriginXValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette != null)
-            {
-                _vignette.CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value);
-                _vignette.ApplyEffect();
-            }
+            if (_vignette == null) return;
+            _vignette.CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value);
+            _vignette.ApplyEffect();
         }
 
         private void SliderOriginYValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette != null)
-            {
-                _vignette.CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value);
-                _vignette.ApplyEffect();
-            }
+            if (_vignette == null) return;
+            _vignette.CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value);
+            _vignette.ApplyEffect();
         }
 
         private void SliderStepsValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette != null)
-            {
-                _vignette.NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value);
-                _vignette.ApplyEffect();
-            }
+            if (_vignette == null) return;
+            _vignette.NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value);
+            _vignette.ApplyEffect();
         }
 
         private void BnSaveImageClick(object sender, RoutedEventArgs e)

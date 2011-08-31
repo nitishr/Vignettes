@@ -425,26 +425,32 @@ namespace Vignettes
             // Then, save the image
             string extn = Path.GetExtension(FileNameToSave);
             var fs = new FileStream(FileNameToSave, FileMode.Create);
-            if (extn == ".png")
+            switch (extn)
             {
-                // Save as PNG
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                encoder.Save(fs);
-            }
-            else if (extn == ".jpg")
-            {
-                // Save as JPG
-                BitmapEncoder encoder = new JpegBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                encoder.Save(fs);
-            }
-            else // if (extn == "bmp")
-            {
-                // Save as BMP
-                BitmapEncoder encoder = new BmpBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                encoder.Save(fs);
+                case ".png":
+                    {
+                        // Save as PNG
+                        BitmapEncoder encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
+                        encoder.Save(fs);
+                    }
+                    break;
+                case ".jpg":
+                    {
+                        // Save as JPG
+                        BitmapEncoder encoder = new JpegBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
+                        encoder.Save(fs);
+                    }
+                    break;
+                default:
+                    {
+                        // Save as BMP
+                        BitmapEncoder encoder = new BmpBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
+                        encoder.Save(fs);
+                    }
+                    break;
             }
             fs.Close();
         }
