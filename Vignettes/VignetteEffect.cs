@@ -143,15 +143,13 @@ namespace Vignettes
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                 Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
             {
+                double step = ((double)BandWidthInPixels/NumberOfGradationSteps);
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    AddAxisValue(_majorAxisValues, a0, i);
-                    AddAxisValue(_minorAxisValues, b0, i);
-                }
-                for (int i = 0; i < NumberOfGradationSteps; ++i)
-                {
-                    AddAxisValue(_midfigureMajorAxisValues, a0, i + 0.5);
-                    AddAxisValue(_midfigureMinorAxisValues, b0, i + 0.5);
+                    AddAxisValue(_majorAxisValues, a0, step, i);
+                    AddAxisValue(_minorAxisValues, b0, step, i);
+                    AddAxisValue(_midfigureMajorAxisValues, a0, step, i + 0.5);
+                    AddAxisValue(_midfigureMinorAxisValues, b0, step, i + 0.5);
                 }
             }
             else// if (Shape == VignetteShape.Diamond)
@@ -163,10 +161,10 @@ namespace Vignettes
 
                 for (int i = 0; i <= NumberOfGradationSteps; ++i)
                 {
-                    AddDiamondAxisValue(_majorAxisValues, a0, stepXdiamond, i);
-                    AddDiamondAxisValue(_minorAxisValues, b0, stepYdiamond, i);
-                    AddDiamondAxisValue(_midfigureMajorAxisValues, a0, stepXdiamond, i + 0.5);
-                    AddDiamondAxisValue(_midfigureMinorAxisValues, b0, stepYdiamond, i + 0.5);
+                    AddAxisValue(_majorAxisValues, a0, stepXdiamond, i);
+                    AddAxisValue(_minorAxisValues, b0, stepYdiamond, i);
+                    AddAxisValue(_midfigureMajorAxisValues, a0, stepXdiamond, i + 0.5);
+                    AddAxisValue(_midfigureMinorAxisValues, b0, stepYdiamond, i + 0.5);
                 }
             }
 
@@ -191,14 +189,9 @@ namespace Vignettes
             }
         }
 
-        private static void AddDiamondAxisValue(List<double> axisValues, double axisValue, double step, double stepMultiplier)
+        private void AddAxisValue(List<double> axisValues, double axisValue, double step, double stepMultiplier)
         {
-            axisValues.Add(axisValue + step*stepMultiplier);
-        }
-
-        private void AddAxisValue(List<double> axisValues, double axisValue, double stepSizeMultiplier)
-        {
-            axisValues.Add(axisValue + stepSizeMultiplier*BandWidthInPixels/NumberOfGradationSteps);
+            axisValues.Add(axisValue + stepMultiplier*step);
         }
 
         private double CoverageRatio
