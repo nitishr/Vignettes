@@ -243,7 +243,7 @@ namespace Vignettes
             }
         }
 
-        private void bnOpen_Click(object sender, RoutedEventArgs e)
+        private void BnOpenClick(object sender, RoutedEventArgs e)
         {
             // Read in the image
             // Scale the image to 600 x 600, maintaining aspect ratio
@@ -334,7 +334,7 @@ namespace Vignettes
             img.Source = _newImage;
         }
 
-        private void comboTechnique_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
         {            
             sliderAngle.IsEnabled = true;
             if (comboTechnique.SelectedIndex == 0)
@@ -366,7 +366,7 @@ namespace Vignettes
             }
         }
 
-        private void bnColour_Click(object sender, RoutedEventArgs e)
+        private void BnColourClick(object sender, RoutedEventArgs e)
         {
             // ColorPickerDialog comes from ColorPicker.dll, which comes from the Microsoft stable.
             // I know that CodeProject has some colour picker dialogs available, but I choose the 
@@ -404,7 +404,7 @@ namespace Vignettes
             }
         }
 
-        private void sliderAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderAngleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if( _vignette != null )
             {
@@ -413,7 +413,7 @@ namespace Vignettes
             }
         }
 
-        private void sliderPercent_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderPercentValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette != null)
             {
@@ -422,7 +422,7 @@ namespace Vignettes
             }
         }
 
-        private void sliderBand_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderBandValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette != null)
             {
@@ -431,7 +431,7 @@ namespace Vignettes
             }
         }
 
-        private void sliderOriginX_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderOriginXValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette != null)
             {
@@ -440,7 +440,7 @@ namespace Vignettes
             }
         }
 
-        private void sliderOriginY_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderOriginYValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette != null)
             {
@@ -449,7 +449,7 @@ namespace Vignettes
             }
         }
 
-        private void sliderSteps_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderStepsValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette != null)
             {
@@ -458,7 +458,7 @@ namespace Vignettes
             }
         }
 
-        private void bnSaveImage_Click(object sender, RoutedEventArgs e)
+        private void BnSaveImageClick(object sender, RoutedEventArgs e)
         {
             var dlg = new SaveFileDialog
                           {Filter = "PNG Images (.png)|*.png|JPG Images (.jpg)|*.jpg|BMP Images (.bmp)|*.bmp"};
