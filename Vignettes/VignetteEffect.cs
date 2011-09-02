@@ -311,50 +311,39 @@ namespace Vignettes
                 for (int k = 0; k < _width; ++k)
                 {
                     var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
-                    var potential = Potential(point);
-
-                    byte g;
-                    byte b;
-                    byte r;
-                    PixModified(potential, point, _width * el + k, out r, out g, out b);
-                    _pixRedModified[_width * el + k] = r;
-                    _pixGreenModified[_width * el + k] = g;
-                    _pixBlueModified[_width * el + k] = b;
+                    Color modified = PixModified(Potential(point), point, _width * el + k);
+                    _pixRedModified[_width * el + k] = modified.R;
+                    _pixGreenModified[_width * el + k] = modified.G;
+                    _pixBlueModified[_width * el + k] = modified.B;
                 }
             }
         }
 
-        private void PixModified(double potential, Point point, int w1, out byte r, out byte g, out byte b)
+        private Color PixModified(double potential, Point point, int w1)
         {
             if (potential < -1.0) // Arbitrary negative number, greater than N1
             {
                 // Point is within the inner square / rectangle,
-                r = _pixRedOrig[w1];
-                g = _pixGreenOrig[w1];
-                b = _pixBlueOrig[w1];
+                return Color.FromRgb(_pixRedOrig[w1], _pixGreenOrig[w1], _pixBlueOrig[w1]);
             }
-            else if (potential > 1.0) // Arbitrary positive number lesser than - N1
+            if (potential > 1.0) // Arbitrary positive number lesser than - N1
             {
                 // Point is outside the outer square / rectangle
-                r = BorderColor.R;
-                g = BorderColor.G;
-                b = BorderColor.B;
+                return BorderColor;
             }
-            else
-            {
-                // Point is in between outermost and innermost squares / rectangles
-                int j;
+            // Point is in between outermost and innermost squares / rectangles
+            int j;
 
-                for (j = 1; j < NumberOfGradationSteps; ++j)
-                {
-                    if (new Rect(0, 0, _majorAxisValues[j], _minorAxisValues[j]).Contains(point))
-                        break;
-                }
-                int j1 = j - 1;
-                r = (byte) (_pixRedOrig[w1]*_imageWeights[j1] + BorderColor.R*_borderWeights[j1]);
-                g = (byte) (_pixGreenOrig[w1]*_imageWeights[j1] + BorderColor.G*_borderWeights[j1]);
-                b = (byte) (_pixBlueOrig[w1]*_imageWeights[j1] + BorderColor.B*_borderWeights[j1]);
+            for (j = 1; j < NumberOfGradationSteps; ++j)
+            {
+                if (new Rect(0, 0, _majorAxisValues[j], _minorAxisValues[j]).Contains(point))
+                    break;
             }
+            int j1 = j - 1;
+            var r = (byte) (_pixRedOrig[w1]*_imageWeights[j1] + BorderColor.R*_borderWeights[j1]);
+            var g = (byte) (_pixGreenOrig[w1]*_imageWeights[j1] + BorderColor.G*_borderWeights[j1]);
+            var b = (byte) (_pixBlueOrig[w1]*_imageWeights[j1] + BorderColor.B*_borderWeights[j1]);
+            return Color.FromRgb(r, g, b);
         }
 
         private double Potential(Point point)
