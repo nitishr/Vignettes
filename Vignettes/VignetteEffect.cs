@@ -310,8 +310,7 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
-                    Color modified = PixModified(Potential(point), point, _width * el + k);
+                    var modified = PixModified(el, k);
                     _pixRedModified[_width * el + k] = modified.R;
                     _pixGreenModified[_width * el + k] = modified.G;
                     _pixBlueModified[_width * el + k] = modified.B;
@@ -319,8 +318,11 @@ namespace Vignettes
             }
         }
 
-        private Color PixModified(double potential, Point point, int w1)
+        private Color PixModified(int el, int k)
         {
+            var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
+            double potential = Potential(point);
+            int w1 = _width*el + k;
             if (potential < -1.0) // Arbitrary negative number, greater than N1
             {
                 // Point is within the inner square / rectangle,
