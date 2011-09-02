@@ -189,84 +189,72 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    // This is the usual rotation formula, along with translation.
-                    // I could have perhaps used the Transform feature of WPF.
-                    var xprime = XPrime(el, k);
-                    var yprime = YPrime(el, k);
-
-                    double factor1 = 1.0 * Math.Abs(xprime) / _majorAxisValues[0];
-                    double factor2 = 1.0 * Math.Abs(yprime) / _minorAxisValues[0];
-                    double factor3 = 1.0 * Math.Abs(xprime) / _majorAxisValues[NumberOfGradationSteps];
-                    double factor4 = 1.0 * Math.Abs(yprime) / _minorAxisValues[NumberOfGradationSteps];
-
-                    double potential1;
-                    double potential2;
-                    if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse)
-                    {
-                        // Equations for the circle / ellipse. 
-                        // "Potentials" are analogous to distances from the inner and outer boundaries
-                        // of the two ellipses.
-                        potential1 = factor1 * factor1 + factor2 * factor2 - 1.0;
-                        potential2 = factor3 * factor3 + factor4 * factor4 - 1.0;
-                    }
-                    else //if (Shape == VignetteShape.Diamond)
-                    {
-                        // Equations for the diamond. 
-                        potential1 = factor1 + factor2 - 1.0;
-                        potential2 = factor3 + factor4 - 1.0;
-                    }
-                    int w1 = _width * el + k;
-
-                    byte r;
-                    byte g;
-                    byte b;
-                    if (potential1 <= 0.0)
-                    {
-                        // Point is within the inner circle / ellipse / diamond
-                        r = _pixRedOrig[w1];
-                        g = _pixGreenOrig[w1];
-                        b = _pixBlueOrig[w1];
-                    }
-                    else if (potential2 >= 0.0)
-                    {
-                        // Point is outside the outer circle / ellipse / diamond
-                        r = BorderColor.R;
-                        g = BorderColor.G;
-                        b = BorderColor.B;
-                    }
-                    else
-                    {
-                        // Point is in between the outermost and innermost circles / ellipses / diamonds
-                        int j;
-
-                        for (j = 1; j < NumberOfGradationSteps; ++j)
-                        {
-                            factor1 = Math.Abs(xprime) / _majorAxisValues[j];
-                            factor2 = Math.Abs(yprime) / _minorAxisValues[j];
-
-                            double potential;
-                            if (Shape == VignetteShape.Circle ||
-                                Shape == VignetteShape.Ellipse)
-                            {
-                                potential = factor1 * factor1 + factor2 * factor2 - 1.0;
-                            }
-                            else // if (Shape == VignetteShape.Diamond)
-                            {
-                                potential = factor1 + factor2 - 1.0;
-                            }
-                            if (potential < 0.0) break;
-                        }
-                        int j1 = j - 1;
-                        // The formulas where the weights are applied to the image, and border.
-                        r = (byte)(_pixRedOrig[w1] * _imageWeights[j1] + BorderColor.R * _borderWeights[j1]);
-                        g = (byte)(_pixGreenOrig[w1] * _imageWeights[j1] + BorderColor.G * _borderWeights[j1]);
-                        b = (byte)(_pixBlueOrig[w1] * _imageWeights[j1] + BorderColor.B * _borderWeights[j1]);
-                    }
-                    _pixRedModified[w1] = r;
-                    _pixGreenModified[w1] = g;
-                    _pixBlueModified[w1] = b;
+                    Color modified = PixModifiedCircleEllipseDiamond(k, el);
+                    _pixRedModified[_width * el + k] = modified.R;
+                    _pixGreenModified[_width * el + k] = modified.G;
+                    _pixBlueModified[_width * el + k] = modified.B;
                 }
             }
+        }
+
+        private Color PixModifiedCircleEllipseDiamond(int k, int el)
+        {
+            var xprime = XPrime(el, k);
+            var yprime = YPrime(el, k);
+
+            double factor1 = 1.0*Math.Abs(xprime)/_majorAxisValues[0];
+            double factor2 = 1.0*Math.Abs(yprime)/_minorAxisValues[0];
+            double factor3 = 1.0*Math.Abs(xprime)/_majorAxisValues[NumberOfGradationSteps];
+            double factor4 = 1.0*Math.Abs(yprime)/_minorAxisValues[NumberOfGradationSteps];
+
+            double potential1;
+            double potential2;
+            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse)
+            {
+                // Equations for the circle / ellipse. 
+                // "Potentials" are analogous to distances from the inner and outer boundaries
+                // of the two ellipses.
+                potential1 = factor1*factor1 + factor2*factor2 - 1.0;
+                potential2 = factor3*factor3 + factor4*factor4 - 1.0;
+            }
+            else //if (Shape == VignetteShape.Diamond)
+            {
+                // Equations for the diamond. 
+                potential1 = factor1 + factor2 - 1.0;
+                potential2 = factor3 + factor4 - 1.0;
+            }
+
+            int w1 = _width*el + k;
+            if (potential1 <= 0.0)
+            {
+                // Point is within the inner circle / ellipse / diamond
+                return Color.FromRgb(_pixRedOrig[w1], _pixGreenOrig[w1], _pixBlueOrig[w1]);
+            }
+            if (potential2 >= 0.0)
+            {
+                // Point is outside the outer circle / ellipse / diamond
+                return BorderColor;
+            }
+            // Point is in between the outermost and innermost circles / ellipses / diamonds
+            int j;
+            for (j = 1; j < NumberOfGradationSteps; ++j)
+            {
+                factor1 = Math.Abs(xprime)/_majorAxisValues[j];
+                factor2 = Math.Abs(yprime)/_minorAxisValues[j];
+
+                double potential;
+                if (Shape == VignetteShape.Circle ||
+                    Shape == VignetteShape.Ellipse)
+                {
+                    potential = factor1*factor1 + factor2*factor2 - 1.0;
+                }
+                else // if (Shape == VignetteShape.Diamond)
+                {
+                    potential = factor1 + factor2 - 1.0;
+                }
+                if (potential < 0.0) break;
+            }
+            return ColorAt(j - 1, w1);
         }
 
         private double YPrime(int el, int k)
@@ -340,9 +328,14 @@ namespace Vignettes
                 if (new Rect(0, 0, _majorAxisValues[j], _minorAxisValues[j]).Contains(point))
                     break;
             }
-            return Color.FromRgb(ColorComponentAt(j - 1, _pixRedOrig[w1], BorderColor.R),
-                                 ColorComponentAt(j - 1, _pixGreenOrig[w1], BorderColor.G),
-                                 ColorComponentAt(j - 1, _pixBlueOrig[w1], BorderColor.B));
+            return ColorAt(j - 1, w1);
+        }
+
+        private Color ColorAt(int j1, int w1)
+        {
+            return Color.FromRgb(ColorComponentAt(j1, _pixRedOrig[w1], BorderColor.R),
+                                 ColorComponentAt(j1, _pixGreenOrig[w1], BorderColor.G),
+                                 ColorComponentAt(j1, _pixBlueOrig[w1], BorderColor.B));
         }
 
         private byte ColorComponentAt(int j1, byte imagePixel, byte borderPixel)
