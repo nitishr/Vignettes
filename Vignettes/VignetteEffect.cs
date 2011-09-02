@@ -335,17 +335,19 @@ namespace Vignettes
             }
             // Point is in between outermost and innermost squares / rectangles
             int j;
-
             for (j = 1; j < NumberOfGradationSteps; ++j)
             {
                 if (new Rect(0, 0, _majorAxisValues[j], _minorAxisValues[j]).Contains(point))
                     break;
             }
-            int j1 = j - 1;
-            var r = (byte) (_pixRedOrig[w1]*_imageWeights[j1] + BorderColor.R*_borderWeights[j1]);
-            var g = (byte) (_pixGreenOrig[w1]*_imageWeights[j1] + BorderColor.G*_borderWeights[j1]);
-            var b = (byte) (_pixBlueOrig[w1]*_imageWeights[j1] + BorderColor.B*_borderWeights[j1]);
-            return Color.FromRgb(r, g, b);
+            return Color.FromRgb(ColorComponentAt(j - 1, _pixRedOrig[w1], BorderColor.R),
+                                 ColorComponentAt(j - 1, _pixGreenOrig[w1], BorderColor.G),
+                                 ColorComponentAt(j - 1, _pixBlueOrig[w1], BorderColor.B));
+        }
+
+        private byte ColorComponentAt(int j1, byte imagePixel, byte borderPixel)
+        {
+            return (byte) (imagePixel*_imageWeights[j1] + borderPixel*_borderWeights[j1]);
         }
 
         private double Potential(Point point)
