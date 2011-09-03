@@ -228,7 +228,7 @@ namespace Vignettes
             if (potential1 <= 0.0)
             {
                 // Point is within the inner circle / ellipse / diamond
-                return Color.FromRgb(_pixRedOrig[w1], _pixGreenOrig[w1], _pixBlueOrig[w1]);
+                return OriginalColorAt(w1);
             }
             if (potential2 >= 0.0)
             {
@@ -255,6 +255,11 @@ namespace Vignettes
                 if (potential < 0.0) break;
             }
             return ColorAt(j - 1, w1);
+        }
+
+        private Color OriginalColorAt(int w1)
+        {
+            return Color.FromRgb(_pixRedOrig[w1], _pixGreenOrig[w1], _pixBlueOrig[w1]);
         }
 
         private double YPrime(int el, int k)
@@ -314,7 +319,7 @@ namespace Vignettes
             if (potential < -1.0) // Arbitrary negative number, greater than N1
             {
                 // Point is within the inner square / rectangle,
-                return Color.FromRgb(_pixRedOrig[w1], _pixGreenOrig[w1], _pixBlueOrig[w1]);
+                return OriginalColorAt(w1);
             }
             if (potential > 1.0) // Arbitrary positive number lesser than - N1
             {
