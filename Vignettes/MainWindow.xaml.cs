@@ -148,14 +148,14 @@ namespace Vignettes
                 {
                     // In a 24-bit per pixel image, the bytes are stored in the order 
                     // BGR - Blue Green Red order.
-                    AddPixels(_scaledPixels[i + 2], _scaledPixels[i + 1], _scaledPixels[i], _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
+                    AddPixels(_scaledPixels, i, _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
                 }
 
                 for (int i = 0; i < _originalPixels.Count(); i += 3)
                 {
                     // In a 24-bit per pixel image, the bytes are stored in the order 
                     // BGR - Blue Green Red order.
-                    AddPixels(_originalPixels[i + 2], _originalPixels[i + 1], _originalPixels[i], _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
+                    AddPixels(_originalPixels, i, _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
                 }
             }
             if (bitsPerPixel != 32) return;
@@ -163,19 +163,22 @@ namespace Vignettes
             {
                 // In a 32-bit per pixel image, the bytes are stored in the order 
                 // BGR - Blue Green Red Alpha order.
-                AddPixels(_scaledPixels[i + 2], _scaledPixels[i + 1], _scaledPixels[i], _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
+                AddPixels(_scaledPixels, i, _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
             }
 
             for (int i = 0; i < _originalPixels.Count(); i += 4)
             {
                 // In a 32-bit per pixel image, the bytes are stored in the order 
                 // BGR - Blue Green Red Alpha order.
-                AddPixels(_originalPixels[i + 2], _originalPixels[i + 1], _originalPixels[i], _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
+                AddPixels(_originalPixels, i, _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
             }
         }
 
-        private static void AddPixels(byte red, byte green, byte blue, List<byte> pixels8Red, List<byte> pixels8Green, List<byte> pixels8Blue, List<byte> pixels8RedModified, List<byte> pixels8GreenModified, List<byte> pixels8BlueModified)
+        private static void AddPixels(byte[] pixels, int i, List<byte> pixels8Red, List<byte> pixels8Green, List<byte> pixels8Blue, List<byte> pixels8RedModified, List<byte> pixels8GreenModified, List<byte> pixels8BlueModified)
         {
+            byte red = pixels[i + 2];
+            byte green = pixels[i + 1];
+            byte blue = pixels[i];
             pixels8Red.Add(red);
             pixels8Green.Add(green);
             pixels8Blue.Add(blue);
