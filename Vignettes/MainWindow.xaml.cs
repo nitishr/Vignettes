@@ -78,7 +78,7 @@ namespace Vignettes
             if ((_originalImage.Format == PixelFormats.Bgra32) ||
                 (_originalImage.Format == PixelFormats.Bgr32))
             {
-                CopyOriginalImage();
+                _originalPixels = Pixels(_originalImage, _originalHeight);
                 Title = "Vignette Effect: " + fileNameOnly;
                 return true;
             }
@@ -87,16 +87,12 @@ namespace Vignettes
             return false;
         }
 
-        private void CopyOriginalImage()
+        private static byte[] Pixels(BitmapSource image, int height)
         {
-            var stride = Stride(_originalImage);
-            _originalPixels = new byte[stride*_originalHeight];
-            _originalImage.CopyPixels(Int32Rect.Empty, _originalPixels, stride, 0);
-        }
-
-        private static int Stride(BitmapSource image)
-        {
-            return (image.PixelWidth*image.Format.BitsPerPixel + 7)/8;
+            var stride = (image.PixelWidth*image.Format.BitsPerPixel + 7)/8;
+            var pixels = new byte[stride*height];
+            image.CopyPixels(Int32Rect.Empty, pixels, stride, 0);
+            return pixels;
         }
 
         void ScaleImage()
@@ -106,14 +102,7 @@ namespace Vignettes
             _scaleFactor = Math.Min(scale.ScaleX, scale.ScaleY);
             _scaledImage = new TransformedBitmap(_originalImage, scale);
             img.Source = _scaledImage;
-            CopyScaledImage();
-        }
-
-        private void CopyScaledImage()
-        {
-            int stride = Stride(_scaledImage);
-            _scaledPixels = new byte[stride*_scaledHeight];
-            _scaledImage.CopyPixels(Int32Rect.Empty, _scaledPixels, stride, 0);
+            _scaledPixels = Pixels(_scaledImage, _scaledHeight);
         }
 
         private void ComputeScaledWidthAndHeight()
