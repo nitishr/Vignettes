@@ -78,7 +78,7 @@ namespace Vignettes
             if ((_originalImage.Format == PixelFormats.Bgra32) ||
                 (_originalImage.Format == PixelFormats.Bgr32))
             {
-                CopyPixels();
+                CopyOriginalImage();
                 Title = "Vignette Effect: " + fileNameOnly;
                 return true;
             }
@@ -87,27 +87,32 @@ namespace Vignettes
             return false;
         }
 
-        private void CopyPixels()
+        private void CopyOriginalImage()
         {
-            int stride = (_originalImage.PixelWidth*_originalImage.Format.BitsPerPixel + 7)/8;
+            var stride = Stride(_originalImage);
             _originalPixels = new byte[stride*_originalHeight];
             _originalImage.CopyPixels(Int32Rect.Empty, _originalPixels, stride, 0);
         }
 
+        private static int Stride(BitmapSource image)
+        {
+            return (image.PixelWidth*image.Format.BitsPerPixel + 7)/8;
+        }
+
         void ScaleImage()
         {
-            double fac1 = Convert.ToDouble(_scaledWidth / (1.0 * _originalWidth));
-            double fac2 = Convert.ToDouble(_scaledHeight / (1.0 * _originalHeight));
-            _scaleFactor = Math.Min(fac1, fac2);
-            var scale = new ScaleTransform(fac1, fac2);
+            var scale = new ScaleTransform(Convert.ToDouble(_scaledWidth/(1.0*_originalWidth)),
+                                           Convert.ToDouble(_scaledHeight/(1.0*_originalHeight)));
+            _scaleFactor = Math.Min(scale.ScaleX, scale.ScaleY);
             _scaledImage = new TransformedBitmap(_originalImage, scale);
-
             img.Source = _scaledImage;
+            CopyScaledImage();
+        }
 
-            int stride = (_scaledImage.PixelWidth * _scaledImage.Format.BitsPerPixel + 7) / 8;
-            _scaledPixels = new byte[stride * _scaledHeight];
-
-            // Update the array scaledPixels from the scaled image
+        private void CopyScaledImage()
+        {
+            int stride = Stride(_scaledImage);
+            _scaledPixels = new byte[stride*_scaledHeight];
             _scaledImage.CopyPixels(Int32Rect.Empty, _scaledPixels, stride, 0);
         }
 
