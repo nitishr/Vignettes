@@ -70,29 +70,28 @@ namespace Vignettes
 
         private bool ReadImage(string fn, string fileNameOnly)
         {
-            bool retVal = false;
             // Open the image
-            var imageUri = new Uri(fn, UriKind.RelativeOrAbsolute);
-            _originalImage = new BitmapImage(imageUri);
-            int stride = (_originalImage.PixelWidth * _originalImage.Format.BitsPerPixel + 7) / 8;
+            _originalImage = new BitmapImage(new Uri(fn, UriKind.RelativeOrAbsolute));
             _originalWidth = _originalImage.PixelWidth;
             _originalHeight = _originalImage.PixelHeight;
 
             if ((_originalImage.Format == PixelFormats.Bgra32) ||
                 (_originalImage.Format == PixelFormats.Bgr32))
             {
-                _originalPixels = new byte[stride * _originalHeight];
-                // Read in pixel values from the image
-                _originalImage.CopyPixels(Int32Rect.Empty, _originalPixels, stride, 0);
+                CopyPixels();
                 Title = "Vignette Effect: " + fileNameOnly;
-                retVal = true;
+                return true;
             }
-            else
-            {
-                MessageBox.Show("Sorry, I don't support this image format.");
-            }
+            MessageBox.Show("Sorry, I don't support this image format.");
 
-            return retVal;
+            return false;
+        }
+
+        private void CopyPixels()
+        {
+            int stride = (_originalImage.PixelWidth*_originalImage.Format.BitsPerPixel + 7)/8;
+            _originalPixels = new byte[stride*_originalHeight];
+            _originalImage.CopyPixels(Int32Rect.Empty, _originalPixels, stride, 0);
         }
 
         void ScaleImage()
