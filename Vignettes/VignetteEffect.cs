@@ -189,15 +189,19 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    Color modified = PixModifiedCircleEllipseDiamond(k, el);
-                    _pixRedModified[_width * el + k] = modified.R;
-                    _pixGreenModified[_width * el + k] = modified.G;
-                    _pixBlueModified[_width * el + k] = modified.B;
+                    ModifyColor(PixModifiedCircleEllipseDiamond(el, k), el, k);
                 }
             }
         }
 
-        private Color PixModifiedCircleEllipseDiamond(int k, int el)
+        private void ModifyColor(Color modified, int el, int k)
+        {
+            _pixRedModified[_width*el + k] = modified.R;
+            _pixGreenModified[_width*el + k] = modified.G;
+            _pixBlueModified[_width*el + k] = modified.B;
+        }
+
+        private Color PixModifiedCircleEllipseDiamond(int el, int k)
         {
             var xprime = XPrime(el, k);
             var yprime = YPrime(el, k);
@@ -303,10 +307,7 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    var modified = PixModified(el, k);
-                    _pixRedModified[_width * el + k] = modified.R;
-                    _pixGreenModified[_width * el + k] = modified.G;
-                    _pixBlueModified[_width * el + k] = modified.B;
+                    ModifyColor(PixModified(el, k), el, k);
                 }
             }
         }
