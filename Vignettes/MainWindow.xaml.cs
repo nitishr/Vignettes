@@ -393,13 +393,9 @@ namespace Vignettes
             }
         }
 
-        private string GetNewFileName(string fileForSaving)
-        {            
-            string fileOnly = Path.GetFileNameWithoutExtension(fileForSaving);
-            string extension = Path.GetExtension(fileForSaving);
-            string newFileName = fileOnly + "_";
-            newFileName += extension;
-            return newFileName;
+        private static string GetNewFileName(string fileForSaving)
+        {
+            return Path.GetFileNameWithoutExtension(fileForSaving) + "_" + Path.GetExtension(fileForSaving);
         }
     }
 }
