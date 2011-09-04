@@ -122,55 +122,27 @@ namespace Vignettes
         private void PopulatePixelsOriginalAndScaled()
         {
             int bitsPerPixel = _originalImage.Format.BitsPerPixel;
-
             if (bitsPerPixel != 24 && bitsPerPixel != 32) return;
+            int step = bitsPerPixel / 8;
+            PopulatePixels(_scaledPixels, step, _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
+            PopulatePixels(_originalPixels, step, _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
+        }
 
-            _pixels8Red.Clear();
-            _pixels8Green.Clear();
-            _pixels8Blue.Clear();
+        private static void PopulatePixels(byte[] pixels, int step, List<byte> pixels8Red, List<byte> pixels8Green, List<byte> pixels8Blue, List<byte> pixels8RedModified, List<byte> pixels8GreenModified, List<byte> pixels8BlueModified)
+        {
+            pixels8Red.Clear();
+            pixels8Green.Clear();
+            pixels8Blue.Clear();
 
-            _pixels8RedModified.Clear();
-            _pixels8GreenModified.Clear();
-            _pixels8BlueModified.Clear();
-
-            _pixels8RedScaled.Clear();
-            _pixels8GreenScaled.Clear();
-            _pixels8BlueScaled.Clear();
-
-            _pixels8RedScaledModified.Clear();
-            _pixels8GreenScaledModified.Clear();
-            _pixels8BlueScaledModified.Clear();                
+            pixels8RedModified.Clear();
+            pixels8GreenModified.Clear();
+            pixels8BlueModified.Clear();
 
             // Populate the Red, Green and Blue lists.
-            if (bitsPerPixel == 24) // 24 bits per pixel
+            for (int i = 0; i < pixels.Count(); i += step)
             {
-                for (int i = 0; i < _scaledPixels.Count(); i += 3)
-                {
-                    // In a 24-bit per pixel image, the bytes are stored in the order 
-                    // BGR - Blue Green Red order.
-                    AddPixels(_scaledPixels, i, _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
-                }
-
-                for (int i = 0; i < _originalPixels.Count(); i += 3)
-                {
-                    // In a 24-bit per pixel image, the bytes are stored in the order 
-                    // BGR - Blue Green Red order.
-                    AddPixels(_originalPixels, i, _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
-                }
-            }
-            if (bitsPerPixel != 32) return;
-            for (int i = 0; i < _scaledPixels.Count(); i += 4)
-            {
-                // In a 32-bit per pixel image, the bytes are stored in the order 
-                // BGR - Blue Green Red Alpha order.
-                AddPixels(_scaledPixels, i, _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
-            }
-
-            for (int i = 0; i < _originalPixels.Count(); i += 4)
-            {
-                // In a 32-bit per pixel image, the bytes are stored in the order 
-                // BGR - Blue Green Red Alpha order.
-                AddPixels(_originalPixels, i, _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
+                AddPixels(pixels, i, pixels8Red, pixels8Green, pixels8Blue, pixels8RedModified,
+                          pixels8GreenModified, pixels8BlueModified);
             }
         }
 
