@@ -364,19 +364,7 @@ namespace Vignettes
         private void SaveImage()
         {
             // First, create the image to be saved
-            int stride = (_width * BitsPerPixel + 7) / 8;
-            var pixelsToWrite = new byte[stride * _height];
-
-            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
-            {
-                int i1 = i / 3;
-                pixelsToWrite[i] = _pixRedModified[i1];
-                pixelsToWrite[i + 1] = _pixGreenModified[i1];
-                pixelsToWrite[i + 2] = _pixBlueModified[i1];
-            }
-
-            BitmapSource imageToSave = BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24,
-                null, pixelsToWrite, stride);
+            var imageToSave = CreateImage(_pixRedModified, _pixGreenModified, _pixBlueModified, _width, _height);
 
             // Then, save the image
             string extn = Path.GetExtension(FileNameToSave);
@@ -409,6 +397,23 @@ namespace Vignettes
                     break;
             }
             fs.Close();
+        }
+
+        public static BitmapSource CreateImage(List<byte> pixRed, List<byte> pixGreen, List<byte> pixBlue, int pixelWidth, int pixelHeight)
+        {
+            int stride = (pixelWidth*BitsPerPixel + 7)/8;
+            var pixelsToWrite = new byte[stride*pixelHeight];
+
+            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
+            {
+                int i1 = i/3;
+                pixelsToWrite[i] = pixRed[i1];
+                pixelsToWrite[i + 1] = pixGreen[i1];
+                pixelsToWrite[i + 2] = pixBlue[i1];
+            }
+
+            return BitmapSource.Create(pixelWidth, pixelHeight, Dpi, Dpi, PixelFormats.Rgb24,
+                                       null, pixelsToWrite, stride);
         }
     }
 }
