@@ -363,18 +363,9 @@ namespace Vignettes
                                       CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value),
                                       CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value),
                                       BorderColor = _borderColor,
-                                      Shape = _shape
+                                      Shape = _shape,
+                                      FileNameToSave = FileToSave(dlg)
                                   };
-                    string fileToSave = dlg.FileName;
-                    // I don't want the original file to be overwritten, since the vignetting operation
-                    // is a lossy one (where some pixels of the original image may be lost).
-                    // Therefore, if the user inadvertently selects the original filename for saving,
-                    // I create the new file name with an underscore _ appended to the filename.
-                    if (fileToSave == _fileName)
-                    {
-                        fileToSave = GetNewFileName(fileToSave);
-                    }
-                    vig.FileNameToSave = fileToSave;
 
                     Mouse.OverrideCursor = Cursors.Wait;
                     vig.TransferImagePixels(ref _pixels8Red, ref _pixels8Green, ref _pixels8Blue,
@@ -391,6 +382,15 @@ namespace Vignettes
             {
                 Mouse.OverrideCursor = null;
             }
+        }
+
+        private string FileToSave(FileDialog dlg)
+        {
+            // I don't want the original file to be overwritten, since the vignetting operation
+            // is a lossy one (where some pixels of the original image may be lost).
+            // Therefore, if the user inadvertently selects the original filename for saving,
+            // I create the new file name with an underscore _ appended to the filename.
+            return dlg.FileName == _fileName ? GetNewFileName(dlg.FileName) : dlg.FileName;
         }
 
         private static string GetNewFileName(string fileForSaving)
