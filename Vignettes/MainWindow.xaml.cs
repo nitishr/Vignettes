@@ -21,21 +21,10 @@ namespace Vignettes
     {
         private const int ViewportWidthHeight = 600;
 
-        List<byte> _pixels8Red = new List<byte>();
-        List<byte> _pixels8Green = new List<byte>();
-        List<byte> _pixels8Blue = new List<byte>();
-
-        List<byte> _pixels8RedModified = new List<byte>();
-        List<byte> _pixels8GreenModified = new List<byte>();
-        List<byte> _pixels8BlueModified = new List<byte>();
-
-        List<byte> _pixels8RedScaled = new List<byte>();
-        List<byte> _pixels8GreenScaled = new List<byte>();
-        List<byte> _pixels8BlueScaled = new List<byte>();
-
-        List<byte> _pixels8RedScaledModified = new List<byte>();
-        List<byte> _pixels8GreenScaledModified = new List<byte>();
-        List<byte> _pixels8BlueScaledModified = new List<byte>();
+        List<Color> _pixels8 = new List<Color>();
+        List<Color> _pixels8Modified = new List<Color>();
+        List<Color> _pixels8Scaled = new List<Color>();
+        List<Color> _pixels8ScaledModified = new List<Color>();
 
         BitmapSource _originalImage;
         BitmapSource _newImage;
@@ -124,39 +113,25 @@ namespace Vignettes
             int bitsPerPixel = _originalImage.Format.BitsPerPixel;
             if (bitsPerPixel != 24 && bitsPerPixel != 32) return;
             int step = bitsPerPixel / 8;
-            PopulatePixels(_scaledPixels, step, _pixels8RedScaled, _pixels8GreenScaled, _pixels8BlueScaled, _pixels8RedScaledModified, _pixels8GreenScaledModified, _pixels8BlueScaledModified);
-            PopulatePixels(_originalPixels, step, _pixels8Red, _pixels8Green, _pixels8Blue, _pixels8RedModified, _pixels8GreenModified, _pixels8BlueModified);
+            PopulatePixels(_scaledPixels, step, _pixels8Scaled, _pixels8ScaledModified);
+            PopulatePixels(_originalPixels, step, _pixels8, _pixels8Modified);
         }
 
-        private static void PopulatePixels(byte[] pixels, int step, List<byte> pixels8Red, List<byte> pixels8Green, List<byte> pixels8Blue, List<byte> pixels8RedModified, List<byte> pixels8GreenModified, List<byte> pixels8BlueModified)
+        private static void PopulatePixels(byte[] pixels, int step, List<Color> pixels8, List<Color> pixels8Modified)
         {
-            pixels8Red.Clear();
-            pixels8Green.Clear();
-            pixels8Blue.Clear();
-
-            pixels8RedModified.Clear();
-            pixels8GreenModified.Clear();
-            pixels8BlueModified.Clear();
-
-            // Populate the Red, Green and Blue lists.
+            pixels8.Clear();
+            pixels8Modified.Clear();
             for (int i = 0; i < pixels.Count(); i += step)
             {
-                AddPixels(pixels, i, pixels8Red, pixels8Green, pixels8Blue, pixels8RedModified,
-                          pixels8GreenModified, pixels8BlueModified);
+                AddPixels(pixels, i, pixels8, pixels8Modified);
             }
         }
 
-        private static void AddPixels(byte[] pixels, int i, List<byte> pixels8Red, List<byte> pixels8Green, List<byte> pixels8Blue, List<byte> pixels8RedModified, List<byte> pixels8GreenModified, List<byte> pixels8BlueModified)
+        private static void AddPixels(byte[] pixels, int i, List<Color> pixels8, List<Color> pixels8Modified)
         {
-            byte red = pixels[i + 2];
-            byte green = pixels[i + 1];
-            byte blue = pixels[i];
-            pixels8Red.Add(red);
-            pixels8Green.Add(green);
-            pixels8Blue.Add(blue);
-            pixels8RedModified.Add(red);
-            pixels8GreenModified.Add(green);
-            pixels8BlueModified.Add(blue);
+            Color color = Color.FromRgb(pixels[i + 2], pixels[i + 1], pixels[i]);
+            pixels8.Add(color);
+            pixels8Modified.Add(color);
         }
 
         private void BnOpenClick(object sender, RoutedEventArgs e)
@@ -214,19 +189,14 @@ namespace Vignettes
                                 BorderColor = _borderColor,
                                 Shape = _shape
                             };
-            _vignette.TransferImagePixels(ref _pixels8RedScaled, ref _pixels8GreenScaled, ref _pixels8BlueScaled,
-                    _scaledWidth, _scaledHeight,
-                    ref _pixels8RedScaledModified, ref _pixels8GreenScaledModified, ref _pixels8BlueScaledModified,
-                    ModeOfOperation.DisplayMode);
+            _vignette.TransferImagePixels(ref _pixels8Scaled, ref _pixels8ScaledModified, _scaledWidth, _scaledHeight,
+                                          ModeOfOperation.DisplayMode);
             _vignette.ApplyEffect();
         }
 
-        public void UpdateImage(ref List<byte> pixels8RedScaledModified,
-            ref List<byte> pixels8GreenScaledModified, 
-            ref List<byte> pixels8BlueScaledModified)
+        public void UpdateImage(ref List<Color> pixels8ScaledModified)
         {
-            _newImage = VignetteEffect.CreateImage(pixels8RedScaledModified, pixels8GreenScaledModified,
-                                                   pixels8BlueScaledModified, _scaledWidth, _scaledHeight);
+            _newImage = VignetteEffect.CreateImage(pixels8ScaledModified, _scaledWidth, _scaledHeight);
             img.Source = _newImage;
         }
 
@@ -368,10 +338,8 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    vig.TransferImagePixels(ref _pixels8Red, ref _pixels8Green, ref _pixels8Blue,
-                            _originalWidth, _originalHeight,
-                            ref _pixels8RedModified, ref _pixels8GreenModified, ref _pixels8BlueModified,
-                            ModeOfOperation.SaveMode);
+                    vig.TransferImagePixels(ref _pixels8, ref _pixels8Modified, _originalWidth, _originalHeight,
+                                            ModeOfOperation.SaveMode);
                     vig.ApplyEffect();                    
                 }
             }

@@ -33,12 +33,8 @@ namespace Vignettes
         private const int Dpi = 72;
         public const int BitsPerPixel = 24;
 
-        List<byte> _pixRedOrig = new List<byte>();
-        List<byte> _pixGreenOrig = new List<byte>();
-        List<byte> _pixBlueOrig = new List<byte>();
-        List<byte> _pixRedModified = new List<byte>();
-        List<byte> _pixGreenModified = new List<byte>();
-        List<byte> _pixBlueModified = new List<byte>();
+        List<Color> _pixOrig = new List<Color>();
+        List<Color> _pixModified = new List<Color>();
         readonly List<double> _majorAxisValues = new List<double>();
         readonly List<double> _minorAxisValues = new List<double>();
         readonly List<double> _midfigureMajorAxisValues = new List<double>();
@@ -73,20 +69,12 @@ namespace Vignettes
 
         public string FileNameToSave { get; set; }
 
-        public void TransferImagePixels(
-            ref List<byte> redOrig, ref List<byte> greenOrig, ref List<byte> blueOrig,
-            int wid, int hei,
-            ref List<byte> redModified, ref List<byte> greenModified, ref List<byte> blueModified, 
-            ModeOfOperation modeOfOperation)
+        public void TransferImagePixels(ref List<Color> orig, ref List<Color> modified, int width, int height, ModeOfOperation modeOfOperation)
         {
-            _pixRedOrig = redOrig;
-            _pixGreenOrig = greenOrig;
-            _pixBlueOrig = blueOrig;
-            _width = wid;
-            _height = hei;
-            _pixRedModified = redModified;
-            _pixGreenModified = greenModified;
-            _pixBlueModified = blueModified;
+            _pixOrig = orig;
+            _width = width;
+            _height = height;
+            _pixModified = modified;
             _mode = modeOfOperation;
         }
 
@@ -101,7 +89,7 @@ namespace Vignettes
 
             if (_mode == ModeOfOperation.DisplayMode) // Send back the pixels to display the image.
             {                
-                _mainWin.UpdateImage(ref _pixRedModified, ref _pixGreenModified, ref _pixBlueModified);
+                _mainWin.UpdateImage(ref _pixModified);
             }
             else // if (mode == ModeOfOperation.SaveMode) // Save the image onto the specified file.
             {
@@ -189,16 +177,9 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    ModifyColor(PixModifiedCircleEllipseDiamond(el, k), el, k);
+                    _pixModified[_width*el + k] = PixModifiedCircleEllipseDiamond(el, k);
                 }
             }
-        }
-
-        private void ModifyColor(Color modified, int el, int k)
-        {
-            _pixRedModified[_width*el + k] = modified.R;
-            _pixGreenModified[_width*el + k] = modified.G;
-            _pixBlueModified[_width*el + k] = modified.B;
         }
 
         private Color PixModifiedCircleEllipseDiamond(int el, int k)
@@ -232,7 +213,7 @@ namespace Vignettes
             if (potential1 <= 0.0)
             {
                 // Point is within the inner circle / ellipse / diamond
-                return OriginalColorAt(w1);
+                return _pixOrig[w1];
             }
             if (potential2 >= 0.0)
             {
@@ -259,11 +240,6 @@ namespace Vignettes
                 if (potential < 0.0) break;
             }
             return ColorAt(j - 1, w1);
-        }
-
-        private Color OriginalColorAt(int w1)
-        {
-            return Color.FromRgb(_pixRedOrig[w1], _pixGreenOrig[w1], _pixBlueOrig[w1]);
         }
 
         private double YPrime(int el, int k)
@@ -307,12 +283,12 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    ModifyColor(PixModified(el, k), el, k);
+                    _pixModified[_width*el + k] = PixModifiedRectangleSquare(el, k);
                 }
             }
         }
 
-        private Color PixModified(int el, int k)
+        private Color PixModifiedRectangleSquare(int el, int k)
         {
             var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
             double potential = Potential(point);
@@ -320,7 +296,7 @@ namespace Vignettes
             if (potential < -1.0) // Arbitrary negative number, greater than N1
             {
                 // Point is within the inner square / rectangle,
-                return OriginalColorAt(w1);
+                return _pixOrig[w1];
             }
             if (potential > 1.0) // Arbitrary positive number lesser than - N1
             {
@@ -339,14 +315,8 @@ namespace Vignettes
 
         private Color ColorAt(int j1, int w1)
         {
-            return Color.FromRgb(ColorComponentAt(j1, _pixRedOrig[w1], BorderColor.R),
-                                 ColorComponentAt(j1, _pixGreenOrig[w1], BorderColor.G),
-                                 ColorComponentAt(j1, _pixBlueOrig[w1], BorderColor.B));
-        }
-
-        private byte ColorComponentAt(int j1, byte imagePixel, byte borderPixel)
-        {
-            return (byte) (imagePixel*_imageWeights[j1] + borderPixel*_borderWeights[j1]);
+            return Color.Add(Color.Multiply(_pixOrig[w1], (float) _imageWeights[j1]),
+                             Color.Multiply(BorderColor, (float) _borderWeights[j1]));
         }
 
         private double Potential(Point point)
@@ -364,7 +334,7 @@ namespace Vignettes
         private void SaveImage()
         {
             // First, create the image to be saved
-            var imageToSave = CreateImage(_pixRedModified, _pixGreenModified, _pixBlueModified, _width, _height);
+            var imageToSave = CreateImage(_pixModified, _width, _height);
 
             // Then, save the image
             string extn = Path.GetExtension(FileNameToSave);
@@ -399,7 +369,7 @@ namespace Vignettes
             fs.Close();
         }
 
-        public static BitmapSource CreateImage(List<byte> pixRed, List<byte> pixGreen, List<byte> pixBlue, int pixelWidth, int pixelHeight)
+        public static BitmapSource CreateImage(List<Color> pix, int pixelWidth, int pixelHeight)
         {
             int stride = (pixelWidth*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*pixelHeight];
@@ -407,9 +377,9 @@ namespace Vignettes
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
                 int i1 = i/3;
-                pixelsToWrite[i] = pixRed[i1];
-                pixelsToWrite[i + 1] = pixGreen[i1];
-                pixelsToWrite[i + 2] = pixBlue[i1];
+                pixelsToWrite[i] = pix[i1].R;
+                pixelsToWrite[i + 1] = pix[i1].G;
+                pixelsToWrite[i + 2] = pix[i1].B;
             }
 
             return BitmapSource.Create(pixelWidth, pixelHeight, Dpi, Dpi, PixelFormats.Rgb24,
