@@ -189,7 +189,7 @@ namespace Vignettes
                                 BorderColor = _borderColor,
                                 Shape = _shape
                             };
-            _vignette.TransferImagePixels(ref _pixels8Scaled, ref _pixels8ScaledModified, _scaledWidth, _scaledHeight,
+            _vignette.TransferImagePixels(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight,
                                           ModeOfOperation.DisplayMode);
             _vignette.ApplyEffect();
         }
@@ -338,7 +338,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    vig.TransferImagePixels(ref _pixels8, ref _pixels8Modified, _originalWidth, _originalHeight,
+                    vig.TransferImagePixels(_pixels8, _pixels8Modified, _originalWidth, _originalHeight,
                                             ModeOfOperation.SaveMode);
                     vig.ApplyEffect();                    
                 }

@@ -69,7 +69,7 @@ namespace Vignettes
 
         public string FileNameToSave { get; set; }
 
-        public void TransferImagePixels(ref List<Color> orig, ref List<Color> modified, int width, int height, ModeOfOperation modeOfOperation)
+        public void TransferImagePixels(List<Color> orig, List<Color> modified, int width, int height, ModeOfOperation modeOfOperation)
         {
             _pixOrig = orig;
             _width = width;
