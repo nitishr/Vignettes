@@ -27,8 +27,6 @@ namespace Vignettes
         readonly List<Color> _pixels8ScaledModified = new List<Color>();
 
         BitmapSource _originalImage;
-        BitmapSource _newImage;
-        TransformedBitmap _scaledImage;
 
         // Tried to use a List<byte> for this, but found that BitmapSource.CopyPixels does not take 
         // this data type as one of its arguments.
@@ -86,12 +84,11 @@ namespace Vignettes
 
         void ScaleImage()
         {
-            var scale = new ScaleTransform(Convert.ToDouble(_scaledWidth/(1.0*_originalWidth)),
-                                           Convert.ToDouble(_scaledHeight/(1.0*_originalHeight)));
+            var scale = new ScaleTransform(_scaledWidth/(1.0*_originalWidth), _scaledHeight/(1.0*_originalHeight));
             _scaleFactor = Math.Min(scale.ScaleX, scale.ScaleY);
-            _scaledImage = new TransformedBitmap(_originalImage, scale);
-            img.Source = _scaledImage;
-            _scaledPixels = Pixels(_scaledImage, _scaledHeight);
+            var scaledImage = new TransformedBitmap(_originalImage, scale);
+            img.Source = scaledImage;
+            _scaledPixels = Pixels(scaledImage, _scaledHeight);
         }
 
         private void ComputeScaledWidthAndHeight()
@@ -194,8 +191,7 @@ namespace Vignettes
 
         public void UpdateImage(List<Color> pixels8ScaledModified)
         {
-            _newImage = VignetteEffect.CreateImage(pixels8ScaledModified, _scaledWidth, _scaledHeight);
-            img.Source = _newImage;
+            img.Source = VignetteEffect.CreateImage(pixels8ScaledModified, _scaledWidth, _scaledHeight);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
