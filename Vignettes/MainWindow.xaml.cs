@@ -21,10 +21,10 @@ namespace Vignettes
     {
         private const int ViewportWidthHeight = 600;
 
-        List<Color> _pixels8 = new List<Color>();
-        List<Color> _pixels8Modified = new List<Color>();
-        List<Color> _pixels8Scaled = new List<Color>();
-        List<Color> _pixels8ScaledModified = new List<Color>();
+        readonly List<Color> _pixels8 = new List<Color>();
+        readonly List<Color> _pixels8Modified = new List<Color>();
+        readonly List<Color> _pixels8Scaled = new List<Color>();
+        readonly List<Color> _pixels8ScaledModified = new List<Color>();
 
         BitmapSource _originalImage;
         BitmapSource _newImage;
