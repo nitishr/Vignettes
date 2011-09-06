@@ -69,15 +69,6 @@ namespace Vignettes
 
         public string FileNameToSave { get; set; }
 
-        public void TransferImagePixels(List<Color> orig, List<Color> modified, int width, int height, ModeOfOperation modeOfOperation)
-        {
-            _pixOrig = orig;
-            _width = width;
-            _height = height;
-            _pixModified = modified;
-            _mode = modeOfOperation;
-        }
-
         public void ApplyEffect()
         {
             SetupParameters();
@@ -384,6 +375,16 @@ namespace Vignettes
 
             return BitmapSource.Create(pixelWidth, pixelHeight, Dpi, Dpi, PixelFormats.Rgb24,
                                        null, pixelsToWrite, stride);
+        }
+
+        public void ApplyEffect(List<Color> pixels, List<Color> pixelsModified, int width, int height, ModeOfOperation modeOfOperation)
+        {
+            _pixOrig = pixels;
+            _width = width;
+            _height = height;
+            _pixModified = pixelsModified;
+            _mode = modeOfOperation;
+            ApplyEffect();
         }
     }
 }
