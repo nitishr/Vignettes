@@ -194,7 +194,7 @@ namespace Vignettes
             _vignette.ApplyEffect();
         }
 
-        public void UpdateImage(ref List<Color> pixels8ScaledModified)
+        public void UpdateImage(List<Color> pixels8ScaledModified)
         {
             _newImage = VignetteEffect.CreateImage(pixels8ScaledModified, _scaledWidth, _scaledHeight);
             img.Source = _newImage;
