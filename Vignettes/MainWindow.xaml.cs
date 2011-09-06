@@ -189,9 +189,13 @@ namespace Vignettes
                                 BorderColor = _borderColor,
                                 Shape = _shape
                             };
-            _vignette.TransferImagePixels(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight,
-                                          ModeOfOperation.DisplayMode);
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette, _pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight, ModeOfOperation.DisplayMode);
+        }
+
+        private static void ApplyEffect(VignetteEffect vignette, List<Color> pixels, List<Color> pixelsModified, int width, int height, ModeOfOperation modeOfOperation)
+        {
+            vignette.TransferImagePixels(pixels, pixelsModified, width, height, modeOfOperation);
+            vignette.ApplyEffect();
         }
 
         public void UpdateImage(List<Color> pixels8ScaledModified)
@@ -338,9 +342,8 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    vig.TransferImagePixels(_pixels8, _pixels8Modified, _originalWidth, _originalHeight,
+                    ApplyEffect(vig, _pixels8, _pixels8Modified, _originalWidth, _originalHeight,
                                             ModeOfOperation.SaveMode);
-                    vig.ApplyEffect();                    
                 }
             }
             catch (Exception)
