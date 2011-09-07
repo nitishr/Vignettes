@@ -42,12 +42,6 @@ namespace Vignettes
         readonly List<double> _borderWeights = new List<double>();
         int _width;
         int _height;
-        readonly MainWindow _mainWin;
-
-        public VignetteEffect(MainWindow main)
-        {
-            _mainWin = main;
-        }
 
         public double OrientationInDegrees { private get; set; } // This parameter is not of relevance for the Circle vignette.
 
@@ -73,8 +67,6 @@ namespace Vignettes
                 ApplyEffectCircleEllipseDiamond();
             else // if (Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
                 ApplyEffectRectangleSquare();
-
-            _mainWin.RenderEffect();
         }
 
         private void SetupParameters()
@@ -328,13 +320,12 @@ namespace Vignettes
                                        null, pixelsToWrite, stride);
         }
 
-        public void ApplyEffect(List<Color> pixels, List<Color> pixelsModified, int width, int height)
+        public void SetupParameters(List<Color> pixels, List<Color> pixelsModified, int width, int height)
         {
             _pixOrig = pixels;
             _width = width;
             _height = height;
             _pixModified = pixelsModified;
-            ApplyEffect();
         }
     }
 }

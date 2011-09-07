@@ -177,7 +177,7 @@ namespace Vignettes
 
         private void ApplyVignette()
         {
-            _vignette = new VignetteEffect(this)
+            _vignette = new VignetteEffect
                             {
                                 OrientationInDegrees = sliderAngle.Value,
                                 CoveragePercent = sliderPercent.Value,
@@ -189,7 +189,14 @@ namespace Vignettes
                                 Shape = _shape
                             };
             _modeOfOperation = ModeOfOperation.DisplayMode;
-            _vignette.ApplyEffect(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight);
+            _vignette.SetupParameters(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight);
+            ApplyEffect(_vignette);
+        }
+
+        private void ApplyEffect(VignetteEffect vignette)
+        {
+            vignette.ApplyEffect();
+            RenderEffect();
         }
 
         public void UpdateImage()
@@ -222,7 +229,7 @@ namespace Vignettes
 
             if (_vignette == null) return;
             _vignette.Shape = _shape;
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void BnColourClick(object sender, RoutedEventArgs e)
@@ -256,49 +263,49 @@ namespace Vignettes
 
             if (_vignette == null) return;
             _vignette.BorderColor = _borderColor;
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void SliderAngleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.OrientationInDegrees = sliderAngle.Value;
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void SliderPercentValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.CoveragePercent = sliderPercent.Value;
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void SliderBandValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.BandWidthInPixels = Convert.ToInt32(sliderBand.Value);
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void SliderOriginXValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value);
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void SliderOriginYValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value);
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void SliderStepsValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value);
-            _vignette.ApplyEffect();
+            ApplyEffect(_vignette);
         }
 
         private void BnSaveImageClick(object sender, RoutedEventArgs e)
@@ -321,7 +328,7 @@ namespace Vignettes
                     // Here, the variable scaleFactor comes in handy to perform such scaling.
                     // Though scaleFactor can never be zero, we enclose the entire saving code 
                     // within a try-catch block, just in case things go out of control.
-                    var vig = new VignetteEffect(this)
+                    var vig = new VignetteEffect
                                   {
                                       OrientationInDegrees = sliderAngle.Value,
                                       CoveragePercent = sliderPercent.Value,
@@ -336,7 +343,8 @@ namespace Vignettes
                     _fileNameToSave = FileToSave(dlg);
                     Mouse.OverrideCursor = Cursors.Wait;
                     _modeOfOperation = ModeOfOperation.SaveMode;
-                    vig.ApplyEffect(_pixels8, _pixels8Modified, _originalWidth, _originalHeight);
+                    vig.SetupParameters(_pixels8, _pixels8Modified, _originalWidth, _originalHeight);
+                    ApplyEffect(vig);
                 }
             }
             catch (Exception)
