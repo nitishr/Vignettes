@@ -46,6 +46,7 @@ namespace Vignettes
         Color _borderColor = Color.FromRgb(20, 20, 240);
 
         double _scaleFactor = 1.0;
+        private string _fileNameToSave;
 
         public MainWindow()
         {
@@ -328,9 +329,9 @@ namespace Vignettes
                                       CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value),
                                       BorderColor = _borderColor,
                                       Shape = _shape,
-                                      FileNameToSave = FileToSave(dlg)
                                   };
 
+                    _fileNameToSave = FileToSave(dlg);
                     Mouse.OverrideCursor = Cursors.Wait;
                     vig.ApplyEffect(_pixels8, _pixels8Modified, _originalWidth, _originalHeight, ModeOfOperation.SaveMode);
                 }
@@ -356,6 +357,44 @@ namespace Vignettes
         private static string GetNewFileName(string fileForSaving)
         {
             return Path.GetFileNameWithoutExtension(fileForSaving) + "_" + Path.GetExtension(fileForSaving);
+        }
+
+        public void SaveImage()
+        {
+            // First, create the image to be saved
+            var imageToSave = VignetteEffect.CreateImage(_pixels8Modified, _originalWidth, _originalHeight);
+
+            // Then, save the image
+            string extn = Path.GetExtension(_fileNameToSave);
+            var fs = new FileStream(_fileNameToSave, FileMode.Create);
+            switch (extn)
+            {
+                case ".png":
+                    {
+                        // Save as PNG
+                        BitmapEncoder encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
+                        encoder.Save(fs);
+                    }
+                    break;
+                case ".jpg":
+                    {
+                        // Save as JPG
+                        BitmapEncoder encoder = new JpegBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
+                        encoder.Save(fs);
+                    }
+                    break;
+                default:
+                    {
+                        // Save as BMP
+                        BitmapEncoder encoder = new BmpBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
+                        encoder.Save(fs);
+                    }
+                    break;
+            }
+            fs.Close();
         }
     }
 }

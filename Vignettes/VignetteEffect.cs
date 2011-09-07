@@ -4,7 +4,6 @@ using System.Windows.Media;
 using System.Windows;
 using System.Linq;
 using System.Windows.Media.Imaging;
-using System.IO;
 
 // Program to "vignettify" an image, for circular, elliptical, diamond, rectangular
 //  and square-shaped vignettes.
@@ -67,8 +66,6 @@ namespace Vignettes
 
         public VignetteShape Shape { get; set; }
 
-        public string FileNameToSave { get; set; }
-
         public void ApplyEffect()
         {
             SetupParameters();
@@ -84,7 +81,7 @@ namespace Vignettes
             }
             else // if (mode == ModeOfOperation.SaveMode) // Save the image onto the specified file.
             {
-                SaveImage();
+                _mainWin.SaveImage();
             }
         }
 
@@ -320,44 +317,6 @@ namespace Vignettes
                          _minorAxisValues[NumberOfGradationSteps]).Contains(point)) return potential;
             potential = 2.0; // Arbitrary positive number = - N1
             return potential;
-        }
-
-        private void SaveImage()
-        {
-            // First, create the image to be saved
-            var imageToSave = CreateImage(_pixModified, _width, _height);
-
-            // Then, save the image
-            string extn = Path.GetExtension(FileNameToSave);
-            var fs = new FileStream(FileNameToSave, FileMode.Create);
-            switch (extn)
-            {
-                case ".png":
-                    {
-                        // Save as PNG
-                        BitmapEncoder encoder = new PngBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                        encoder.Save(fs);
-                    }
-                    break;
-                case ".jpg":
-                    {
-                        // Save as JPG
-                        BitmapEncoder encoder = new JpegBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                        encoder.Save(fs);
-                    }
-                    break;
-                default:
-                    {
-                        // Save as BMP
-                        BitmapEncoder encoder = new BmpBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                        encoder.Save(fs);
-                    }
-                    break;
-            }
-            fs.Close();
         }
 
         public static BitmapSource CreateImage(List<Color> pix, int pixelWidth, int pixelHeight)
