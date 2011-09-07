@@ -53,7 +53,6 @@ namespace Vignettes
             InitializeComponent();
             bnColour.Background = new SolidColorBrush(_borderColor);
             comboTechnique.SelectedIndex = 1; // Select the ellipse shape
-            _vignette = null;
         }
 
         private bool ReadImage(string fn, string fileNameOnly)
@@ -188,12 +187,12 @@ namespace Vignettes
                                 Shape = _shape
                             };
             _vignette.SetupParameters(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight);
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
-        private void ApplyEffect(VignetteEffect vignette)
+        private void ApplyEffect()
         {
-            vignette.ApplyEffect();
+            _vignette.ApplyEffect();
             img.Source = VignetteEffect.CreateImage(_pixels8ScaledModified, _scaledWidth, _scaledHeight);
         }
 
@@ -222,7 +221,7 @@ namespace Vignettes
 
             if (_vignette == null) return;
             _vignette.Shape = _shape;
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void BnColourClick(object sender, RoutedEventArgs e)
@@ -256,49 +255,49 @@ namespace Vignettes
 
             if (_vignette == null) return;
             _vignette.BorderColor = _borderColor;
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void SliderAngleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.OrientationInDegrees = sliderAngle.Value;
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void SliderPercentValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.CoveragePercent = sliderPercent.Value;
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void SliderBandValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.BandWidthInPixels = Convert.ToInt32(sliderBand.Value);
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void SliderOriginXValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value);
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void SliderOriginYValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value);
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void SliderStepsValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_vignette == null) return;
             _vignette.NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value);
-            ApplyEffect(_vignette);
+            ApplyEffect();
         }
 
         private void BnSaveImageClick(object sender, RoutedEventArgs e)
