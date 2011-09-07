@@ -21,7 +21,7 @@ namespace Vignettes
         Rectangle
     };
 
-    internal enum ModeOfOperation
+    public enum ModeOfOperation
     {
         DisplayMode,
         SaveMode
@@ -42,7 +42,6 @@ namespace Vignettes
         readonly List<double> _borderWeights = new List<double>();
         int _width;
         int _height;
-        ModeOfOperation _mode;
         readonly MainWindow _mainWin;
 
         public VignetteEffect(MainWindow main)
@@ -75,19 +74,7 @@ namespace Vignettes
             else // if (Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
                 ApplyEffectRectangleSquare();
 
-            RenderEffect();
-        }
-
-        private void RenderEffect()
-        {
-            if (_mode == ModeOfOperation.DisplayMode) // Send back the pixels to display the image.
-            {
-                _mainWin.UpdateImage();
-            }
-            else // if (mode == ModeOfOperation.SaveMode) // Save the image onto the specified file.
-            {
-                _mainWin.SaveImage();
-            }
+            _mainWin.RenderEffect();
         }
 
         private void SetupParameters()
@@ -341,13 +328,12 @@ namespace Vignettes
                                        null, pixelsToWrite, stride);
         }
 
-        public void ApplyEffect(List<Color> pixels, List<Color> pixelsModified, int width, int height, ModeOfOperation modeOfOperation)
+        public void ApplyEffect(List<Color> pixels, List<Color> pixelsModified, int width, int height)
         {
             _pixOrig = pixels;
             _width = width;
             _height = height;
             _pixModified = pixelsModified;
-            _mode = modeOfOperation;
             ApplyEffect();
         }
     }
