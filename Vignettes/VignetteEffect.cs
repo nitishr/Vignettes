@@ -75,8 +75,13 @@ namespace Vignettes
             else // if (Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
                 ApplyEffectRectangleSquare();
 
+            RenderEffect();
+        }
+
+        private void RenderEffect()
+        {
             if (_mode == ModeOfOperation.DisplayMode) // Send back the pixels to display the image.
-            {                
+            {
                 _mainWin.UpdateImage();
             }
             else // if (mode == ModeOfOperation.SaveMode) // Save the image onto the specified file.
