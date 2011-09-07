@@ -46,7 +46,6 @@ namespace Vignettes
         Color _borderColor = Color.FromRgb(20, 20, 240);
 
         double _scaleFactor = 1.0;
-        private string _fileNameToSave;
 
         public MainWindow()
         {
@@ -332,11 +331,10 @@ namespace Vignettes
                                       Shape = _shape,
                                   };
 
-                    _fileNameToSave = FileToSave(dlg);
                     Mouse.OverrideCursor = Cursors.Wait;
                     vig.SetupParameters(_pixels8, _pixels8Modified, _originalWidth, _originalHeight);
                     vig.ApplyEffect();
-                    SaveImage();
+                    SaveImage(FileToSave(dlg));
                 }
             }
             catch (Exception)
@@ -362,42 +360,27 @@ namespace Vignettes
             return Path.GetFileNameWithoutExtension(fileForSaving) + "_" + Path.GetExtension(fileForSaving);
         }
 
-        public void SaveImage()
+        private void SaveImage(string fileNameToSave)
         {
-            // First, create the image to be saved
-            var imageToSave = VignetteEffect.CreateImage(_pixels8Modified, _originalWidth, _originalHeight);
+            var encoder = BitmapEncoderFor(fileNameToSave);
+            encoder.Frames.Add(BitmapFrame.Create(VignetteEffect.CreateImage(_pixels8Modified, _originalWidth, _originalHeight)));
+            using (var fs = new FileStream(fileNameToSave, FileMode.Create))
+            {
+                encoder.Save(fs);
+            }
+        }
 
-            // Then, save the image
-            string extn = Path.GetExtension(_fileNameToSave);
-            var fs = new FileStream(_fileNameToSave, FileMode.Create);
-            switch (extn)
+        private static BitmapEncoder BitmapEncoderFor(string fileName)
+        {
+            switch (Path.GetExtension(fileName))
             {
                 case ".png":
-                    {
-                        // Save as PNG
-                        BitmapEncoder encoder = new PngBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                        encoder.Save(fs);
-                    }
-                    break;
+                    return new PngBitmapEncoder();
                 case ".jpg":
-                    {
-                        // Save as JPG
-                        BitmapEncoder encoder = new JpegBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                        encoder.Save(fs);
-                    }
-                    break;
+                    return new JpegBitmapEncoder();
                 default:
-                    {
-                        // Save as BMP
-                        BitmapEncoder encoder = new BmpBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(imageToSave));
-                        encoder.Save(fs);
-                    }
-                    break;
+                    return new BmpBitmapEncoder();
             }
-            fs.Close();
         }
     }
 }
