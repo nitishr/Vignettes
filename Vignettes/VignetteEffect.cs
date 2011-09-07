@@ -80,7 +80,7 @@ namespace Vignettes
 
             if (_mode == ModeOfOperation.DisplayMode) // Send back the pixels to display the image.
             {                
-                _mainWin.UpdateImage(_pixModified);
+                _mainWin.UpdateImage();
             }
             else // if (mode == ModeOfOperation.SaveMode) // Save the image onto the specified file.
             {

@@ -189,9 +189,9 @@ namespace Vignettes
             _vignette.ApplyEffect(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight, ModeOfOperation.DisplayMode);
         }
 
-        public void UpdateImage(List<Color> pixels8ScaledModified)
+        public void UpdateImage()
         {
-            img.Source = VignetteEffect.CreateImage(pixels8ScaledModified, _scaledWidth, _scaledHeight);
+            img.Source = VignetteEffect.CreateImage(_pixels8ScaledModified, _scaledWidth, _scaledHeight);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
