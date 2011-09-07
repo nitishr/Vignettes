@@ -21,12 +21,6 @@ namespace Vignettes
         Rectangle
     };
 
-    public enum ModeOfOperation
-    {
-        DisplayMode,
-        SaveMode
-    };
-
     class VignetteEffect
     {
         private const int Dpi = 72;

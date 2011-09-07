@@ -47,7 +47,6 @@ namespace Vignettes
 
         double _scaleFactor = 1.0;
         private string _fileNameToSave;
-        private ModeOfOperation _modeOfOperation;
 
         public MainWindow()
         {
@@ -188,7 +187,6 @@ namespace Vignettes
                                 BorderColor = _borderColor,
                                 Shape = _shape
                             };
-            _modeOfOperation = ModeOfOperation.DisplayMode;
             _vignette.SetupParameters(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight);
             ApplyEffect(_vignette);
         }
@@ -196,11 +194,6 @@ namespace Vignettes
         private void ApplyEffect(VignetteEffect vignette)
         {
             vignette.ApplyEffect();
-            RenderEffect();
-        }
-
-        public void UpdateImage()
-        {
             img.Source = VignetteEffect.CreateImage(_pixels8ScaledModified, _scaledWidth, _scaledHeight);
         }
 
@@ -342,9 +335,9 @@ namespace Vignettes
 
                     _fileNameToSave = FileToSave(dlg);
                     Mouse.OverrideCursor = Cursors.Wait;
-                    _modeOfOperation = ModeOfOperation.SaveMode;
                     vig.SetupParameters(_pixels8, _pixels8Modified, _originalWidth, _originalHeight);
-                    ApplyEffect(vig);
+                    vig.ApplyEffect();
+                    SaveImage();
                 }
             }
             catch (Exception)
@@ -406,18 +399,6 @@ namespace Vignettes
                     break;
             }
             fs.Close();
-        }
-
-        public void RenderEffect()
-        {
-            if (_modeOfOperation == ModeOfOperation.DisplayMode) // Send back the pixels to display the image.
-            {
-                UpdateImage();
-            }
-            else // if (mode == ModeOfOperation.SaveMode) // Save the image onto the specified file.
-            {
-                SaveImage();
-            }
         }
     }
 }
