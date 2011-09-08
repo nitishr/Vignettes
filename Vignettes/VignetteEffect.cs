@@ -53,7 +53,7 @@ namespace Vignettes
 
         public VignetteShape Shape { get; set; }
 
-        public void ApplyEffect()
+        private void ApplyEffect()
         {
             SetupParameters();
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
@@ -299,6 +299,7 @@ namespace Vignettes
 
         public BitmapSource CreateImage()
         {
+            ApplyEffect();
             int stride = (_width*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*_height];
 

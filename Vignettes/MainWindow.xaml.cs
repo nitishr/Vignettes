@@ -191,13 +191,7 @@ namespace Vignettes
 
         private void ApplyEffect()
         {
-            img.Source = CreateImage(_vignette);
-        }
-
-        private static BitmapSource CreateImage(VignetteEffect vignette)
-        {
-            vignette.ApplyEffect();
-            return vignette.CreateImage();
+            img.Source = _vignette.CreateImage();
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -338,7 +332,7 @@ namespace Vignettes
 
                     Mouse.OverrideCursor = Cursors.Wait;
                     vig.SetupParameters(_pixels8, _pixels8Modified, _originalWidth, _originalHeight);
-                    SaveImage(CreateImage(vig), FileToSave(dlg));
+                    SaveImage(vig.CreateImage(), FileToSave(dlg));
                 }
             }
             catch (Exception)
