@@ -186,14 +186,17 @@ namespace Vignettes
                 return BorderColor;
             }
             // Point is in between the outermost and innermost circles / ellipses / diamonds
-            int j;
-            for (j = 1; j < NumberOfGradationSteps; ++j)
+            return ColorAt(NegativePotentialIndex(yprime, xprime) - 1, w1);
+        }
+
+        private int NegativePotentialIndex(double yprime, double xprime)
+        {
+            int i;
+            for (i = 1; i < NumberOfGradationSteps; ++i)
             {
-                factor1 = Math.Abs(xprime)/_majorAxisValues[j];
-                factor2 = Math.Abs(yprime)/_minorAxisValues[j];
-                if (Potential(factor1, factor2) < 0.0) break;
+                if (Potential(Math.Abs(xprime)/_majorAxisValues[i], Math.Abs(yprime)/_minorAxisValues[i]) < 0.0) break;
             }
-            return ColorAt(j - 1, w1);
+            return i;
         }
 
         private double Potential(double factor1, double factor2)
