@@ -56,11 +56,18 @@ namespace Vignettes
         private void ApplyEffect()
         {
             SetupParameters();
-            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
-                Shape == VignetteShape.Diamond)
-                ApplyEffectCircleEllipseDiamond();
-            else // if (Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
-                ApplyEffectRectangleSquare();
+            ApplyEffect(PixModified);
+        }
+
+        private Func<int, int, Color> PixModified
+        {
+            get
+            {
+                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
+                       Shape == VignetteShape.Diamond
+                           ? (Func<int, int, Color>) PixModifiedCircleEllipseDiamond
+                           : PixModifiedRectangleSquare;
+            }
         }
 
         private void SetupParameters()
@@ -136,14 +143,13 @@ namespace Vignettes
             }
         }
 
-        private void ApplyEffectCircleEllipseDiamond()
+        private void ApplyEffect(Func<int, int, Color> pixModified)
         {
-            // Loop over the number of pixels
             for (int el = 0; el < _height; ++el)
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    _pixModified[_width*el + k] = PixModifiedCircleEllipseDiamond(el, k);
+                    _pixModified[_width*el + k] = pixModified(el, k);
                 }
             }
         }
@@ -241,17 +247,6 @@ namespace Vignettes
         private double Wb2
         {
             get { return (1 + CenterXOffsetPercent/100.0)*_width*0.5; }
-        }
-
-        private void ApplyEffectRectangleSquare()
-        {
-            for (int el = 0; el < _height; ++el)
-            {
-                for (int k = 0; k < _width; ++k)
-                {
-                    _pixModified[_width*el + k] = PixModifiedRectangleSquare(el, k);
-                }
-            }
         }
 
         private Color PixModifiedRectangleSquare(int el, int k)
