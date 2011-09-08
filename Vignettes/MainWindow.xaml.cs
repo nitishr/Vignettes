@@ -19,8 +19,6 @@ namespace Vignettes
 {
     public partial class MainWindow
     {
-        private const int Dpi = 72;
-        private const int BitsPerPixel = 24;
         private const int ViewportWidthHeight = 600;
 
         readonly List<Color> _pixels8 = new List<Color>();
@@ -194,7 +192,7 @@ namespace Vignettes
         private void ApplyEffect()
         {
             _vignette.ApplyEffect();
-            img.Source = CreateImage(_pixels8ScaledModified, _scaledWidth, _scaledHeight);
+            img.Source = _vignette.CreateImage();
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -336,7 +334,7 @@ namespace Vignettes
                     Mouse.OverrideCursor = Cursors.Wait;
                     vig.SetupParameters(_pixels8, _pixels8Modified, _originalWidth, _originalHeight);
                     vig.ApplyEffect();
-                    SaveImage(FileToSave(dlg));
+                    SaveImage(vig.CreateImage(), FileToSave(dlg));
                 }
             }
             catch (Exception)
@@ -362,11 +360,11 @@ namespace Vignettes
             return Path.GetFileNameWithoutExtension(fileForSaving) + "_" + Path.GetExtension(fileForSaving);
         }
 
-        private void SaveImage(string fileNameToSave)
+        private static void SaveImage(BitmapSource image, string fileName)
         {
-            var encoder = BitmapEncoderFor(fileNameToSave);
-            encoder.Frames.Add(BitmapFrame.Create(CreateImage(_pixels8Modified, _originalWidth, _originalHeight)));
-            using (var fs = new FileStream(fileNameToSave, FileMode.Create))
+            var encoder = BitmapEncoderFor(fileName);
+            encoder.Frames.Add(BitmapFrame.Create(image));
+            using (var fs = new FileStream(fileName, FileMode.Create))
             {
                 encoder.Save(fs);
             }
@@ -383,23 +381,6 @@ namespace Vignettes
                 default:
                     return new BmpBitmapEncoder();
             }
-        }
-
-        private static BitmapSource CreateImage(IList<Color> pix, int pixelWidth, int pixelHeight)
-        {
-            int stride = (pixelWidth*BitsPerPixel + 7)/8;
-            var pixelsToWrite = new byte[stride*pixelHeight];
-
-            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
-            {
-                int i1 = i/3;
-                pixelsToWrite[i] = pix[i1].R;
-                pixelsToWrite[i + 1] = pix[i1].G;
-                pixelsToWrite[i + 2] = pix[i1].B;
-            }
-
-            return BitmapSource.Create(pixelWidth, pixelHeight, Dpi, Dpi, PixelFormats.Rgb24,
-                                       null, pixelsToWrite, stride);
         }
     }
 }

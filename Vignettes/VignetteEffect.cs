@@ -23,6 +23,9 @@ namespace Vignettes
 
     class VignetteEffect
     {
+        private const int Dpi = 72;
+        public const int BitsPerPixel = 24;
+
         List<Color> _pixOrig = new List<Color>();
         List<Color> _pixModified = new List<Color>();
         readonly List<double> _majorAxisValues = new List<double>();
@@ -292,6 +295,22 @@ namespace Vignettes
                          _minorAxisValues[NumberOfGradationSteps]).Contains(point)) return potential;
             potential = 2.0; // Arbitrary positive number = - N1
             return potential;
+        }
+
+        public BitmapSource CreateImage()
+        {
+            int stride = (_width*BitsPerPixel + 7)/8;
+            var pixelsToWrite = new byte[stride*_height];
+
+            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
+            {
+                int i1 = i/3;
+                pixelsToWrite[i] = _pixModified[i1].R;
+                pixelsToWrite[i + 1] = _pixModified[i1].G;
+                pixelsToWrite[i + 2] = _pixModified[i1].B;
+            }
+
+            return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
 
         public void SetupParameters(List<Color> pixels, List<Color> pixelsModified, int width, int height)
