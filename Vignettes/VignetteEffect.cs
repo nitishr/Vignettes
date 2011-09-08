@@ -68,8 +68,7 @@ namespace Vignettes
         {
             get
             {
-                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
-                       Shape == VignetteShape.Diamond
+                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
                            ? (Func<int, int, Color>) PixModifiedCircleEllipseDiamond
                            : PixModifiedRectangleSquare;
             }
@@ -192,20 +191,16 @@ namespace Vignettes
             {
                 factor1 = Math.Abs(xprime)/_majorAxisValues[j];
                 factor2 = Math.Abs(yprime)/_minorAxisValues[j];
-
-                double potential;
-                if (Shape == VignetteShape.Circle ||
-                    Shape == VignetteShape.Ellipse)
-                {
-                    potential = factor1*factor1 + factor2*factor2 - 1.0;
-                }
-                else // if (Shape == VignetteShape.Diamond)
-                {
-                    potential = factor1 + factor2 - 1.0;
-                }
-                if (potential < 0.0) break;
+                if (Potential(factor1, factor2) < 0.0) break;
             }
             return ColorAt(j - 1, w1);
+        }
+
+        private double Potential(double factor1, double factor2)
+        {
+            return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse
+                       ? factor1*factor1 + factor2*factor2 - 1.0
+                       : factor1 + factor2 - 1.0;
         }
 
         private double YPrime(int el, int k)
