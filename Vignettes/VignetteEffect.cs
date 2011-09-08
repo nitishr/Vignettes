@@ -56,7 +56,18 @@ namespace Vignettes
         private void ApplyEffect()
         {
             SetupParameters();
-            ApplyEffect(PixModified);
+            ModifyPixels();
+        }
+
+        private void ModifyPixels()
+        {
+            for (int el = 0; el < _height; ++el)
+            {
+                for (int k = 0; k < _width; ++k)
+                {
+                    _pixModified[_width*el + k] = PixModified(el, k);
+                }
+            }
         }
 
         private Func<int, int, Color> PixModified
@@ -140,17 +151,6 @@ namespace Vignettes
                 _minorAxisValues.Add(b0 + i*stepY);
                 _midfigureMajorAxisValues.Add(a0 + (i + 0.5)*stepX);
                 _midfigureMinorAxisValues.Add(b0 + (i + 0.5)*stepY);
-            }
-        }
-
-        private void ApplyEffect(Func<int, int, Color> pixModified)
-        {
-            for (int el = 0; el < _height; ++el)
-            {
-                for (int k = 0; k < _width; ++k)
-                {
-                    _pixModified[_width*el + k] = pixModified(el, k);
-                }
             }
         }
 
