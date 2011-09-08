@@ -53,12 +53,6 @@ namespace Vignettes
 
         public VignetteShape Shape { get; set; }
 
-        private void ApplyEffect()
-        {
-            SetupParameters();
-            ModifyPixels();
-        }
-
         private void ModifyPixels()
         {
             for (int el = 0; el < _height; ++el)
@@ -294,7 +288,8 @@ namespace Vignettes
 
         public BitmapSource CreateImage()
         {
-            ApplyEffect();
+            SetupParameters();
+            ModifyPixels();
             int stride = (_width*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*_height];
 
