@@ -243,27 +243,26 @@ namespace Vignettes
 
         private Color PixModifiedRectangleSquare(int el, int k)
         {
-            var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
+            return PixModifiedRectangleSquare(new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k))), _width*el + k);
+        }
+
+        private Color PixModifiedRectangleSquare(Point point, int w1)
+        {
             double potential = Potential(point);
-            int w1 = _width*el + k;
-            if (potential < -1.0) // Arbitrary negative number, greater than N1
+            return potential < -1.0
+                       ? _pixOrig[w1]
+                       : (potential > 1.0 ? BorderColor : ColorAt(NegativePotentialIndex(point) - 1, w1));
+        }
+
+        private int NegativePotentialIndex(Point point)
+        {
+            int i;
+            for (i = 1; i < NumberOfGradationSteps; ++i)
             {
-                // Point is within the inner square / rectangle,
-                return _pixOrig[w1];
-            }
-            if (potential > 1.0) // Arbitrary positive number lesser than - N1
-            {
-                // Point is outside the outer square / rectangle
-                return BorderColor;
-            }
-            // Point is in between outermost and innermost squares / rectangles
-            int j;
-            for (j = 1; j < NumberOfGradationSteps; ++j)
-            {
-                if (new Rect(0, 0, _majorAxisValues[j], _minorAxisValues[j]).Contains(point))
+                if (new Rect(0, 0, _majorAxisValues[i], _minorAxisValues[i]).Contains(point))
                     break;
             }
-            return ColorAt(j - 1, w1);
+            return i;
         }
 
         private Color ColorAt(int j1, int w1)
