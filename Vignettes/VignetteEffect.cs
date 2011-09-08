@@ -186,17 +186,17 @@ namespace Vignettes
                 return BorderColor;
             }
             // Point is in between the outermost and innermost circles / ellipses / diamonds
-            return ColorAt(NegativePotentialIndex(yprime, xprime) - 1, w1);
+            return ColorAt(NegativePotentialIndex(xprime, yprime) - 1, w1);
         }
 
-        private int NegativePotentialIndex(double yprime, double xprime)
+        private int NegativePotentialIndex(double xprime, double yprime)
         {
-            int i;
-            for (i = 1; i < NumberOfGradationSteps; ++i)
-            {
-                if (Potential(Math.Abs(xprime)/_majorAxisValues[i], Math.Abs(yprime)/_minorAxisValues[i]) < 0.0) break;
-            }
-            return i;
+            return NegativePotentialIndex(i => Potential(Math.Abs(xprime)/_majorAxisValues[i], Math.Abs(yprime)/_minorAxisValues[i]) < 0.0);
+        }
+
+        private int NegativePotentialIndex(Func<int, bool> isPotentialNegative)
+        {
+            return Enumerable.Range(1, NumberOfGradationSteps).First(isPotentialNegative);
         }
 
         private double Potential(double factor1, double factor2)
@@ -256,13 +256,7 @@ namespace Vignettes
 
         private int NegativePotentialIndex(Point point)
         {
-            int i;
-            for (i = 1; i < NumberOfGradationSteps; ++i)
-            {
-                if (new Rect(0, 0, _majorAxisValues[i], _minorAxisValues[i]).Contains(point))
-                    break;
-            }
-            return i;
+            return NegativePotentialIndex(i => new Rect(0, 0, _majorAxisValues[i], _minorAxisValues[i]).Contains(point));
         }
 
         private Color ColorAt(int j1, int w1)
