@@ -228,16 +228,15 @@ namespace Vignettes
         public BitmapSource CreateImage()
         {
             SetupParameters();
-            IList<Color> pixModified = _pixOrig.Select((color, i) => GetPixModified(i)).ToList();
             int stride = (_width*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*_height];
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
-                int i1 = i/3;
-                pixelsToWrite[i] = pixModified[i1].R;
-                pixelsToWrite[i + 1] = pixModified[i1].G;
-                pixelsToWrite[i + 2] = pixModified[i1].B;
+                Color color = GetPixModified(i/3);
+                pixelsToWrite[i] = color.R;
+                pixelsToWrite[i + 1] = color.G;
+                pixelsToWrite[i + 2] = color.B;
             }
 
             return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
