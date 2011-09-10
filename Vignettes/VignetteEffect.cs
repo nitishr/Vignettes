@@ -230,10 +230,9 @@ namespace Vignettes
         {
             var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
             int w1 = _width*el + k;
-            double potential = Potential(point);
-            return potential < 0
+            return PointInRectAt(0, point)
                        ? _pixOrig[w1]
-                       : (potential > 0 ? BorderColor : ColorAt(Step(point), w1));
+                       : (PointInRectAt(NumberOfGradationSteps, point) ? ColorAt(Step(point), w1) : BorderColor);
         }
 
         private int Step(Point point)
@@ -250,11 +249,6 @@ namespace Vignettes
         {
             return Color.Add(Color.Multiply(_pixOrig[w1], (float) _imageWeights[j1]),
                              Color.Multiply(BorderColor, (float) _borderWeights[j1]));
-        }
-
-        private double Potential(Point point)
-        {
-            return PointInRectAt(0, point) ? -1 : (PointInRectAt(NumberOfGradationSteps, point) ? 0 : 1);
         }
 
         public BitmapSource CreateImage()
