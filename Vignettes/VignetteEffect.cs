@@ -218,7 +218,7 @@ namespace Vignettes
 
         private int Step(int el, int k, Func<int, int, int, bool> isPixelInStep)
         {
-            return Enumerable.Range(1, NumberOfGradationSteps).First(i => isPixelInStep(i, el, k)) - 1;
+            return Enumerable.Range(1, NumberOfGradationSteps).First(step => isPixelInStep(step, el, k)) - 1;
         }
 
         private bool IsPixelInStepRectangleSquare(int step, int el, int k)
@@ -226,9 +226,9 @@ namespace Vignettes
             return PointInRectAt(step, new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k))));
         }
 
-        private bool PointInRectAt(int i, Point point)
+        private bool PointInRectAt(int step, Point point)
         {
-            return new Rect(0, 0, _majorAxisValues[i], _minorAxisValues[i]).Contains(point);
+            return new Rect(0, 0, _majorAxisValues[step], _minorAxisValues[step]).Contains(point);
         }
 
         private Color ColorAt(int step, int w1)
