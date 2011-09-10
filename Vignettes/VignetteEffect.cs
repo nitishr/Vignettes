@@ -88,12 +88,19 @@ namespace Vignettes
 
         private Color GetPixModified(int i)
         {
-            int row = i / _width;
-            int column = i % _width;
-            int w1 = i + column;
-            return IsPixelInStep(0, row, column)
-                       ? _pixOrig[w1]
-                       : (IsPixelInStep(NumberOfGradationSteps, row, column) ? ColorAt(Step(row, column, IsPixelInStep), w1) : BorderColor);
+            return IsPixelInStep(0, Row(i), Column(i))
+                       ? _pixOrig[i + Column(i)]
+                       : (IsPixelInStep(NumberOfGradationSteps, Row(i), Column(i)) ? ColorAt(Step(Row(i), Column(i), IsPixelInStep), i + Column(i)) : BorderColor);
+        }
+
+        private int Column(int i)
+        {
+            return i%_width;
+        }
+
+        private int Row(int i)
+        {
+            return i/_width;
         }
 
         private void SetupParameters()
