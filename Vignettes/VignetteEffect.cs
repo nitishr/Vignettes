@@ -183,12 +183,7 @@ namespace Vignettes
 
         private Color PixModifiedCircleEllipseDiamond(int el, int k)
         {
-            return GetPixModified(el, k, PixelInStepAtCircleEllipseDiamond, StepCircleEllipseDiamond);
-        }
-
-        private int StepCircleEllipseDiamond(int el, int k)
-        {
-            return Step(i => PotentialAt(i, el, k) < 0);
+            return GetPixModified(el, k, PixelInStepAtCircleEllipseDiamond);
         }
 
         private bool PixelInStepAtCircleEllipseDiamond(int step, int el, int k)
@@ -199,11 +194,6 @@ namespace Vignettes
         private double PotentialAt(int i, int el, int k)
         {
             return Potential(Math.Abs(XPrime(el, k))/_majorAxisValues[i], Math.Abs(YPrime(el, k))/_minorAxisValues[i]);
-        }
-
-        private int Step(Func<int, bool> isInStep)
-        {
-            return Enumerable.Range(1, NumberOfGradationSteps).First(isInStep) - 1;
         }
 
         private double Potential(double factor1, double factor2)
@@ -225,30 +215,25 @@ namespace Vignettes
 
         private Color PixModifiedRectangleSquare(int el, int k)
         {
-            return GetPixModified(el, k, PixelInStepAtRectangleSquare, StepRectangleSquare);
+            return GetPixModified(el, k, PixelInStepAtRectangleSquare);
         }
 
-        private Color GetPixModified(int el, int k, Func<int, int, int, bool> pixelInStepAt, Func<int, int, int> step)
+        private Color GetPixModified(int el, int k, Func<int, int, int, bool> pixelInStepAt)
         {
             int w1 = _width*el + k;
             return pixelInStepAt(0, el, k)
                        ? _pixOrig[w1]
-                       : (pixelInStepAt(NumberOfGradationSteps, el, k) ? ColorAt(step(el, k), w1) : BorderColor);
+                       : (pixelInStepAt(NumberOfGradationSteps, el, k) ? ColorAt(Step(el, k, pixelInStepAt), w1) : BorderColor);
         }
 
-        private int StepRectangleSquare(int el, int k)
+        private int Step(int el, int k, Func<int, int, int, bool> pixelInStepAt)
         {
-            return Step(new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k))));
+            return Enumerable.Range(1, NumberOfGradationSteps).First(i => pixelInStepAt(i, el, k)) - 1;
         }
 
         private bool PixelInStepAtRectangleSquare(int step, int el, int k)
         {
             return PointInRectAt(step, new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k))));
-        }
-
-        private int Step(Point point)
-        {
-            return Step(i => PointInRectAt(i, point));
         }
 
         private bool PointInRectAt(int i, Point point)
