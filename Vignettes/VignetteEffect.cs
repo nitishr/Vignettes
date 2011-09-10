@@ -78,13 +78,13 @@ namespace Vignettes
             get { return (1 + CenterXOffsetPercent / 100.0) * _width * 0.5; }
         }
 
-        private Func<int, int, Color> PixModified
+        private Func<int, int, int, bool> IsPixelInStep
         {
             get
             {
                 return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
-                           ? (Func<int, int, Color>)PixModifiedCircleEllipseDiamond
-                           : PixModifiedRectangleSquare;
+                           ? (Func<int, int, int, bool>) IsPixelInStepCircleEllipseDiamond
+                           : IsPixelInStepRectangleSquare;
             }
         }
 
@@ -94,7 +94,7 @@ namespace Vignettes
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    _pixModified[_width*el + k] = PixModified(el, k);
+                    _pixModified[_width*el + k] = GetPixModified(el, k, IsPixelInStep);
                 }
             }
         }
@@ -181,12 +181,7 @@ namespace Vignettes
             }
         }
 
-        private Color PixModifiedCircleEllipseDiamond(int el, int k)
-        {
-            return GetPixModified(el, k, PixelInStepAtCircleEllipseDiamond);
-        }
-
-        private bool PixelInStepAtCircleEllipseDiamond(int step, int el, int k)
+        private bool IsPixelInStepCircleEllipseDiamond(int step, int el, int k)
         {
             return PotentialAt(step, el, k) < 0;
         }
@@ -213,25 +208,20 @@ namespace Vignettes
             return (k - Wb2)*CosOrientation + (el - Hb2)*SinOrientation;
         }
 
-        private Color PixModifiedRectangleSquare(int el, int k)
-        {
-            return GetPixModified(el, k, PixelInStepAtRectangleSquare);
-        }
-
-        private Color GetPixModified(int el, int k, Func<int, int, int, bool> pixelInStepAt)
+        private Color GetPixModified(int el, int k, Func<int, int, int, bool> isPixelInStep)
         {
             int w1 = _width*el + k;
-            return pixelInStepAt(0, el, k)
+            return isPixelInStep(0, el, k)
                        ? _pixOrig[w1]
-                       : (pixelInStepAt(NumberOfGradationSteps, el, k) ? ColorAt(Step(el, k, pixelInStepAt), w1) : BorderColor);
+                       : (isPixelInStep(NumberOfGradationSteps, el, k) ? ColorAt(Step(el, k, isPixelInStep), w1) : BorderColor);
         }
 
-        private int Step(int el, int k, Func<int, int, int, bool> pixelInStepAt)
+        private int Step(int el, int k, Func<int, int, int, bool> isPixelInStep)
         {
-            return Enumerable.Range(1, NumberOfGradationSteps).First(i => pixelInStepAt(i, el, k)) - 1;
+            return Enumerable.Range(1, NumberOfGradationSteps).First(i => isPixelInStep(i, el, k)) - 1;
         }
 
-        private bool PixelInStepAtRectangleSquare(int step, int el, int k)
+        private bool IsPixelInStepRectangleSquare(int step, int el, int k)
         {
             return PointInRectAt(step, new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k))));
         }
