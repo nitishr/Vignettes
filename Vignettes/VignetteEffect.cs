@@ -86,11 +86,6 @@ namespace Vignettes
             }
         }
 
-        private IList<Color> ModifiedPixels()
-        {
-            return _pixOrig.Select((color, i) => GetPixModified(i)).ToList();
-        }
-
         private Color GetPixModified(int i)
         {
             return GetPixModified(i / _width, i % _width, IsPixelInStep);
@@ -233,7 +228,7 @@ namespace Vignettes
         public BitmapSource CreateImage()
         {
             SetupParameters();
-            IList<Color> pixModified = ModifiedPixels();
+            IList<Color> pixModified = _pixOrig.Select((color, i) => GetPixModified(i)).ToList();
             int stride = (_width*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*_height];
 
