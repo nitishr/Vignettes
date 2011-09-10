@@ -41,17 +41,42 @@ namespace Vignettes
 
         public double CoveragePercent { private get; set; }
 
-        public int BandWidthInPixels { get; set; }
+        public int BandWidthInPixels { private get; set; }
 
-        public int NumberOfGradationSteps { get; set; }
+        public int NumberOfGradationSteps { private get; set; }
 
-        public int CenterXOffsetPercent { get; set; } // with respect to half the width of the image.
+        public int CenterXOffsetPercent { private get; set; } // with respect to half the width of the image.
 
-        public int CenterYOffsetPercent { get; set; } // with respect to half the height of the image.
+        public int CenterYOffsetPercent { private get; set; } // with respect to half the height of the image.
 
-        public Color BorderColor { get; set; } // We consider only R, G, B values here. Alpha value is ignored.
+        public Color BorderColor { private get; set; } // We consider only R, G, B values here. Alpha value is ignored.
 
-        public VignetteShape Shape { get; set; }
+        public VignetteShape Shape { private get; set; }
+
+        private double SinOrientation
+        {
+            get { return Math.Sin(OrientationInRadians); }
+        }
+
+        private double CosOrientation
+        {
+            get { return Math.Cos(OrientationInRadians); }
+        }
+
+        private double OrientationInRadians
+        {
+            get { return OrientationInDegrees * Math.PI / 180.0; }
+        }
+
+        private double Hb2
+        {
+            get { return (1 + CenterYOffsetPercent / 100.0) * _height * 0.5; }
+        }
+
+        private double Wb2
+        {
+            get { return (1 + CenterXOffsetPercent / 100.0) * _width * 0.5; }
+        }
 
         private void ModifyPixels()
         {
@@ -214,31 +239,6 @@ namespace Vignettes
         private double XPrime(int el, int k)
         {
             return (k - Wb2)*CosOrientation + (el - Hb2)*SinOrientation;
-        }
-
-        private double SinOrientation
-        {
-            get { return Math.Sin(OrientationInRadians); }
-        }
-
-        private double CosOrientation
-        {
-            get { return Math.Cos(OrientationInRadians); }
-        }
-
-        private double OrientationInRadians
-        {
-            get { return OrientationInDegrees*Math.PI/180.0; }
-        }
-
-        private double Hb2
-        {
-            get { return (1 + CenterYOffsetPercent/100.0)*_height*0.5; }
-        }
-
-        private double Wb2
-        {
-            get { return (1 + CenterXOffsetPercent/100.0)*_width*0.5; }
         }
 
         private Color PixModifiedRectangleSquare(int el, int k)
