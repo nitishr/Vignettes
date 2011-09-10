@@ -208,19 +208,14 @@ namespace Vignettes
                 potential2 = factor3 + factor4 - 1.0;
             }
 
-            int w1 = _width*el + k;
-            if (potential1 <= 0.0)
-            {
-                // Point is within the inner circle / ellipse / diamond
-                return _pixOrig[w1];
-            }
-            if (potential2 >= 0.0)
-            {
-                // Point is outside the outer circle / ellipse / diamond
-                return BorderColor;
-            }
-            // Point is in between the outermost and innermost circles / ellipses / diamonds
-            return ColorAt(NegativePotentialIndex(xprime, yprime) - 1, w1);
+            return PixModifiedCircleEllipseDiamond(xprime, yprime, potential1, potential2, _width*el + k);
+        }
+
+        private Color PixModifiedCircleEllipseDiamond(double xprime, double yprime, double potential1, double potential2, int w1)
+        {
+            return potential1 <= 0.0
+                       ? _pixOrig[w1]
+                       : (potential2 >= 0.0 ? BorderColor : ColorAt(NegativePotentialIndex(xprime, yprime) - 1, w1));
         }
 
         private int NegativePotentialIndex(double xprime, double yprime)
