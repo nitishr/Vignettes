@@ -21,8 +21,8 @@ namespace Vignettes
     {
         private const int ViewportWidthHeight = 600;
 
-        readonly List<Color> _pixels8 = new List<Color>();
-        readonly List<Color> _pixels8Scaled = new List<Color>();
+        private List<Color> _pixels8;
+        private List<Color> _pixels8Scaled;
 
         BitmapSource _originalImage;
 
@@ -107,24 +107,22 @@ namespace Vignettes
             int bitsPerPixel = _originalImage.Format.BitsPerPixel;
             if (bitsPerPixel != 24 && bitsPerPixel != 32) return;
             int step = bitsPerPixel / 8;
-            PopulatePixels(_scaledPixels, step, _pixels8Scaled);
-            PopulatePixels(_originalPixels, step, _pixels8);
+            _pixels8Scaled = PopulatePixels(_scaledPixels, step);
+            _pixels8 = PopulatePixels(_originalPixels, step);
         }
 
-        private static void PopulatePixels(byte[] pixels, int step, List<Color> pixels8)
+        private static List<Color> PopulatePixels(byte[] pixels, int step)
         {
-            pixels8.Clear();
+            var pixels8 = new List<Color>();
             for (int i = 0; i < pixels.Count(); i += step)
             {
                 pixels8.Add(Color.FromRgb(pixels[i + 2], pixels[i + 1], pixels[i]));
             }
+            return pixels8;
         }
 
         private void BnOpenClick(object sender, RoutedEventArgs e)
         {
-            // Read in the image
-            // Scale the image to 600 x 600, maintaining aspect ratio
-            // Populate the lists pixels8RedScaled, pixels8GreenScaled, pixels8BlueScaled
             var ofd = new OpenFileDialog
                           {
                               Filter =
