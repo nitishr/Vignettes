@@ -32,8 +32,8 @@ namespace Vignettes
         readonly List<double> _minorAxisValues = new List<double>();
         readonly List<double> _midfigureMajorAxisValues = new List<double>();
         readonly List<double> _midfigureMinorAxisValues = new List<double>();
-        readonly List<double> _imageWeights = new List<double>();
-        readonly List<double> _borderWeights = new List<double>();
+        private List<double> _imageWeights;
+        private List<double> _borderWeights;
         int _width;
         int _height;
 
@@ -105,8 +105,6 @@ namespace Vignettes
             _minorAxisValues.Clear();
             _midfigureMajorAxisValues.Clear();
             _midfigureMinorAxisValues.Clear();
-            _imageWeights.Clear();
-            _borderWeights.Clear();
 
             double a0 = AxisValue(_width, -1);
             double b0 = AxisValue(_height, -1);
@@ -123,11 +121,13 @@ namespace Vignettes
 
         private void InitWeights(double a0)
         {
-            for (int i = 0; i < NumberOfGradationSteps; ++i)
-            {
-                _imageWeights.Add(Weight(1, i, a0));
-                _borderWeights.Add(Weight(-1, i, a0));
-            }
+            _imageWeights = Weights(a0, 1);
+            _borderWeights = Weights(a0, -1);
+        }
+
+        private List<double> Weights(double a0, int multiplier)
+        {
+            return new List<double>(Enumerable.Range(0, NumberOfGradationSteps).Select(i => Weight(multiplier, i, a0)));
         }
 
         // The weight functions given below form the crux of the code. It was a struggle after which 
