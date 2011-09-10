@@ -183,44 +183,25 @@ namespace Vignettes
 
         private Color PixModifiedCircleEllipseDiamond(int el, int k)
         {
-            var xprime = XPrime(el, k);
-            var yprime = YPrime(el, k);
-
-            double factor1 = 1.0*Math.Abs(xprime)/_majorAxisValues[0];
-            double factor2 = 1.0*Math.Abs(yprime)/_minorAxisValues[0];
-            double factor3 = 1.0*Math.Abs(xprime)/_majorAxisValues[NumberOfGradationSteps];
-            double factor4 = 1.0*Math.Abs(yprime)/_minorAxisValues[NumberOfGradationSteps];
-
-            double potential1;
-            double potential2;
-            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse)
-            {
-                // Equations for the circle / ellipse. 
-                // "Potentials" are analogous to distances from the inner and outer boundaries
-                // of the two ellipses.
-                potential1 = factor1*factor1 + factor2*factor2 - 1.0;
-                potential2 = factor3*factor3 + factor4*factor4 - 1.0;
-            }
-            else //if (Shape == VignetteShape.Diamond)
-            {
-                // Equations for the diamond. 
-                potential1 = factor1 + factor2 - 1.0;
-                potential2 = factor3 + factor4 - 1.0;
-            }
-
-            return PixModifiedCircleEllipseDiamond(xprime, yprime, potential1, potential2, _width*el + k);
+            double xprime = XPrime(el, k);
+            double yprime = YPrime(el, k);
+            int w1 = _width * el + k;
+            return PotentialAt(0, xprime, yprime) <= 0
+                       ? _pixOrig[w1]
+                       : (PotentialAt(NumberOfGradationSteps, xprime, yprime) >= 0
+                              ? BorderColor
+                              : ColorAt(NegativePotentialIndex(xprime, yprime) - 1, w1));
         }
 
-        private Color PixModifiedCircleEllipseDiamond(double xprime, double yprime, double potential1, double potential2, int w1)
+        private double PotentialAt(int axisOffset, double xprime, double yprime)
         {
-            return potential1 <= 0.0
-                       ? _pixOrig[w1]
-                       : (potential2 >= 0.0 ? BorderColor : ColorAt(NegativePotentialIndex(xprime, yprime) - 1, w1));
+            return Potential(Math.Abs(xprime)/_majorAxisValues[axisOffset],
+                             Math.Abs(yprime)/_minorAxisValues[axisOffset]);
         }
 
         private int NegativePotentialIndex(double xprime, double yprime)
         {
-            return NegativePotentialIndex(i => Potential(Math.Abs(xprime)/_majorAxisValues[i], Math.Abs(yprime)/_minorAxisValues[i]) < 0.0);
+            return NegativePotentialIndex(i => PotentialAt(i, xprime, yprime) < 0.0);
         }
 
         private int NegativePotentialIndex(Func<int, bool> isPotentialNegative)
@@ -231,8 +212,8 @@ namespace Vignettes
         private double Potential(double factor1, double factor2)
         {
             return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse
-                       ? factor1*factor1 + factor2*factor2 - 1.0
-                       : factor1 + factor2 - 1.0;
+                       ? factor1*factor1 + factor2*factor2 - 1
+                       : factor1 + factor2 - 1;
         }
 
         private double YPrime(int el, int k)
@@ -247,15 +228,12 @@ namespace Vignettes
 
         private Color PixModifiedRectangleSquare(int el, int k)
         {
-            return PixModifiedRectangleSquare(new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k))), _width*el + k);
-        }
-
-        private Color PixModifiedRectangleSquare(Point point, int w1)
-        {
+            var point = new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k)));
+            int w1 = _width*el + k;
             double potential = Potential(point);
-            return potential < -1.0
+            return potential < 0
                        ? _pixOrig[w1]
-                       : (potential > 1.0 ? BorderColor : ColorAt(NegativePotentialIndex(point) - 1, w1));
+                       : (potential > 0 ? BorderColor : ColorAt(NegativePotentialIndex(point) - 1, w1));
         }
 
         private int NegativePotentialIndex(Point point)
@@ -276,7 +254,7 @@ namespace Vignettes
 
         private double Potential(Point point)
         {
-            return PointInRectAt(0, point) ? -2.0 : (PointInRectAt(NumberOfGradationSteps, point) ? 0.0 : 2.0);
+            return PointInRectAt(0, point) ? -1 : (PointInRectAt(NumberOfGradationSteps, point) ? 0 : 1);
         }
 
         public BitmapSource CreateImage()
