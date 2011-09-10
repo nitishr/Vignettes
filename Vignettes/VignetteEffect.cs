@@ -78,6 +78,16 @@ namespace Vignettes
             get { return (1 + CenterXOffsetPercent / 100.0) * _width * 0.5; }
         }
 
+        private Func<int, int, Color> PixModified
+        {
+            get
+            {
+                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
+                           ? (Func<int, int, Color>)PixModifiedCircleEllipseDiamond
+                           : PixModifiedRectangleSquare;
+            }
+        }
+
         private void ModifyPixels()
         {
             for (int el = 0; el < _height; ++el)
@@ -89,16 +99,6 @@ namespace Vignettes
             }
         }
 
-        private Func<int, int, Color> PixModified
-        {
-            get
-            {
-                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
-                           ? (Func<int, int, Color>) PixModifiedCircleEllipseDiamond
-                           : PixModifiedRectangleSquare;
-            }
-        }
-
         private void SetupParameters()
         {
             _majorAxisValues.Clear();
@@ -107,39 +107,27 @@ namespace Vignettes
             _midfigureMinorAxisValues.Clear();
             _imageWeights.Clear();
             _borderWeights.Clear();
+
             double a0 = AxisValue(_width, -1);
             double b0 = AxisValue(_height, -1);
 
             // For a circle or square, both 'major' and 'minor' axes are identical
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
             {
-                a0 = Math.Min(a0, b0);
-                b0 = a0;
+                a0 = b0 = Math.Min(a0, b0);
             }
 
-            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
-                Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
-            {
-                double step = ((double)BandWidthInPixels/NumberOfGradationSteps);
-                AddAxisValues(a0, step, b0, step);
-            }
-            else// if (Shape == VignetteShape.Diamond)
-            {
-                double aLast = AxisValue(_width, 1);
-                double bLast = b0 * aLast / a0;
-                AddAxisValues(a0, (aLast - a0) / NumberOfGradationSteps, b0, (bLast - b0) / NumberOfGradationSteps);
-            }
+            InitAxisValues(a0, b0);
+            InitWeights(a0);
+        }
 
+        private void InitWeights(double a0)
+        {
             for (int i = 0; i < NumberOfGradationSteps; ++i)
             {
                 _imageWeights.Add(Weight(1, i, a0));
                 _borderWeights.Add(Weight(-1, i, a0));
             }
-        }
-
-        private double AxisValue(int length, int multiplier)
-        {
-            return (length*CoveragePercent/100.0 + multiplier*BandWidthInPixels)*0.5;
         }
 
         // The weight functions given below form the crux of the code. It was a struggle after which 
@@ -158,10 +146,31 @@ namespace Vignettes
         //  October 1983, Pages 217-236].
         private double Weight(int multiplier, int i, double a0)
         {
-            return 0.5 * (1.0 + multiplier*Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[i] - a0)));
+            return 0.5 * (1.0 + multiplier * Math.Cos(Math.PI / BandWidthInPixels * (_midfigureMajorAxisValues[i] - a0)));
         }
 
-        private void AddAxisValues(double a0, double stepX, double b0, double stepY)
+        private double AxisValue(int length, int multiplier)
+        {
+            return (length * CoveragePercent / 100.0 + multiplier * BandWidthInPixels) * 0.5;
+        }
+
+        private void InitAxisValues(double a0, double b0)
+        {
+            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
+                Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
+            {
+                double step = ((double) BandWidthInPixels/NumberOfGradationSteps);
+                InitAxisValues(a0, step, b0, step);
+            }
+            else // if (Shape == VignetteShape.Diamond)
+            {
+                double aLast = AxisValue(_width, 1);
+                double bLast = b0*aLast/a0;
+                InitAxisValues(a0, (aLast - a0)/NumberOfGradationSteps, b0, (bLast - b0)/NumberOfGradationSteps);
+            }
+        }
+
+        private void InitAxisValues(double a0, double stepX, double b0, double stepY)
         {
             for (int i = 0; i <= NumberOfGradationSteps; ++i)
             {
