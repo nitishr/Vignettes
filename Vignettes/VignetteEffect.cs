@@ -144,9 +144,9 @@ namespace Vignettes
         // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
         //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
         //  October 1983, Pages 217-236].
-        private double Weight(int multiplier, int i, double a0)
+        private double Weight(int multiplier, int step, double a0)
         {
-            return 0.5 * (1.0 + multiplier * Math.Cos(Math.PI / BandWidthInPixels * (_midfigureMajorAxisValues[i] - a0)));
+            return 0.5 * (1.0 + multiplier * Math.Cos(Math.PI / BandWidthInPixels * (_midfigureMajorAxisValues[step] - a0)));
         }
 
         private double AxisValue(int length, int multiplier)
@@ -191,9 +191,9 @@ namespace Vignettes
             return PotentialAt(step, el, k) < 0;
         }
 
-        private double PotentialAt(int i, int el, int k)
+        private double PotentialAt(int step, int el, int k)
         {
-            return Potential(Math.Abs(XPrime(el, k))/_majorAxisValues[i], Math.Abs(YPrime(el, k))/_minorAxisValues[i]);
+            return Potential(Math.Abs(XPrime(el, k))/_majorAxisValues[step], Math.Abs(YPrime(el, k))/_minorAxisValues[step]);
         }
 
         private double Potential(double factor1, double factor2)
@@ -241,10 +241,10 @@ namespace Vignettes
             return new Rect(0, 0, _majorAxisValues[i], _minorAxisValues[i]).Contains(point);
         }
 
-        private Color ColorAt(int j1, int w1)
+        private Color ColorAt(int step, int w1)
         {
-            return Color.Add(Color.Multiply(_pixOrig[w1], (float) _imageWeights[j1]),
-                             Color.Multiply(BorderColor, (float) _borderWeights[j1]));
+            return Color.Add(Color.Multiply(_pixOrig[w1], (float) _imageWeights[step]),
+                             Color.Multiply(BorderColor, (float) _borderWeights[step]));
         }
 
         public BitmapSource CreateImage()
