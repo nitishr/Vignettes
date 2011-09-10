@@ -201,7 +201,7 @@ namespace Vignettes
 
         private int NegativePotentialIndex(double xprime, double yprime)
         {
-            return NegativePotentialIndex(i => PotentialAt(i, xprime, yprime) < 0.0);
+            return NegativePotentialIndex(i => PotentialAt(i, xprime, yprime) < 0);
         }
 
         private int NegativePotentialIndex(Func<int, bool> isPotentialNegative)
