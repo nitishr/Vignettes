@@ -27,7 +27,6 @@ namespace Vignettes
         public const int BitsPerPixel = 24;
 
         private List<Color> _pixOrig;
-        private List<Color> _pixModified;
         private List<double> _majorAxisValues;
         private List<double> _minorAxisValues;
         private List<double> _midfigureMajorAxisValues;
@@ -87,15 +86,17 @@ namespace Vignettes
             }
         }
 
-        private void ModifyPixels()
+        private IList<Color> ModifiedPixels()
         {
+            var pixModified = new Color[_pixOrig.Count];
             for (int el = 0; el < _height; ++el)
             {
                 for (int k = 0; k < _width; ++k)
                 {
-                    _pixModified[_width*el + k] = GetPixModified(el, k, IsPixelInStep);
+                    pixModified[_width*el + k] = GetPixModified(el, k, IsPixelInStep);
                 }
             }
+            return pixModified;
         }
 
         private void SetupParameters()
@@ -235,27 +236,26 @@ namespace Vignettes
         public BitmapSource CreateImage()
         {
             SetupParameters();
-            ModifyPixels();
+            IList<Color> pixModified = ModifiedPixels();
             int stride = (_width*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*_height];
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
                 int i1 = i/3;
-                pixelsToWrite[i] = _pixModified[i1].R;
-                pixelsToWrite[i + 1] = _pixModified[i1].G;
-                pixelsToWrite[i + 2] = _pixModified[i1].B;
+                pixelsToWrite[i] = pixModified[i1].R;
+                pixelsToWrite[i + 1] = pixModified[i1].G;
+                pixelsToWrite[i + 2] = pixModified[i1].B;
             }
 
             return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
 
-        public void SetupParameters(List<Color> pixels, List<Color> pixelsModified, int width, int height)
+        public void SetupParameters(List<Color> pixels, int width, int height)
         {
             _pixOrig = pixels;
             _width = width;
             _height = height;
-            _pixModified = pixelsModified;
         }
     }
 }

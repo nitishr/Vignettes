@@ -22,9 +22,7 @@ namespace Vignettes
         private const int ViewportWidthHeight = 600;
 
         readonly List<Color> _pixels8 = new List<Color>();
-        readonly List<Color> _pixels8Modified = new List<Color>();
         readonly List<Color> _pixels8Scaled = new List<Color>();
-        readonly List<Color> _pixels8ScaledModified = new List<Color>();
 
         BitmapSource _originalImage;
 
@@ -109,25 +107,17 @@ namespace Vignettes
             int bitsPerPixel = _originalImage.Format.BitsPerPixel;
             if (bitsPerPixel != 24 && bitsPerPixel != 32) return;
             int step = bitsPerPixel / 8;
-            PopulatePixels(_scaledPixels, step, _pixels8Scaled, _pixels8ScaledModified);
-            PopulatePixels(_originalPixels, step, _pixels8, _pixels8Modified);
+            PopulatePixels(_scaledPixels, step, _pixels8Scaled);
+            PopulatePixels(_originalPixels, step, _pixels8);
         }
 
-        private static void PopulatePixels(byte[] pixels, int step, List<Color> pixels8, List<Color> pixels8Modified)
+        private static void PopulatePixels(byte[] pixels, int step, List<Color> pixels8)
         {
             pixels8.Clear();
-            pixels8Modified.Clear();
             for (int i = 0; i < pixels.Count(); i += step)
             {
-                AddPixels(pixels, i, pixels8, pixels8Modified);
+                pixels8.Add(Color.FromRgb(pixels[i + 2], pixels[i + 1], pixels[i]));
             }
-        }
-
-        private static void AddPixels(byte[] pixels, int i, List<Color> pixels8, List<Color> pixels8Modified)
-        {
-            Color color = Color.FromRgb(pixels[i + 2], pixels[i + 1], pixels[i]);
-            pixels8.Add(color);
-            pixels8Modified.Add(color);
         }
 
         private void BnOpenClick(object sender, RoutedEventArgs e)
@@ -185,7 +175,7 @@ namespace Vignettes
                                 BorderColor = _borderColor,
                                 Shape = _shape
                             };
-            _vignette.SetupParameters(_pixels8Scaled, _pixels8ScaledModified, _scaledWidth, _scaledHeight);
+            _vignette.SetupParameters(_pixels8Scaled, _scaledWidth, _scaledHeight);
             ApplyEffect();
         }
 
@@ -331,7 +321,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    vig.SetupParameters(_pixels8, _pixels8Modified, _originalWidth, _originalHeight);
+                    vig.SetupParameters(_pixels8, _originalWidth, _originalHeight);
                     SaveImage(vig.CreateImage(), FileToSave(dlg));
                 }
             }
