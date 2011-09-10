@@ -26,11 +26,6 @@ namespace Vignettes
 
         BitmapSource _originalImage;
 
-        // Tried to use a List<byte> for this, but found that BitmapSource.CopyPixels does not take 
-        // this data type as one of its arguments.
-        byte[] _originalPixels;
-        byte[] _scaledPixels;
-
         int _originalWidth;
         int _originalHeight;
         int _scaledWidth;
@@ -54,28 +49,38 @@ namespace Vignettes
 
         private bool ReadImage(string fn, string fileNameOnly)
         {
-            // Open the image
             _originalImage = new BitmapImage(new Uri(fn, UriKind.RelativeOrAbsolute));
-            _originalWidth = _originalImage.PixelWidth;
-            _originalHeight = _originalImage.PixelHeight;
+            PixelFormat format = _originalImage.Format;
 
-            if ((_originalImage.Format == PixelFormats.Bgra32) ||
-                (_originalImage.Format == PixelFormats.Bgr32))
+            if ((format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) && (format.BitsPerPixel == 24 || format.BitsPerPixel == 32))
             {
-                _originalPixels = Pixels(_originalImage, _originalHeight);
                 Title = "Vignette Effect: " + fileNameOnly;
+                _originalWidth = _originalImage.PixelWidth;
+                _originalHeight = _originalImage.PixelHeight;
+                _pixels8 = PopulatePixels(_originalImage);
                 return true;
             }
             MessageBox.Show("Sorry, I don't support this image format.");
-
             return false;
         }
 
-        private static byte[] Pixels(BitmapSource image, int height)
+        private List<Color> PopulatePixels(BitmapSource image)
+        {
+            byte[] pixels = Pixels(image);
+            int step = _originalImage.Format.BitsPerPixel / 8;
+            var pixels8 = new List<Color>();
+            for (int i = 0; i < pixels.Count(); i += step)
+            {
+                pixels8.Add(Color.FromRgb(pixels[i + 2], pixels[i + 1], pixels[i]));
+            }
+            return pixels8;
+        }
+
+        private static byte[] Pixels(BitmapSource image)
         {
             var stride = (image.PixelWidth*image.Format.BitsPerPixel + 7)/8;
-            var pixels = new byte[stride*height];
-            image.CopyPixels(Int32Rect.Empty, pixels, stride, 0);
+            var pixels = new byte[stride*image.PixelHeight];
+            image.CopyPixels(pixels, stride, 0);
             return pixels;
         }
 
@@ -85,7 +90,7 @@ namespace Vignettes
             _scaleFactor = Math.Min(scale.ScaleX, scale.ScaleY);
             var scaledImage = new TransformedBitmap(_originalImage, scale);
             img.Source = scaledImage;
-            _scaledPixels = Pixels(scaledImage, _scaledHeight);
+            _pixels8Scaled = PopulatePixels(scaledImage);
         }
 
         private void ComputeScaledWidthAndHeight()
@@ -100,25 +105,6 @@ namespace Vignettes
                 _scaledHeight = ViewportWidthHeight;
                 _scaledWidth = _originalWidth * ViewportWidthHeight / _originalHeight;
             }
-        }
-
-        private void PopulatePixelsOriginalAndScaled()
-        {
-            int bitsPerPixel = _originalImage.Format.BitsPerPixel;
-            if (bitsPerPixel != 24 && bitsPerPixel != 32) return;
-            int step = bitsPerPixel / 8;
-            _pixels8Scaled = PopulatePixels(_scaledPixels, step);
-            _pixels8 = PopulatePixels(_originalPixels, step);
-        }
-
-        private static List<Color> PopulatePixels(byte[] pixels, int step)
-        {
-            var pixels8 = new List<Color>();
-            for (int i = 0; i < pixels.Count(); i += step)
-            {
-                pixels8.Add(Color.FromRgb(pixels[i + 2], pixels[i + 1], pixels[i]));
-            }
-            return pixels8;
         }
 
         private void BnOpenClick(object sender, RoutedEventArgs e)
@@ -141,7 +127,6 @@ namespace Vignettes
                         bnSaveImage.IsEnabled = true;
                         ComputeScaledWidthAndHeight();
                         ScaleImage();
-                        PopulatePixelsOriginalAndScaled();
                         ApplyVignette();
                     }
                     else
