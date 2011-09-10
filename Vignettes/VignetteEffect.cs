@@ -26,16 +26,15 @@ namespace Vignettes
         private const int Dpi = 72;
         public const int BitsPerPixel = 24;
 
-        List<Color> _pixOrig = new List<Color>();
-        List<Color> _pixModified = new List<Color>();
-        readonly List<double> _majorAxisValues = new List<double>();
-        readonly List<double> _minorAxisValues = new List<double>();
-        readonly List<double> _midfigureMajorAxisValues = new List<double>();
-        readonly List<double> _midfigureMinorAxisValues = new List<double>();
+        private List<Color> _pixOrig;
+        private List<Color> _pixModified;
+        private List<double> _majorAxisValues;
+        private List<double> _minorAxisValues;
+        private List<double> _midfigureMajorAxisValues;
         private List<double> _imageWeights;
         private List<double> _borderWeights;
-        int _width;
-        int _height;
+        private int _width;
+        private int _height;
 
         public double OrientationInDegrees { private get; set; } // This parameter is not of relevance for the Circle vignette.
 
@@ -101,11 +100,6 @@ namespace Vignettes
 
         private void SetupParameters()
         {
-            _majorAxisValues.Clear();
-            _minorAxisValues.Clear();
-            _midfigureMajorAxisValues.Clear();
-            _midfigureMinorAxisValues.Clear();
-
             double a0 = AxisValue(_width, -1);
             double b0 = AxisValue(_height, -1);
 
@@ -172,13 +166,14 @@ namespace Vignettes
 
         private void InitAxisValues(double a0, double stepX, double b0, double stepY)
         {
-            for (int i = 0; i <= NumberOfGradationSteps; ++i)
-            {
-                _majorAxisValues.Add(a0 + i*stepX);
-                _minorAxisValues.Add(b0 + i*stepY);
-                _midfigureMajorAxisValues.Add(a0 + (i + 0.5)*stepX);
-                _midfigureMinorAxisValues.Add(b0 + (i + 0.5)*stepY);
-            }
+            _majorAxisValues = AxisValues(i => a0 + i * stepX);
+            _minorAxisValues = AxisValues(i => b0 + i * stepY);
+            _midfigureMajorAxisValues = AxisValues(i => a0 + (i + 0.5) * stepX);
+        }
+
+        private List<double> AxisValues(Func<int, double> selector)
+        {
+            return new List<double>(Enumerable.Range(0, NumberOfGradationSteps + 1).Select(selector));
         }
 
         private bool IsPixelInStepCircleEllipseDiamond(int step, int el, int k)
