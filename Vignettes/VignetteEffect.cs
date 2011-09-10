@@ -256,7 +256,12 @@ namespace Vignettes
 
         private int NegativePotentialIndex(Point point)
         {
-            return NegativePotentialIndex(i => new Rect(0, 0, _majorAxisValues[i], _minorAxisValues[i]).Contains(point));
+            return NegativePotentialIndex(i => PointInRectAt(i, point));
+        }
+
+        private bool PointInRectAt(int i, Point point)
+        {
+            return new Rect(0, 0, _majorAxisValues[i], _minorAxisValues[i]).Contains(point);
         }
 
         private Color ColorAt(int j1, int w1)
@@ -267,14 +272,7 @@ namespace Vignettes
 
         private double Potential(Point point)
         {
-            double potential = 0.0;
-            if (new Rect(0, 0, _majorAxisValues[0], _minorAxisValues[0]).Contains(point))
-                potential = -2.0; // Arbitrary negative number N1
-
-            if (new Rect(0, 0, _majorAxisValues[NumberOfGradationSteps],
-                         _minorAxisValues[NumberOfGradationSteps]).Contains(point)) return potential;
-            potential = 2.0; // Arbitrary positive number = - N1
-            return potential;
+            return PointInRectAt(0, point) ? -2.0 : (PointInRectAt(NumberOfGradationSteps, point) ? 0.0 : 2.0);
         }
 
         public BitmapSource CreateImage()
