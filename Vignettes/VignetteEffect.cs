@@ -88,7 +88,12 @@ namespace Vignettes
 
         private Color GetPixModified(int i)
         {
-            return GetPixModified(i / _width, i % _width, IsPixelInStep);
+            int row = i / _width;
+            int column = i % _width;
+            int w1 = i + column;
+            return IsPixelInStep(0, row, column)
+                       ? _pixOrig[w1]
+                       : (IsPixelInStep(NumberOfGradationSteps, row, column) ? ColorAt(Step(row, column, IsPixelInStep), w1) : BorderColor);
         }
 
         private void SetupParameters()
@@ -194,14 +199,6 @@ namespace Vignettes
         private double XPrime(int el, int k)
         {
             return (k - Wb2)*CosOrientation + (el - Hb2)*SinOrientation;
-        }
-
-        private Color GetPixModified(int el, int k, Func<int, int, int, bool> isPixelInStep)
-        {
-            int w1 = _width*el + k;
-            return isPixelInStep(0, el, k)
-                       ? _pixOrig[w1]
-                       : (isPixelInStep(NumberOfGradationSteps, el, k) ? ColorAt(Step(el, k, isPixelInStep), w1) : BorderColor);
         }
 
         private int Step(int el, int k, Func<int, int, int, bool> isPixelInStep)
