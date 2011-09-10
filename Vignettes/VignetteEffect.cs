@@ -190,7 +190,7 @@ namespace Vignettes
                        ? _pixOrig[w1]
                        : (PotentialAt(NumberOfGradationSteps, xprime, yprime) >= 0
                               ? BorderColor
-                              : ColorAt(NegativePotentialIndex(xprime, yprime) - 1, w1));
+                              : ColorAt(Step(xprime, yprime), w1));
         }
 
         private double PotentialAt(int axisOffset, double xprime, double yprime)
@@ -199,14 +199,14 @@ namespace Vignettes
                              Math.Abs(yprime)/_minorAxisValues[axisOffset]);
         }
 
-        private int NegativePotentialIndex(double xprime, double yprime)
+        private int Step(double xprime, double yprime)
         {
-            return NegativePotentialIndex(i => PotentialAt(i, xprime, yprime) < 0);
+            return Step(i => PotentialAt(i, xprime, yprime) < 0);
         }
 
-        private int NegativePotentialIndex(Func<int, bool> isPotentialNegative)
+        private int Step(Func<int, bool> isInBand)
         {
-            return Enumerable.Range(1, NumberOfGradationSteps).First(isPotentialNegative);
+            return Enumerable.Range(1, NumberOfGradationSteps).First(isInBand) - 1;
         }
 
         private double Potential(double factor1, double factor2)
@@ -233,12 +233,12 @@ namespace Vignettes
             double potential = Potential(point);
             return potential < 0
                        ? _pixOrig[w1]
-                       : (potential > 0 ? BorderColor : ColorAt(NegativePotentialIndex(point) - 1, w1));
+                       : (potential > 0 ? BorderColor : ColorAt(Step(point), w1));
         }
 
-        private int NegativePotentialIndex(Point point)
+        private int Step(Point point)
         {
-            return NegativePotentialIndex(i => PointInRectAt(i, point));
+            return Step(i => PointInRectAt(i, point));
         }
 
         private bool PointInRectAt(int i, Point point)
