@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Media;
 using System.Windows;
 using System.Linq;
@@ -88,15 +89,7 @@ namespace Vignettes
 
         private IList<Color> ModifiedPixels()
         {
-            var pixModified = new Color[_pixOrig.Count];
-            for (int el = 0; el < _height; ++el)
-            {
-                for (int k = 0; k < _width; ++k)
-                {
-                    pixModified[_width*el + k] = GetPixModified(el, k, IsPixelInStep);
-                }
-            }
-            return pixModified;
+            return _pixOrig.Select((color, i) => GetPixModified(i / _width, i % _width, IsPixelInStep)).ToList();
         }
 
         private void SetupParameters()
