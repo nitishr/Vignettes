@@ -221,11 +221,14 @@ namespace Vignettes
 
         private void InitAxisValues()
         {
-            double stepX = BandThicknessX/NumberOfGradationSteps;
-            double stepY = BandThicknessY/NumberOfGradationSteps;
-            _majorAxisValues = AxisValues(i => InnerSize.Width + i*stepX);
-            _minorAxisValues = AxisValues(i => InnerSize.Height + i*stepY);
-            _midfigureMajorAxisValues = AxisValues(i => (i + 0.5)*stepX);
+            _majorAxisValues = AxisValues(step => AxisValue(step, InnerSize.Width, BandThicknessX));
+            _minorAxisValues = AxisValues(step => AxisValue(step, InnerSize.Height, BandThicknessY));
+            _midfigureMajorAxisValues = AxisValues(step => AxisValue(step + 0.5, 0, BandThicknessX));
+        }
+
+        private double AxisValue(double step, double length, double bandThickness)
+        {
+            return length + step*(bandThickness/NumberOfGradationSteps);
         }
 
         public void SetupParameters(List<Color> pixels, int width, int height)
