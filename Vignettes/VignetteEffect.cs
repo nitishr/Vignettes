@@ -30,7 +30,6 @@ namespace Vignettes
         private List<double> _majorAxisValues;
         private List<double> _minorAxisValues;
         private List<double> _midfigureMajorAxisValues;
-        private List<double> _weights;
         private int _width;
         private int _height;
 
@@ -74,7 +73,7 @@ namespace Vignettes
 
         private Color ColorAt(int i)
         {
-            var weight = (float) _weights[StepContaining(i)];
+            var weight = (float) Weight(StepContaining(i));
             return Color.Add(Color.Multiply(_pixels[i], weight),
                              Color.Multiply(BorderColor, 1 - weight));
         }
@@ -135,7 +134,6 @@ namespace Vignettes
             }
 
             InitAxisValues(a0, b0);
-            _weights = new List<double>(Enumerable.Range(0, NumberOfGradationSteps).Select(i => Weight(i, a0)));
         }
 
         // The weight functions given below form the crux of the code. It was a struggle after which 
@@ -152,9 +150,9 @@ namespace Vignettes
         // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
         //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
         //  October 1983, Pages 217-236].
-        private double Weight(int step, double a0)
+        private double Weight(int step)
         {
-            return 0.5*(1.0 + Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[step] - a0)));
+            return 0.5*(1.0 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[step]));
         }
 
         private double AxisValue(int length, int multiplier)
@@ -182,7 +180,7 @@ namespace Vignettes
         {
             _majorAxisValues = AxisValues(i => a0 + i * stepX);
             _minorAxisValues = AxisValues(i => b0 + i * stepY);
-            _midfigureMajorAxisValues = AxisValues(i => a0 + (i + 0.5) * stepX);
+            _midfigureMajorAxisValues = AxisValues(i => (i + 0.5) * stepX);
         }
 
         private List<double> AxisValues(Func<int, double> selector)
