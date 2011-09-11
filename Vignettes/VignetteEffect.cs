@@ -97,12 +97,22 @@ namespace Vignettes
 
         private bool IsPixelInStepRectangleSquare(int i, int step)
         {
-            return PointInRectAt(step, new Point(Math.Abs(XPrime(Row(i), Column(i))), Math.Abs(YPrime(Row(i), Column(i)))));
+            return PointInRectAt(step, new Point(XPrime(i), YPrime(i)));
         }
 
         private bool IsPixelInStepCircleEllipseDiamond(int i, int step)
         {
-            return Potential(Math.Abs(XPrime(Row(i), Column(i)))/_majorAxisValues[step], Math.Abs(YPrime(Row(i), Column(i)))/_minorAxisValues[step]) < 0;
+            return Potential(XPrime(i)/_majorAxisValues[step], YPrime(i)/_minorAxisValues[step]) < 0;
+        }
+
+        private double YPrime(int i)
+        {
+            return Math.Abs(-(Column(i) - Wb2)*SinOrientation + (Row(i) - Hb2)*CosOrientation);
+        }
+
+        private double XPrime(int i)
+        {
+            return Math.Abs((Column(i) - Wb2)*CosOrientation + (Row(i) - Hb2)*SinOrientation);
         }
 
         private int Column(int i)
@@ -198,16 +208,6 @@ namespace Vignettes
             return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse
                        ? factor1*factor1 + factor2*factor2 - 1
                        : factor1 + factor2 - 1;
-        }
-
-        private double YPrime(int el, int k)
-        {
-            return -(k - Wb2)*SinOrientation + (el - Hb2)*CosOrientation;
-        }
-
-        private double XPrime(int el, int k)
-        {
-            return (k - Wb2)*CosOrientation + (el - Hb2)*SinOrientation;
         }
 
         private bool PointInRectAt(int step, Point point)
