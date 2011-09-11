@@ -70,7 +70,14 @@ namespace Vignettes
         {
             return IsPixelInStep(i, 0)
                        ? _pixOrig[i]
-                       : (IsPixelInStep(i, NumberOfGradationSteps) ? ColorAt(StepContaining(i), i) : BorderColor);
+                       : (IsPixelInStep(i, NumberOfGradationSteps) ? ColorAt(i) : BorderColor);
+        }
+
+        private Color ColorAt(int i)
+        {
+            int step = StepContaining(i);
+            return Color.Add(Color.Multiply(_pixOrig[i], (float) _imageWeights[step]),
+                             Color.Multiply(BorderColor, (float) _borderWeights[step]));
         }
 
         private int StepContaining(int i)
@@ -203,12 +210,6 @@ namespace Vignettes
         private bool PointInRectAt(int step, Point point)
         {
             return new Rect(0, 0, _majorAxisValues[step], _minorAxisValues[step]).Contains(point);
-        }
-
-        private Color ColorAt(int step, int w1)
-        {
-            return Color.Add(Color.Multiply(_pixOrig[w1], (float) _imageWeights[step]),
-                             Color.Multiply(BorderColor, (float) _borderWeights[step]));
         }
 
         public BitmapSource CreateImage()
