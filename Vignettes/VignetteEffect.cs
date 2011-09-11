@@ -130,18 +130,8 @@ namespace Vignettes
         private bool IsPixelInStep(int i, int step)
         {
             return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
-                        ? IsPixelInStepCircleEllipseDiamond(i, step)
-                        : IsPixelInStepRectangleSquare(i, step);
-        }
-
-        private bool IsPixelInStepRectangleSquare(int i, int step)
-        {
-            return PointInRectAt(step, new Point(XPrime(i), YPrime(i)));
-        }
-
-        private bool IsPixelInStepCircleEllipseDiamond(int i, int step)
-        {
-            return Potential(XPrime(i)/MajorAxisValue(step), YPrime(i)/MinorAxisValue(step)) < 0;
+                       ? new NonRectangularSteps().IsPixelInStep(this, i, step)
+                       : new RectangularSteps().IsPixelInStep(this, i, step);
         }
 
         private double YPrime(int i)
@@ -169,18 +159,6 @@ namespace Vignettes
         private double AxisValue(int length, int multiplier)
         {
             return (length * CoveragePercent / 100.0 + multiplier * BandWidthInPixels) * 0.5;
-        }
-
-        private double Potential(double factor1, double factor2)
-        {
-            return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse
-                       ? factor1*factor1 + factor2*factor2 - 1
-                       : factor1 + factor2 - 1;
-        }
-
-        private bool PointInRectAt(int step, Point point)
-        {
-            return new Rect(0, 0, MajorAxisValue(step), MinorAxisValue(step)).Contains(point);
         }
 
         public BitmapSource CreateImage()
@@ -277,6 +255,34 @@ namespace Vignettes
             public double Y(VignetteEffect effect)
             {
                 return effect.InnerSize.Height * (effect.AxisValue(effect._width, 1) / effect.InnerSize.Width - 1);
+            }
+        }
+
+        interface ISteps
+        {
+            bool IsPixelInStep(VignetteEffect effect, int pixel, int step);
+        }
+
+        class RectangularSteps : ISteps
+        {
+            public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
+            {
+                return
+                    new Rect(0, 0, effect.MajorAxisValue(step), effect.MinorAxisValue(step)).Contains(
+                        new Point(effect.XPrime(pixel), effect.YPrime(pixel)));
+            }
+        }
+
+        class NonRectangularSteps : ISteps
+        {
+            public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
+            {
+                double factor1 = effect.XPrime(pixel)/effect.MajorAxisValue(step);
+                double factor2 = effect.YPrime(pixel)/effect.MinorAxisValue(step);
+                return
+                    (effect.Shape == VignetteShape.Circle || effect.Shape == VignetteShape.Ellipse
+                         ? factor1*factor1 + factor2*factor2 - 1
+                         : factor1 + factor2 - 1) < 0;
             }
         }
     }
