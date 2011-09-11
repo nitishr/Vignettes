@@ -26,7 +26,7 @@ namespace Vignettes
         private const int Dpi = 72;
         public const int BitsPerPixel = 24;
 
-        private List<Color> _pixOrig;
+        private List<Color> _pixels;
         private List<double> _majorAxisValues;
         private List<double> _minorAxisValues;
         private List<double> _midfigureMajorAxisValues;
@@ -68,14 +68,14 @@ namespace Vignettes
         private Color GetPixModified(int i)
         {
             return IsPixelInStep(i, 0)
-                       ? _pixOrig[i]
+                       ? _pixels[i]
                        : (IsPixelInStep(i, NumberOfGradationSteps) ? ColorAt(i) : BorderColor);
         }
 
         private Color ColorAt(int i)
         {
             var weight = (float) _weights[StepContaining(i)];
-            return Color.Add(Color.Multiply(_pixOrig[i], weight),
+            return Color.Add(Color.Multiply(_pixels[i], weight),
                              Color.Multiply(BorderColor, 1 - weight));
         }
 
@@ -219,7 +219,7 @@ namespace Vignettes
 
         public void SetupParameters(List<Color> pixels, int width, int height)
         {
-            _pixOrig = pixels;
+            _pixels = pixels;
             _width = width;
             _height = height;
         }
