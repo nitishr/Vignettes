@@ -163,13 +163,6 @@ namespace Vignettes
             return (length * CoveragePercent / 100.0 + multiplier * BandWidthInPixels) * 0.5;
         }
 
-        private void InitAxisValues(Size innerSize, double stepX, double stepY)
-        {
-            _majorAxisValues = AxisValues(i => innerSize.Width + i * stepX);
-            _minorAxisValues = AxisValues(i => innerSize.Height + i * stepY);
-            _midfigureMajorAxisValues = AxisValues(i => (i + 0.5) * stepX);
-        }
-
         private List<double> AxisValues(Func<int, double> selector)
         {
             return new List<double>(RangeOfGradationSteps.Select(selector));
@@ -209,15 +202,22 @@ namespace Vignettes
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                 Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
             {
-                double step = ((double) BandWidthInPixels/NumberOfGradationSteps);
-                InitAxisValues(InnerSize, step, step);
+                InitAxisValues(BandWidthInPixels, BandWidthInPixels);
             }
             else // if (Shape == VignetteShape.Diamond)
             {
                 double aLast = AxisValue(_width, 1);
-                InitAxisValues(InnerSize, (aLast - InnerSize.Width)/NumberOfGradationSteps,
-                               (InnerSize.Height*(aLast/InnerSize.Width - 1))/NumberOfGradationSteps);
+                InitAxisValues(aLast - InnerSize.Width, InnerSize.Height*(aLast/InnerSize.Width - 1));
             }
+        }
+
+        private void InitAxisValues(double bandThicknessX, double bandThicknessY)
+        {
+            double stepX = bandThicknessX/NumberOfGradationSteps;
+            double stepY = (bandThicknessY / NumberOfGradationSteps);
+            _majorAxisValues = AxisValues(i => InnerSize.Width + i * stepX);
+            _minorAxisValues = AxisValues(i => InnerSize.Height + i * stepY);
+            _midfigureMajorAxisValues = AxisValues(i => (i + 0.5) * stepX);
         }
 
         public void SetupParameters(List<Color> pixels, int width, int height)
