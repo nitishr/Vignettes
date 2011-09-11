@@ -30,8 +30,7 @@ namespace Vignettes
         private List<double> _majorAxisValues;
         private List<double> _minorAxisValues;
         private List<double> _midfigureMajorAxisValues;
-        private List<double> _imageWeights;
-        private List<double> _borderWeights;
+        private List<double> _weights;
         private int _width;
         private int _height;
 
@@ -75,9 +74,9 @@ namespace Vignettes
 
         private Color ColorAt(int i)
         {
-            int step = StepContaining(i);
-            return Color.Add(Color.Multiply(_pixOrig[i], (float) _imageWeights[step]),
-                             Color.Multiply(BorderColor, (float) _borderWeights[step]));
+            var weight = (float) _weights[StepContaining(i)];
+            return Color.Add(Color.Multiply(_pixOrig[i], weight),
+                             Color.Multiply(BorderColor, 1 - weight));
         }
 
         private int StepContaining(int i)
@@ -134,18 +133,7 @@ namespace Vignettes
             }
 
             InitAxisValues(a0, b0);
-            InitWeights(a0);
-        }
-
-        private void InitWeights(double a0)
-        {
-            _imageWeights = Weights(a0, 1);
-            _borderWeights = Weights(a0, -1);
-        }
-
-        private List<double> Weights(double a0, int multiplier)
-        {
-            return new List<double>(Enumerable.Range(0, NumberOfGradationSteps).Select(i => Weight(multiplier, i, a0)));
+            _weights = new List<double>(Enumerable.Range(0, NumberOfGradationSteps).Select(i => Weight(i, a0)));
         }
 
         // The weight functions given below form the crux of the code. It was a struggle after which 
@@ -162,9 +150,9 @@ namespace Vignettes
         // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
         //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
         //  October 1983, Pages 217-236].
-        private double Weight(int multiplier, int step, double a0)
+        private double Weight(int step, double a0)
         {
-            return 0.5 * (1.0 + multiplier * Math.Cos(Math.PI / BandWidthInPixels * (_midfigureMajorAxisValues[step] - a0)));
+            return 0.5*(1.0 + Math.Cos(Math.PI/BandWidthInPixels*(_midfigureMajorAxisValues[step] - a0)));
         }
 
         private double AxisValue(int length, int multiplier)
