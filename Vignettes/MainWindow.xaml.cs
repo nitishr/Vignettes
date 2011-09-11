@@ -21,24 +21,24 @@ namespace Vignettes
     {
         private const int ViewportWidthHeight = 600;
 
-        private List<Color> _pixels8;
-        private List<Color> _pixels8Scaled;
+        private List<Color> _pixels;
+        private List<Color> _scaledPixels;
 
-        BitmapSource _originalImage;
+        private BitmapSource _image;
 
-        int _originalWidth;
-        int _originalHeight;
-        int _scaledWidth;
-        int _scaledHeight;
-        string _fileName;
+        private int _width;
+        private int _height;
+        private int _scaledWidth;
+        private int _scaledHeight;
+        private string _fileName;
 
-        VignetteEffect _vignette;
-        VignetteShape _shape;
+        private VignetteEffect _vignette;
+        private VignetteShape _shape;
 
         // Magic numbers to represent the starting colour - predominantly blue
-        Color _borderColor = Color.FromRgb(20, 20, 240);
+        private Color _borderColor = Color.FromRgb(20, 20, 240);
 
-        double _scaleFactor = 1.0;
+        private double _scaleFactor = 1.0;
 
         public MainWindow()
         {
@@ -49,15 +49,15 @@ namespace Vignettes
 
         private bool ReadImage(string fn, string fileNameOnly)
         {
-            _originalImage = new BitmapImage(new Uri(fn, UriKind.RelativeOrAbsolute));
-            PixelFormat format = _originalImage.Format;
+            _image = new BitmapImage(new Uri(fn, UriKind.RelativeOrAbsolute));
+            PixelFormat format = _image.Format;
 
             if ((format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) && (format.BitsPerPixel == 24 || format.BitsPerPixel == 32))
             {
                 Title = "Vignette Effect: " + fileNameOnly;
-                _originalWidth = _originalImage.PixelWidth;
-                _originalHeight = _originalImage.PixelHeight;
-                _pixels8 = PopulatePixels(_originalImage);
+                _width = _image.PixelWidth;
+                _height = _image.PixelHeight;
+                _pixels = PopulatePixels(_image);
                 return true;
             }
             MessageBox.Show("Sorry, I don't support this image format.");
@@ -67,7 +67,7 @@ namespace Vignettes
         private List<Color> PopulatePixels(BitmapSource image)
         {
             byte[] pixels = Pixels(image);
-            int step = _originalImage.Format.BitsPerPixel / 8;
+            int step = _image.Format.BitsPerPixel / 8;
             var pixels8 = new List<Color>();
             for (int i = 0; i < pixels.Count(); i += step)
             {
@@ -86,24 +86,24 @@ namespace Vignettes
 
         void ScaleImage()
         {
-            var scale = new ScaleTransform(_scaledWidth/(1.0*_originalWidth), _scaledHeight/(1.0*_originalHeight));
+            var scale = new ScaleTransform(_scaledWidth/(1.0*_width), _scaledHeight/(1.0*_height));
             _scaleFactor = Math.Min(scale.ScaleX, scale.ScaleY);
-            var scaledImage = new TransformedBitmap(_originalImage, scale);
+            var scaledImage = new TransformedBitmap(_image, scale);
             img.Source = scaledImage;
-            _pixels8Scaled = PopulatePixels(scaledImage);
+            _scaledPixels = PopulatePixels(scaledImage);
         }
 
         private void ComputeScaledWidthAndHeight()
         {
-            if (_originalWidth > _originalHeight)
+            if (_width > _height)
             {
                 _scaledWidth = ViewportWidthHeight;
-                _scaledHeight = _originalHeight * ViewportWidthHeight / _originalWidth;
+                _scaledHeight = _height * ViewportWidthHeight / _width;
             }
             else
             {
                 _scaledHeight = ViewportWidthHeight;
-                _scaledWidth = _originalWidth * ViewportWidthHeight / _originalHeight;
+                _scaledWidth = _width * ViewportWidthHeight / _height;
             }
         }
 
@@ -158,7 +158,7 @@ namespace Vignettes
                                 BorderColor = _borderColor,
                                 Shape = _shape
                             };
-            _vignette.SetupParameters(_pixels8Scaled, _scaledWidth, _scaledHeight);
+            _vignette.SetupParameters(_scaledPixels, _scaledWidth, _scaledHeight);
             ApplyEffect();
         }
 
@@ -304,7 +304,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    vig.SetupParameters(_pixels8, _originalWidth, _originalHeight);
+                    vig.SetupParameters(_pixels, _width, _height);
                     SaveImage(vig.CreateImage(), FileToSave(dlg));
                 }
             }
