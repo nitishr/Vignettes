@@ -17,15 +17,6 @@ using Microsoft.Win32;
 
 namespace Vignettes
 {
-    public enum VignetteShape
-    {
-        Circle,
-        Ellipse,
-        Diamond,
-        Square,
-        Rectangle
-    };
-
     public partial class MainWindow
     {
         private const int ViewportWidthHeight = 600;
@@ -42,7 +33,7 @@ namespace Vignettes
         private string _fileName;
 
         private VignetteEffect _vignette;
-        private VignetteShape _shape;
+        private VignetteEffect.VignetteFigure _shape;
 
         // Magic numbers to represent the starting colour - predominantly blue
         private Color _borderColor = Color.FromRgb(20, 20, 240);
@@ -165,7 +156,7 @@ namespace Vignettes
                                 CenterXOffsetPercent = sliderOriginX.Value,
                                 CenterYOffsetPercent = sliderOriginY.Value,
                                 BorderColor = _borderColor,
-                                Figure = FigureFor(_shape)
+                                Figure = _shape
                             };
             _vignette.SetupParameters(_scaledPixels, _scaledWidth, _scaledHeight);
             ApplyEffect();
@@ -182,25 +173,25 @@ namespace Vignettes
             switch (comboTechnique.SelectedIndex)
             {
                 case 0:
-                    _shape = VignetteShape.Circle;
+                    _shape = new VignetteEffect.Circle();
                     sliderAngle.IsEnabled = false;
                     break;
                 case 1:
-                    _shape = VignetteShape.Ellipse;
+                    _shape = new VignetteEffect.Ellipse();
                     break;
                 case 2:
-                    _shape = VignetteShape.Diamond;
+                    _shape = new VignetteEffect.Diamond();
                     break;
                 case 3:
-                    _shape = VignetteShape.Square;
+                    _shape = new VignetteEffect.Square();
                     break;
                 default:
-                    _shape = VignetteShape.Rectangle;
+                    _shape = new VignetteEffect.Rectangle();
                     break;
             }
 
             if (_vignette == null) return;
-            _vignette.Figure = FigureFor(_shape);
+            _vignette.Figure = _shape;
             ApplyEffect();
         }
 
@@ -309,7 +300,7 @@ namespace Vignettes
                                       CenterXOffsetPercent = sliderOriginX.Value,
                                       CenterYOffsetPercent = sliderOriginY.Value,
                                       BorderColor = _borderColor,
-                                      Figure = FigureFor(_shape),
+                                      Figure = _shape,
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
@@ -360,25 +351,6 @@ namespace Vignettes
                     return new JpegBitmapEncoder();
                 default:
                     return new BmpBitmapEncoder();
-            }
-        }
-
-        public static VignetteEffect.VignetteFigure FigureFor(VignetteShape shape)
-        {
-            switch (shape)
-            {
-                case VignetteShape.Circle:
-                    return new VignetteEffect.Circle();
-                case VignetteShape.Ellipse:
-                    return new VignetteEffect.Ellipse();
-                case VignetteShape.Diamond:
-                    return new VignetteEffect.Diamond();
-                case VignetteShape.Square:
-                    return new VignetteEffect.Square();
-                case VignetteShape.Rectangle:
-                    return new VignetteEffect.Rectangle();
-                default:
-                    throw new ArgumentOutOfRangeException("_shape");
             }
         }
     }
