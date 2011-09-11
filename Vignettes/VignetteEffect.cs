@@ -154,7 +154,7 @@ namespace Vignettes
                 a0 = b0 = Math.Min(a0, b0);
             }
 
-            InitAxisValues(a0, b0);
+            InitAxisValues(new Size(a0, b0));
         }
 
         private double AxisValue(int length, int multiplier)
@@ -162,26 +162,26 @@ namespace Vignettes
             return (length * CoveragePercent / 100.0 + multiplier * BandWidthInPixels) * 0.5;
         }
 
-        private void InitAxisValues(double a0, double b0)
+        private void InitAxisValues(Size innerSize)
         {
             if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                 Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
             {
                 double step = ((double) BandWidthInPixels/NumberOfGradationSteps);
-                InitAxisValues(a0, step, b0, step);
+                InitAxisValues(innerSize, step, step);
             }
             else // if (Shape == VignetteShape.Diamond)
             {
                 double aLast = AxisValue(_width, 1);
-                double bLast = b0*aLast/a0;
-                InitAxisValues(a0, (aLast - a0)/NumberOfGradationSteps, b0, (bLast - b0)/NumberOfGradationSteps);
+                InitAxisValues(innerSize, (aLast - innerSize.Width)/NumberOfGradationSteps,
+                               (innerSize.Height*(aLast/innerSize.Width - 1))/NumberOfGradationSteps);
             }
         }
 
-        private void InitAxisValues(double a0, double stepX, double b0, double stepY)
+        private void InitAxisValues(Size innerSize, double stepX, double stepY)
         {
-            _majorAxisValues = AxisValues(i => a0 + i * stepX);
-            _minorAxisValues = AxisValues(i => b0 + i * stepY);
+            _majorAxisValues = AxisValues(i => innerSize.Width + i * stepX);
+            _minorAxisValues = AxisValues(i => innerSize.Height + i * stepY);
             _midfigureMajorAxisValues = AxisValues(i => (i + 0.5) * stepX);
         }
 
