@@ -113,12 +113,14 @@ namespace Vignettes
 
         private double RowMinusHalfHeight(int i)
         {
-            return i/_width - (1 + CenterYOffsetPercent/100.0)*_height*0.5;
+            int row = i/_width;
+            return row - (1 + CenterYOffsetPercent/100.0)*_height*0.5;
         }
 
         private double ColumnMinusHalfWidth(int i)
         {
-            return i%_width - (1 + CenterXOffsetPercent/100.0)*_width*0.5;
+            int column = i%_width;
+            return column - (1 + CenterXOffsetPercent/100.0)*_width*0.5;
         }
 
         private void SetupParameters()
