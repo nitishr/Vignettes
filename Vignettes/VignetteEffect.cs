@@ -70,25 +70,25 @@ namespace Vignettes
             }
         }
 
-        private double BandThicknessX
+        private double BandWidthX
         {
             get
             {
                 return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                        Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square
-                           ? BandWidthInPixels
-                           : AxisValue(_width, 1) - InnerSize.Width;
+                           ? new UniformBandWidth().X(this)
+                           : new DiamondBandWidth().X(this);
             }
         }
 
-        private double BandThicknessY
+        private double BandWidthY
         {
             get
             {
                 return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
                        Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square
-                           ? BandWidthInPixels
-                           : InnerSize.Height * (AxisValue(_width, 1) / InnerSize.Width - 1);
+                           ? new UniformBandWidth().Y(this)
+                           : new DiamondBandWidth().Y(this);
             }
         }
 
@@ -201,17 +201,17 @@ namespace Vignettes
 
         private double MidfigureMajorAxisValue(int step)
         {
-            return AxisValue(step + 0.5, 0, BandThicknessX);
+            return AxisValue(step + 0.5, 0, BandWidthX);
         }
 
         private double MinorAxisValue(int step)
         {
-            return AxisValue(step, InnerSize.Height, BandThicknessY);
+            return AxisValue(step, InnerSize.Height, BandWidthY);
         }
 
         private double MajorAxisValue(int step)
         {
-            return AxisValue(step, InnerSize.Width, BandThicknessX);
+            return AxisValue(step, InnerSize.Width, BandWidthX);
         }
 
         private double AxisValue(double step, double length, double bandThickness)
@@ -245,6 +245,38 @@ namespace Vignettes
             public Size Size(VignetteEffect effect)
             {
                 return new Size(effect.AxisValue(effect._width, -1), effect.AxisValue(effect._height, -1));
+            }
+        }
+
+        interface IHasBandWidth
+        {
+            double X(VignetteEffect effect);
+            double Y(VignetteEffect effect);
+        }
+
+        class UniformBandWidth : IHasBandWidth
+        {
+            public double X(VignetteEffect effect)
+            {
+                return effect.BandWidthInPixels;
+            }
+
+            public double Y(VignetteEffect effect)
+            {
+                return effect.BandWidthInPixels;
+            }
+        }
+
+        class DiamondBandWidth : IHasBandWidth
+        {
+            public double X(VignetteEffect effect)
+            {
+                return effect.AxisValue(effect._width, 1) - effect.InnerSize.Width;
+            }
+
+            public double Y(VignetteEffect effect)
+            {
+                return effect.InnerSize.Height * (effect.AxisValue(effect._width, 1) / effect.InnerSize.Width - 1);
             }
         }
     }
