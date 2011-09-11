@@ -129,9 +129,19 @@ namespace Vignettes
 
         private bool IsPixelInStep(int i, int step)
         {
-            return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
-                       ? new NonRectangularSteps().IsPixelInStep(this, i, step)
-                       : new RectangularSteps().IsPixelInStep(this, i, step);
+            switch (Shape)
+            {
+                case VignetteShape.Circle:
+                case VignetteShape.Ellipse:
+                    return new EllipticalSteps().IsPixelInStep(this, i, step);
+                case VignetteShape.Diamond:
+                    return new DiamondSteps().IsPixelInStep(this, i, step);
+                case VignetteShape.Square:
+                case VignetteShape.Rectangle:
+                    return new RectangularSteps().IsPixelInStep(this, i, step);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private double YPrime(int i)
@@ -273,16 +283,31 @@ namespace Vignettes
             }
         }
 
-        class NonRectangularSteps : ISteps
+        abstract class NonRectangularSteps : ISteps
         {
             public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
             {
-                double factor1 = effect.XPrime(pixel)/effect.MajorAxisValue(step);
-                double factor2 = effect.YPrime(pixel)/effect.MinorAxisValue(step);
                 return
-                    (effect.Shape == VignetteShape.Circle || effect.Shape == VignetteShape.Ellipse
-                         ? factor1*factor1 + factor2*factor2 - 1
-                         : factor1 + factor2 - 1) < 0;
+                    Potential(effect, effect.XPrime(pixel)/effect.MajorAxisValue(step),
+                              effect.YPrime(pixel)/effect.MinorAxisValue(step)) < 1;
+            }
+
+            protected abstract double Potential(VignetteEffect effect, double factor1, double factor2);
+        }
+
+        class EllipticalSteps : NonRectangularSteps
+        {
+            protected override double Potential(VignetteEffect effect, double factor1, double factor2)
+            {
+                return factor1*factor1 + factor2*factor2;
+            }
+        }
+
+        class DiamondSteps : NonRectangularSteps
+        {
+            protected override double Potential(VignetteEffect effect, double factor1, double factor2)
+            {
+                return factor1 + factor2;
             }
         }
     }
