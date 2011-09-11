@@ -69,6 +69,21 @@ namespace Vignettes
             get { return Enumerable.Range(0, NumberOfGradationSteps + 1); }
         }
 
+        private Size InnerSize
+        {
+            get
+            {
+                double a0 = AxisValue(_width, -1);
+                double b0 = AxisValue(_height, -1);
+                // For a circle or square, both 'major' and 'minor' axes are identical
+                if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
+                {
+                    a0 = b0 = Math.Min(a0, b0);
+                }
+                return new Size(a0, b0);
+            }
+        }
+
         private Color ColorAt(int i)
         {
             var weight = WeightAt(i);
@@ -143,39 +158,9 @@ namespace Vignettes
             return column - (1 + CenterXOffsetPercent/100.0)*_width*0.5;
         }
 
-        private void SetupParameters()
-        {
-            double a0 = AxisValue(_width, -1);
-            double b0 = AxisValue(_height, -1);
-
-            // For a circle or square, both 'major' and 'minor' axes are identical
-            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
-            {
-                a0 = b0 = Math.Min(a0, b0);
-            }
-
-            InitAxisValues(new Size(a0, b0));
-        }
-
         private double AxisValue(int length, int multiplier)
         {
             return (length * CoveragePercent / 100.0 + multiplier * BandWidthInPixels) * 0.5;
-        }
-
-        private void InitAxisValues(Size innerSize)
-        {
-            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
-                Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
-            {
-                double step = ((double) BandWidthInPixels/NumberOfGradationSteps);
-                InitAxisValues(innerSize, step, step);
-            }
-            else // if (Shape == VignetteShape.Diamond)
-            {
-                double aLast = AxisValue(_width, 1);
-                InitAxisValues(innerSize, (aLast - innerSize.Width)/NumberOfGradationSteps,
-                               (innerSize.Height*(aLast/innerSize.Width - 1))/NumberOfGradationSteps);
-            }
         }
 
         private void InitAxisValues(Size innerSize, double stepX, double stepY)
@@ -204,7 +189,7 @@ namespace Vignettes
 
         public BitmapSource CreateImage()
         {
-            SetupParameters();
+            InitAxisValues();
             int stride = (_width*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*_height];
 
@@ -217,6 +202,22 @@ namespace Vignettes
             }
 
             return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
+        }
+
+        private void InitAxisValues()
+        {
+            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
+                Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
+            {
+                double step = ((double) BandWidthInPixels/NumberOfGradationSteps);
+                InitAxisValues(InnerSize, step, step);
+            }
+            else // if (Shape == VignetteShape.Diamond)
+            {
+                double aLast = AxisValue(_width, 1);
+                InitAxisValues(InnerSize, (aLast - InnerSize.Width)/NumberOfGradationSteps,
+                               (InnerSize.Height*(aLast/InnerSize.Width - 1))/NumberOfGradationSteps);
+            }
         }
 
         public void SetupParameters(List<Color> pixels, int width, int height)
