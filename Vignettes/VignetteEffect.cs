@@ -61,11 +61,6 @@ namespace Vignettes
             get { return OrientationInDegrees * Math.PI / 180.0; }
         }
 
-        private IEnumerable<int> RangeOfGradationSteps
-        {
-            get { return Enumerable.Range(0, NumberOfGradationSteps + 1); }
-        }
-
         private Size InnerSize
         {
             get
@@ -135,7 +130,7 @@ namespace Vignettes
 
         private int StepContaining(int i)
         {
-            return RangeOfGradationSteps.First(step => IsPixelInStep(i, step));
+            return Enumerable.Range(1, NumberOfGradationSteps).First(step => IsPixelInStep(i, step)) - 1;
         }
 
         private bool IsPixelInStep(int i, int step)
