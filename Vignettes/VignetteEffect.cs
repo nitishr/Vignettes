@@ -76,21 +76,23 @@ namespace Vignettes
             get { return (1 + CenterXOffsetPercent / 100.0) * _width * 0.5; }
         }
 
-        private Func<int, int, int, bool> IsPixelInStep
+        private Func<int, int, int, bool> IsPixelInStep()
         {
-            get
-            {
-                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
-                           ? (Func<int, int, int, bool>) IsPixelInStepCircleEllipseDiamond
-                           : IsPixelInStepRectangleSquare;
-            }
+            return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
+                       ? (Func<int, int, int, bool>) IsPixelInStepCircleEllipseDiamond
+                       : IsPixelInStepRectangleSquare;
         }
 
         private Color GetPixModified(int i)
         {
-            return IsPixelInStep(0, Row(i), Column(i))
+            return IsPixelInStep(i, 0)
                        ? _pixOrig[i]
-                       : (IsPixelInStep(NumberOfGradationSteps, Row(i), Column(i)) ? ColorAt(Step(Row(i), Column(i), IsPixelInStep), i) : BorderColor);
+                       : (IsPixelInStep(i, NumberOfGradationSteps) ? ColorAt(Step(Row(i), Column(i), IsPixelInStep()), i) : BorderColor);
+        }
+
+        private bool IsPixelInStep(int i, int step)
+        {
+            return IsPixelInStep()(step, Row(i), Column(i));
         }
 
         private int Column(int i)
