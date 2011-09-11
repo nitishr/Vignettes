@@ -38,9 +38,9 @@ namespace Vignettes
 
         public int NumberOfGradationSteps { private get; set; }
 
-        public int CenterXOffsetPercent { private get; set; } // with respect to half the width of the image.
+        public double CenterXOffsetPercent { private get; set; } // with respect to half the width of the image.
 
-        public int CenterYOffsetPercent { private get; set; } // with respect to half the height of the image.
+        public double CenterYOffsetPercent { private get; set; } // with respect to half the height of the image.
 
         public Color BorderColor { private get; set; } // We consider only R, G, B values here. Alpha value is ignored.
 

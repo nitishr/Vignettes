@@ -153,8 +153,8 @@ namespace Vignettes
                                 CoveragePercent = sliderPercent.Value,
                                 BandWidthInPixels = Convert.ToInt32(sliderBand.Value),
                                 NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value),
-                                CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value),
-                                CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value),
+                                CenterXOffsetPercent = sliderOriginX.Value,
+                                CenterYOffsetPercent = sliderOriginY.Value,
                                 BorderColor = _borderColor,
                                 Shape = _shape
                             };
@@ -297,8 +297,8 @@ namespace Vignettes
                                       CoveragePercent = sliderPercent.Value,
                                       BandWidthInPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
                                       NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
-                                      CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value),
-                                      CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value),
+                                      CenterXOffsetPercent = sliderOriginX.Value,
+                                      CenterYOffsetPercent = sliderOriginY.Value,
                                       BorderColor = _borderColor,
                                       Shape = _shape,
                                   };
