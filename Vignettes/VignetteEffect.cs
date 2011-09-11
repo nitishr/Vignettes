@@ -91,8 +91,18 @@ namespace Vignettes
         private bool IsPixelInStep(int i, int step)
         {
             return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
-                        ? IsPixelInStepCircleEllipseDiamond(step, Row(i), Column(i))
-                        : IsPixelInStepRectangleSquare(step, Row(i), Column(i));
+                        ? IsPixelInStepCircleEllipseDiamond(i, step)
+                        : IsPixelInStepRectangleSquare(i, step);
+        }
+
+        private bool IsPixelInStepRectangleSquare(int i, int step)
+        {
+            return PointInRectAt(step, new Point(Math.Abs(XPrime(Row(i), Column(i))), Math.Abs(YPrime(Row(i), Column(i)))));
+        }
+
+        private bool IsPixelInStepCircleEllipseDiamond(int i, int step)
+        {
+            return Potential(Math.Abs(XPrime(Row(i), Column(i)))/_majorAxisValues[step], Math.Abs(YPrime(Row(i), Column(i)))/_minorAxisValues[step]) < 0;
         }
 
         private int Column(int i)
@@ -183,16 +193,6 @@ namespace Vignettes
             return new List<double>(Enumerable.Range(0, NumberOfGradationSteps + 1).Select(selector));
         }
 
-        private bool IsPixelInStepCircleEllipseDiamond(int step, int el, int k)
-        {
-            return PotentialAt(step, el, k) < 0;
-        }
-
-        private double PotentialAt(int step, int el, int k)
-        {
-            return Potential(Math.Abs(XPrime(el, k))/_majorAxisValues[step], Math.Abs(YPrime(el, k))/_minorAxisValues[step]);
-        }
-
         private double Potential(double factor1, double factor2)
         {
             return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse
@@ -208,11 +208,6 @@ namespace Vignettes
         private double XPrime(int el, int k)
         {
             return (k - Wb2)*CosOrientation + (el - Hb2)*SinOrientation;
-        }
-
-        private bool IsPixelInStepRectangleSquare(int step, int el, int k)
-        {
-            return PointInRectAt(step, new Point(Math.Abs(XPrime(el, k)), Math.Abs(YPrime(el, k))));
         }
 
         private bool PointInRectAt(int step, Point point)
