@@ -84,6 +84,28 @@ namespace Vignettes
             }
         }
 
+        private double BandThicknessX
+        {
+            get
+            {
+                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
+                       Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square
+                           ? BandWidthInPixels
+                           : AxisValue(_width, 1) - InnerSize.Width;
+            }
+        }
+
+        private double BandThicknessY
+        {
+            get
+            {
+                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
+                       Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square
+                           ? BandWidthInPixels
+                           : InnerSize.Height * (AxisValue(_width, 1) / InnerSize.Width - 1);
+            }
+        }
+
         private Color ColorAt(int i)
         {
             var weight = WeightAt(i);
@@ -199,25 +221,11 @@ namespace Vignettes
 
         private void InitAxisValues()
         {
-            if (Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
-                Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square)
-            {
-                InitAxisValues(BandWidthInPixels, BandWidthInPixels);
-            }
-            else // if (Shape == VignetteShape.Diamond)
-            {
-                double aLast = AxisValue(_width, 1);
-                InitAxisValues(aLast - InnerSize.Width, InnerSize.Height*(aLast/InnerSize.Width - 1));
-            }
-        }
-
-        private void InitAxisValues(double bandThicknessX, double bandThicknessY)
-        {
-            double stepX = bandThicknessX/NumberOfGradationSteps;
-            double stepY = (bandThicknessY / NumberOfGradationSteps);
-            _majorAxisValues = AxisValues(i => InnerSize.Width + i * stepX);
-            _minorAxisValues = AxisValues(i => InnerSize.Height + i * stepY);
-            _midfigureMajorAxisValues = AxisValues(i => (i + 0.5) * stepX);
+            double stepX = BandThicknessX/NumberOfGradationSteps;
+            double stepY = BandThicknessY/NumberOfGradationSteps;
+            _majorAxisValues = AxisValues(i => InnerSize.Width + i*stepX);
+            _minorAxisValues = AxisValues(i => InnerSize.Height + i*stepY);
+            _midfigureMajorAxisValues = AxisValues(i => (i + 0.5)*stepX);
         }
 
         public void SetupParameters(List<Color> pixels, int width, int height)
