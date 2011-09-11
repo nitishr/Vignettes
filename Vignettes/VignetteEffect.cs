@@ -76,23 +76,23 @@ namespace Vignettes
             get { return (1 + CenterXOffsetPercent / 100.0) * _width * 0.5; }
         }
 
-        private Func<int, int, int, bool> IsPixelInStep()
-        {
-            return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
-                       ? (Func<int, int, int, bool>) IsPixelInStepCircleEllipseDiamond
-                       : IsPixelInStepRectangleSquare;
-        }
-
         private Color GetPixModified(int i)
         {
             return IsPixelInStep(i, 0)
                        ? _pixOrig[i]
-                       : (IsPixelInStep(i, NumberOfGradationSteps) ? ColorAt(Step(Row(i), Column(i), IsPixelInStep()), i) : BorderColor);
+                       : (IsPixelInStep(i, NumberOfGradationSteps) ? ColorAt(StepContaining(i), i) : BorderColor);
+        }
+
+        private int StepContaining(int i)
+        {
+            return Enumerable.Range(1, NumberOfGradationSteps).First(step => IsPixelInStep(i, step)) - 1;
         }
 
         private bool IsPixelInStep(int i, int step)
         {
-            return IsPixelInStep()(step, Row(i), Column(i));
+            return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse || Shape == VignetteShape.Diamond
+                        ? IsPixelInStepCircleEllipseDiamond(step, Row(i), Column(i))
+                        : IsPixelInStepRectangleSquare(step, Row(i), Column(i));
         }
 
         private int Column(int i)
@@ -208,11 +208,6 @@ namespace Vignettes
         private double XPrime(int el, int k)
         {
             return (k - Wb2)*CosOrientation + (el - Hb2)*SinOrientation;
-        }
-
-        private int Step(int el, int k, Func<int, int, int, bool> isPixelInStep)
-        {
-            return Enumerable.Range(1, NumberOfGradationSteps).First(step => isPixelInStep(step, el, k)) - 1;
         }
 
         private bool IsPixelInStepRectangleSquare(int step, int el, int k)
