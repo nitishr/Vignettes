@@ -73,9 +73,28 @@ namespace Vignettes
 
         private Color ColorAt(int i)
         {
-            var weight = (float) Weight(StepContaining(i));
+            var weight = WeightAt(i);
             return Color.Add(Color.Multiply(_pixels[i], weight),
                              Color.Multiply(BorderColor, 1 - weight));
+        }
+
+        // The weight functions given below form the crux of the code. It was a struggle after which 
+        // I got these weighting functions. 
+        // Initially, I tried linear interpolation, and the effect was not so pleasing. The 
+        // linear interpolation function is C0-continuous at the boundary, and therefore shows 
+        // a distinct border.
+        // Later, upon searching, I found a paper by Burt and Adelson on Mosaics. Though I did 
+        // not use the formulas given there, one of the initial figures in that paper set me thinking
+        // on using the cosine function. This function is C1-continuous at the boundary, and therefore
+        // the effect is pleasing on the eye. Yields quite a nice blending effect. The cosine 
+        // functions are incorporated into the wei1 and wei2 definitions below.
+        //
+        // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
+        //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
+        //  October 1983, Pages 217-236].
+        private float WeightAt(int i)
+        {
+            return (float) (1 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[StepContaining(i)]))/2;
         }
 
         private int StepContaining(int i)
@@ -134,25 +153,6 @@ namespace Vignettes
             }
 
             InitAxisValues(a0, b0);
-        }
-
-        // The weight functions given below form the crux of the code. It was a struggle after which 
-        // I got these weighting functions. 
-        // Initially, I tried linear interpolation, and the effect was not so pleasing. The 
-        // linear interpolation function is C0-continuous at the boundary, and therefore shows 
-        // a distinct border.
-        // Later, upon searching, I found a paper by Burt and Adelson on Mosaics. Though I did 
-        // not use the formulas given there, one of the initial figures in that paper set me thinking
-        // on using the cosine function. This function is C1-continuous at the boundary, and therefore
-        // the effect is pleasing on the eye. Yields quite a nice blending effect. The cosine 
-        // functions are incorporated into the wei1 and wei2 definitions below.
-        //
-        // Reference: Burt and Adelson [Peter J Burt and Edward H Adelson, A Multiresolution Spline
-        //  With Application to Image Mosaics, ACM Transactions on Graphics, Vol 2. No. 4,
-        //  October 1983, Pages 217-236].
-        private double Weight(int step)
-        {
-            return 0.5*(1.0 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[step]));
         }
 
         private double AxisValue(int length, int multiplier)
