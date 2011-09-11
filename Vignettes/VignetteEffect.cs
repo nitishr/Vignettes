@@ -27,9 +27,6 @@ namespace Vignettes
         public const int BitsPerPixel = 24;
 
         private List<Color> _pixels;
-        private List<double> _majorAxisValues;
-        private List<double> _minorAxisValues;
-        private List<double> _midfigureMajorAxisValues;
         private int _width;
         private int _height;
 
@@ -132,7 +129,7 @@ namespace Vignettes
             return
                 (float)
                 (IsPixelInStep(i, NumberOfGradationSteps)
-                     ? (1 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[StepContaining(i)]))/2
+                     ? (1 + Math.Cos(Math.PI/BandWidthInPixels*MidfigureMajorAxisValue(StepContaining(i))))/2
                      : IsPixelInStep(i, 0) ? 1 : 0);
         }
 
@@ -155,7 +152,7 @@ namespace Vignettes
 
         private bool IsPixelInStepCircleEllipseDiamond(int i, int step)
         {
-            return Potential(XPrime(i)/_majorAxisValues[step], YPrime(i)/_minorAxisValues[step]) < 0;
+            return Potential(XPrime(i)/MajorAxisValue(step), YPrime(i)/MinorAxisValue(step)) < 0;
         }
 
         private double YPrime(int i)
@@ -185,11 +182,6 @@ namespace Vignettes
             return (length * CoveragePercent / 100.0 + multiplier * BandWidthInPixels) * 0.5;
         }
 
-        private List<double> AxisValues(Func<int, double> selector)
-        {
-            return new List<double>(RangeOfGradationSteps.Select(selector));
-        }
-
         private double Potential(double factor1, double factor2)
         {
             return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse
@@ -199,12 +191,11 @@ namespace Vignettes
 
         private bool PointInRectAt(int step, Point point)
         {
-            return new Rect(0, 0, _majorAxisValues[step], _minorAxisValues[step]).Contains(point);
+            return new Rect(0, 0, MajorAxisValue(step), MinorAxisValue(step)).Contains(point);
         }
 
         public BitmapSource CreateImage()
         {
-            InitAxisValues();
             int stride = (_width*BitsPerPixel + 7)/8;
             var pixelsToWrite = new byte[stride*_height];
 
@@ -219,11 +210,19 @@ namespace Vignettes
             return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
 
-        private void InitAxisValues()
+        private double MidfigureMajorAxisValue(int step)
         {
-            _majorAxisValues = AxisValues(step => AxisValue(step, InnerSize.Width, BandThicknessX));
-            _minorAxisValues = AxisValues(step => AxisValue(step, InnerSize.Height, BandThicknessY));
-            _midfigureMajorAxisValues = AxisValues(step => AxisValue(step + 0.5, 0, BandThicknessX));
+            return AxisValue(step + 0.5, 0, BandThicknessX);
+        }
+
+        private double MinorAxisValue(int step)
+        {
+            return AxisValue(step, InnerSize.Height, BandThicknessY);
+        }
+
+        private double MajorAxisValue(int step)
+        {
+            return AxisValue(step, InnerSize.Width, BandThicknessX);
         }
 
         private double AxisValue(double step, double length, double bandThickness)
