@@ -64,6 +64,11 @@ namespace Vignettes
             get { return OrientationInDegrees * Math.PI / 180.0; }
         }
 
+        private IEnumerable<int> RangeOfGradationSteps
+        {
+            get { return Enumerable.Range(0, NumberOfGradationSteps + 1); }
+        }
+
         private Color ColorAt(int i)
         {
             var weight = WeightAt(i);
@@ -87,14 +92,16 @@ namespace Vignettes
         //  October 1983, Pages 217-236].
         private float WeightAt(int i)
         {
-            return (float) (IsPixelInStep(i, NumberOfGradationSteps)
-                                ? (1 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[StepContaining(i)]))/ 2
-                                : IsPixelInStep(i, 0) ? 1 : 0);
+            return
+                (float)
+                (IsPixelInStep(i, NumberOfGradationSteps)
+                     ? (1 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[StepContaining(i)]))/2
+                     : IsPixelInStep(i, 0) ? 1 : 0);
         }
 
         private int StepContaining(int i)
         {
-            return Enumerable.Range(1, NumberOfGradationSteps).First(step => IsPixelInStep(i, step)) - 1;
+            return RangeOfGradationSteps.First(step => IsPixelInStep(i, step));
         }
 
         private bool IsPixelInStep(int i, int step)
@@ -180,7 +187,7 @@ namespace Vignettes
 
         private List<double> AxisValues(Func<int, double> selector)
         {
-            return new List<double>(Enumerable.Range(0, NumberOfGradationSteps + 1).Select(selector));
+            return new List<double>(RangeOfGradationSteps.Select(selector));
         }
 
         private double Potential(double factor1, double factor2)
