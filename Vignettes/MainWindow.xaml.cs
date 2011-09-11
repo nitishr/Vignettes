@@ -17,6 +17,15 @@ using Microsoft.Win32;
 
 namespace Vignettes
 {
+    public enum VignetteShape
+    {
+        Circle,
+        Ellipse,
+        Diamond,
+        Square,
+        Rectangle
+    };
+
     public partial class MainWindow
     {
         private const int ViewportWidthHeight = 600;
@@ -156,7 +165,7 @@ namespace Vignettes
                                 CenterXOffsetPercent = sliderOriginX.Value,
                                 CenterYOffsetPercent = sliderOriginY.Value,
                                 BorderColor = _borderColor,
-                                Shape = _shape
+                                Figure = FigureFor(_shape)
                             };
             _vignette.SetupParameters(_scaledPixels, _scaledWidth, _scaledHeight);
             ApplyEffect();
@@ -191,7 +200,7 @@ namespace Vignettes
             }
 
             if (_vignette == null) return;
-            _vignette.Shape = _shape;
+            _vignette.Figure = FigureFor(_shape);
             ApplyEffect();
         }
 
@@ -300,7 +309,7 @@ namespace Vignettes
                                       CenterXOffsetPercent = sliderOriginX.Value,
                                       CenterYOffsetPercent = sliderOriginY.Value,
                                       BorderColor = _borderColor,
-                                      Shape = _shape,
+                                      Figure = FigureFor(_shape),
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
@@ -351,6 +360,25 @@ namespace Vignettes
                     return new JpegBitmapEncoder();
                 default:
                     return new BmpBitmapEncoder();
+            }
+        }
+
+        public static VignetteEffect.VignetteFigure FigureFor(VignetteShape shape)
+        {
+            switch (shape)
+            {
+                case VignetteShape.Circle:
+                    return new VignetteEffect.Circle();
+                case VignetteShape.Ellipse:
+                    return new VignetteEffect.Ellipse();
+                case VignetteShape.Diamond:
+                    return new VignetteEffect.Diamond();
+                case VignetteShape.Square:
+                    return new VignetteEffect.Square();
+                case VignetteShape.Rectangle:
+                    return new VignetteEffect.Rectangle();
+                default:
+                    throw new ArgumentOutOfRangeException("_shape");
             }
         }
     }

@@ -12,16 +12,7 @@ using System.Windows.Media.Imaging;
 
 namespace Vignettes
 {
-    enum VignetteShape
-    {
-        Circle, 
-        Ellipse,
-        Diamond,
-        Square,
-        Rectangle
-    };
-
-    class VignetteEffect
+    public class VignetteEffect
     {
         private const int Dpi = 72;
         public const int BitsPerPixel = 24;
@@ -44,31 +35,7 @@ namespace Vignettes
 
         public Color BorderColor { private get; set; } // We consider only R, G, B values here. Alpha value is ignored.
 
-        public VignetteShape Shape
-        {
-            set { Figure = FigureFor(value); }
-        }
-
-        private static VignetteFigure FigureFor(VignetteShape shape)
-        {
-            switch (shape)
-            {
-                case VignetteShape.Circle:
-                    return new Circle();
-                case VignetteShape.Ellipse:
-                    return new Ellipse();
-                case VignetteShape.Diamond:
-                    return new Diamond();
-                case VignetteShape.Square:
-                    return new Square();
-                case VignetteShape.Rectangle:
-                    return new Rectangle();
-                default:
-                    throw new ArgumentOutOfRangeException("_shape");
-            }
-        }
-
-        private VignetteFigure Figure { get; set; }
+        public VignetteFigure Figure { private get; set; }
 
         private double SinOrientation
         {
@@ -210,7 +177,7 @@ namespace Vignettes
             _height = height;
         }
 
-        interface IHasSize
+        public interface IHasSize
         {
             Size Size(VignetteEffect effect);
         }
@@ -232,7 +199,7 @@ namespace Vignettes
             }
         }
 
-        interface IHasBandWidth
+        public interface IHasBandWidth
         {
             double X(VignetteEffect effect);
             double Y(VignetteEffect effect);
@@ -264,7 +231,7 @@ namespace Vignettes
             }
         }
 
-        interface ISteps
+        public interface ISteps
         {
             bool IsPixelInStep(VignetteEffect effect, int pixel, int step);
         }
@@ -307,7 +274,7 @@ namespace Vignettes
             }
         }
 
-        class VignetteFigure : IHasSize, IHasBandWidth, ISteps
+        public class VignetteFigure : IHasSize, IHasBandWidth, ISteps
         {
             private readonly IHasSize _hasSize;
             private readonly IHasBandWidth _hasBandWidth;
@@ -341,35 +308,35 @@ namespace Vignettes
             }
         }
 
-        class Circle : VignetteFigure
+        public class Circle : VignetteFigure
         {
             public Circle() : base(new IdenticalAxes(), new UniformBandWidth(), new EllipticalSteps())
             {
             }
         }
 
-        class Ellipse : VignetteFigure
+        public class Ellipse : VignetteFigure
         {
             public Ellipse() : base(new DifferentAxes(), new UniformBandWidth(), new EllipticalSteps())
             {
             }
         }
 
-        class Diamond : VignetteFigure
+        public class Diamond : VignetteFigure
         {
             public Diamond() : base(new DifferentAxes(), new DiamondBandWidth(), new DiamondSteps())
             {
             }
         }
 
-        class Square : VignetteFigure
+        public class Square : VignetteFigure
         {
             public Square() : base(new IdenticalAxes(), new UniformBandWidth(), new RectangularSteps())
             {
             }
         }
 
-        class Rectangle : VignetteFigure
+        public class Rectangle : VignetteFigure
         {
             public Rectangle() : base(new DifferentAxes(), new UniformBandWidth(), new RectangularSteps())
             {
