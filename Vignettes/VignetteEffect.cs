@@ -63,16 +63,10 @@ namespace Vignettes
 
         private Size InnerSize
         {
-            get
-            {
-                double a0 = AxisValue(_width, -1);
-                double b0 = AxisValue(_height, -1);
-                // For a circle or square, both 'major' and 'minor' axes are identical
-                if (Shape == VignetteShape.Circle || Shape == VignetteShape.Square)
-                {
-                    a0 = b0 = Math.Min(a0, b0);
-                }
-                return new Size(a0, b0);
+            get {
+                return Shape == VignetteShape.Circle || Shape == VignetteShape.Square
+                           ? new IdenticalAxes().Size(this)
+                           : new DifferentAxes().Size(this);
             }
         }
 
@@ -230,6 +224,28 @@ namespace Vignettes
             _pixels = pixels;
             _width = width;
             _height = height;
+        }
+
+        interface IHasSize
+        {
+            Size Size(VignetteEffect effect);
+        }
+
+        class IdenticalAxes : IHasSize
+        {
+            public Size Size(VignetteEffect effect)
+            {
+                double dimension = Math.Min(effect.AxisValue(effect._width, -1), effect.AxisValue(effect._height, -1));
+                return new Size(dimension, dimension);
+            }
+        }
+
+        class DifferentAxes : IHasSize
+        {
+            public Size Size(VignetteEffect effect)
+            {
+                return new Size(effect.AxisValue(effect._width, -1), effect.AxisValue(effect._height, -1));
+            }
         }
     }
 }
