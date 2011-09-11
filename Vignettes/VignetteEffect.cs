@@ -66,16 +66,6 @@ namespace Vignettes
             get { return OrientationInDegrees * Math.PI / 180.0; }
         }
 
-        private double Hb2
-        {
-            get { return (1 + CenterYOffsetPercent / 100.0) * _height * 0.5; }
-        }
-
-        private double Wb2
-        {
-            get { return (1 + CenterXOffsetPercent / 100.0) * _width * 0.5; }
-        }
-
         private Color GetPixModified(int i)
         {
             return IsPixelInStep(i, 0)
@@ -107,22 +97,22 @@ namespace Vignettes
 
         private double YPrime(int i)
         {
-            return Math.Abs(-(Column(i) - Wb2)*SinOrientation + (Row(i) - Hb2)*CosOrientation);
+            return Math.Abs(RowMinusHalfHeight(i)*CosOrientation - ColumnMinusHalfWidth(i)*SinOrientation);
         }
 
         private double XPrime(int i)
         {
-            return Math.Abs((Column(i) - Wb2)*CosOrientation + (Row(i) - Hb2)*SinOrientation);
+            return Math.Abs(RowMinusHalfHeight(i)*SinOrientation + ColumnMinusHalfWidth(i)*CosOrientation);
         }
 
-        private int Column(int i)
+        private double RowMinusHalfHeight(int i)
         {
-            return i%_width;
+            return i/_width - (1 + CenterYOffsetPercent/100.0)*_height*0.5;
         }
 
-        private int Row(int i)
+        private double ColumnMinusHalfWidth(int i)
         {
-            return i/_width;
+            return i%_width - (1 + CenterXOffsetPercent/100.0)*_width*0.5;
         }
 
         private void SetupParameters()
