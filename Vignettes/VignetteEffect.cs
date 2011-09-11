@@ -44,7 +44,31 @@ namespace Vignettes
 
         public Color BorderColor { private get; set; } // We consider only R, G, B values here. Alpha value is ignored.
 
-        public VignetteShape Shape { private get; set; }
+        public VignetteShape Shape
+        {
+            set { Figure = FigureFor(value); }
+        }
+
+        private static VignetteFigure FigureFor(VignetteShape shape)
+        {
+            switch (shape)
+            {
+                case VignetteShape.Circle:
+                    return new Circle();
+                case VignetteShape.Ellipse:
+                    return new Ellipse();
+                case VignetteShape.Diamond:
+                    return new Diamond();
+                case VignetteShape.Square:
+                    return new Square();
+                case VignetteShape.Rectangle:
+                    return new Rectangle();
+                default:
+                    throw new ArgumentOutOfRangeException("_shape");
+            }
+        }
+
+        private VignetteFigure Figure { get; set; }
 
         private double SinOrientation
         {
@@ -63,33 +87,17 @@ namespace Vignettes
 
         private Size InnerSize
         {
-            get {
-                return Shape == VignetteShape.Circle || Shape == VignetteShape.Square
-                           ? new IdenticalAxes().Size(this)
-                           : new DifferentAxes().Size(this);
-            }
+            get { return Figure.Size(this); }
         }
 
         private double BandWidthX
         {
-            get
-            {
-                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
-                       Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square
-                           ? new UniformBandWidth().X(this)
-                           : new DiamondBandWidth().X(this);
-            }
+            get { return Figure.X(this); }
         }
 
         private double BandWidthY
         {
-            get
-            {
-                return Shape == VignetteShape.Circle || Shape == VignetteShape.Ellipse ||
-                       Shape == VignetteShape.Rectangle || Shape == VignetteShape.Square
-                           ? new UniformBandWidth().Y(this)
-                           : new DiamondBandWidth().Y(this);
-            }
+            get { return Figure.Y(this); }
         }
 
         private Color ColorAt(int i)
@@ -129,19 +137,7 @@ namespace Vignettes
 
         private bool IsPixelInStep(int i, int step)
         {
-            switch (Shape)
-            {
-                case VignetteShape.Circle:
-                case VignetteShape.Ellipse:
-                    return new EllipticalSteps().IsPixelInStep(this, i, step);
-                case VignetteShape.Diamond:
-                    return new DiamondSteps().IsPixelInStep(this, i, step);
-                case VignetteShape.Square:
-                case VignetteShape.Rectangle:
-                    return new RectangularSteps().IsPixelInStep(this, i, step);
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            return Figure.IsPixelInStep(this, i, step);
         }
 
         private double YPrime(int i)
@@ -308,6 +304,75 @@ namespace Vignettes
             protected override double Potential(VignetteEffect effect, double factor1, double factor2)
             {
                 return factor1 + factor2;
+            }
+        }
+
+        class VignetteFigure : IHasSize, IHasBandWidth, ISteps
+        {
+            private readonly IHasSize _hasSize;
+            private readonly IHasBandWidth _hasBandWidth;
+            private readonly ISteps _steps;
+
+            protected VignetteFigure(IHasSize hasSize, IHasBandWidth hasBandWidth, ISteps steps)
+            {
+                _hasSize = hasSize;
+                _hasBandWidth = hasBandWidth;
+                _steps = steps;
+            }
+
+            public Size Size(VignetteEffect effect)
+            {
+                return _hasSize.Size(effect);
+            }
+
+            public double X(VignetteEffect effect)
+            {
+                return _hasBandWidth.X(effect);
+            }
+
+            public double Y(VignetteEffect effect)
+            {
+                return _hasBandWidth.Y(effect);
+            }
+
+            public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
+            {
+                return _steps.IsPixelInStep(effect, pixel, step);
+            }
+        }
+
+        class Circle : VignetteFigure
+        {
+            public Circle() : base(new IdenticalAxes(), new UniformBandWidth(), new EllipticalSteps())
+            {
+            }
+        }
+
+        class Ellipse : VignetteFigure
+        {
+            public Ellipse() : base(new DifferentAxes(), new UniformBandWidth(), new EllipticalSteps())
+            {
+            }
+        }
+
+        class Diamond : VignetteFigure
+        {
+            public Diamond() : base(new DifferentAxes(), new DiamondBandWidth(), new DiamondSteps())
+            {
+            }
+        }
+
+        class Square : VignetteFigure
+        {
+            public Square() : base(new IdenticalAxes(), new UniformBandWidth(), new RectangularSteps())
+            {
+            }
+        }
+
+        class Rectangle : VignetteFigure
+        {
+            public Rectangle() : base(new DifferentAxes(), new UniformBandWidth(), new RectangularSteps())
+            {
             }
         }
     }
