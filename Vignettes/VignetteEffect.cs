@@ -64,13 +64,6 @@ namespace Vignettes
             get { return OrientationInDegrees * Math.PI / 180.0; }
         }
 
-        private Color GetPixModified(int i)
-        {
-            return IsPixelInStep(i, 0)
-                       ? _pixels[i]
-                       : (IsPixelInStep(i, NumberOfGradationSteps) ? ColorAt(i) : BorderColor);
-        }
-
         private Color ColorAt(int i)
         {
             var weight = WeightAt(i);
@@ -94,7 +87,9 @@ namespace Vignettes
         //  October 1983, Pages 217-236].
         private float WeightAt(int i)
         {
-            return (float) (1 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[StepContaining(i)]))/2;
+            return (float) (IsPixelInStep(i, NumberOfGradationSteps)
+                                ? (1 + Math.Cos(Math.PI/BandWidthInPixels*_midfigureMajorAxisValues[StepContaining(i)]))/ 2
+                                : IsPixelInStep(i, 0) ? 1 : 0);
         }
 
         private int StepContaining(int i)
@@ -208,7 +203,7 @@ namespace Vignettes
 
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
-                Color color = GetPixModified(i/3);
+                Color color = ColorAt(i/3);
                 pixelsToWrite[i] = color.R;
                 pixelsToWrite[i + 1] = color.G;
                 pixelsToWrite[i + 2] = color.B;
