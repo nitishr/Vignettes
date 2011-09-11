@@ -70,8 +70,7 @@ namespace Vignettes
         private Color ColorAt(int i)
         {
             var weight = WeightAt(i);
-            return Color.Add(Color.Multiply(_pixels[i], weight),
-                             Color.Multiply(BorderColor, 1 - weight));
+            return Color.Add(Color.Multiply(_pixels[i], weight), Color.Multiply(BorderColor, 1 - weight));
         }
 
         // The weight functions given below form the crux of the code. It was a struggle after which 
@@ -248,29 +247,32 @@ namespace Vignettes
 
         abstract class NonRectangularSteps : ISteps
         {
+            private readonly double _power;
+
+            protected NonRectangularSteps(double power)
+            {
+                _power = power;
+            }
+
             public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
             {
                 return
-                    Potential(effect, effect.XPrime(pixel)/effect.MajorAxisValue(step),
-                              effect.YPrime(pixel)/effect.MinorAxisValue(step)) < 1;
+                    Math.Pow(effect.XPrime(pixel)/effect.MajorAxisValue(step), _power) +
+                    Math.Pow(effect.YPrime(pixel)/effect.MinorAxisValue(step), _power) < 1;
             }
-
-            protected abstract double Potential(VignetteEffect effect, double factor1, double factor2);
         }
 
         class EllipticalSteps : NonRectangularSteps
         {
-            protected override double Potential(VignetteEffect effect, double factor1, double factor2)
+            public EllipticalSteps() : base(2)
             {
-                return factor1*factor1 + factor2*factor2;
             }
         }
 
         class DiamondSteps : NonRectangularSteps
         {
-            protected override double Potential(VignetteEffect effect, double factor1, double factor2)
+            public DiamondSteps() : base(1)
             {
-                return factor1 + factor2;
             }
         }
 
