@@ -52,6 +52,26 @@ namespace Vignettes
             get { return OrientationInDegrees * Math.PI / 180.0; }
         }
 
+        private double CoverageRatio
+        {
+            get { return CoveragePercent / 100.0; }
+        }
+
+        private double InnerWidth
+        {
+            get { return (_width*CoverageRatio - BandWidthInPixels)/2; }
+        }
+
+        private double InnerHeight
+        {
+            get { return (_height*CoverageRatio - BandWidthInPixels)/2; }
+        }
+
+        private double OuterWidth
+        {
+            get { return (_width*CoverageRatio + BandWidthInPixels)/2; }
+        }
+
         private Size InnerSize
         {
             get { return Figure.Size(this); }
@@ -92,7 +112,7 @@ namespace Vignettes
             return
                 (float)
                 (IsPixelInStep(i, NumberOfGradationSteps)
-                     ? (1 + Math.Cos(Math.PI/BandWidthInPixels*MidfigureMajorAxisValue(StepContaining(i))))/2
+                     ? (1 + Math.Cos(Math.PI/BandWidthInPixels*Offset(StepContaining(i) + 0.5, 0, BandWidthX)))/2
                      : IsPixelInStep(i, 0) ? 1 : 0);
         }
 
@@ -128,11 +148,6 @@ namespace Vignettes
             return column - (1 + CenterXOffsetPercent/100.0)*_width*0.5;
         }
 
-        private double AxisValue(int length, int multiplier)
-        {
-            return (length * CoveragePercent / 100.0 + multiplier * BandWidthInPixels) * 0.5;
-        }
-
         public BitmapSource CreateImage()
         {
             int stride = (_width*BitsPerPixel + 7)/8;
@@ -149,24 +164,19 @@ namespace Vignettes
             return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
 
-        private double MidfigureMajorAxisValue(int step)
+        private double YOffsetOf(int step)
         {
-            return AxisValue(step + 0.5, 0, BandWidthX);
+            return Offset(step, InnerSize.Height, BandWidthY);
         }
 
-        private double MinorAxisValue(int step)
+        private double XOffsetOf(int step)
         {
-            return AxisValue(step, InnerSize.Height, BandWidthY);
+            return Offset(step, InnerSize.Width, BandWidthX);
         }
 
-        private double MajorAxisValue(int step)
+        private double Offset(double step, double length, double bandWidth)
         {
-            return AxisValue(step, InnerSize.Width, BandWidthX);
-        }
-
-        private double AxisValue(double step, double length, double bandThickness)
-        {
-            return length + step*(bandThickness/NumberOfGradationSteps);
+            return step*(bandWidth/NumberOfGradationSteps) + length;
         }
 
         public void SetupParameters(List<Color> pixels, int width, int height)
@@ -185,7 +195,7 @@ namespace Vignettes
         {
             public Size Size(VignetteEffect effect)
             {
-                double dimension = Math.Min(effect.AxisValue(effect._width, -1), effect.AxisValue(effect._height, -1));
+                double dimension = Math.Min(effect.InnerWidth, effect.InnerHeight);
                 return new Size(dimension, dimension);
             }
         }
@@ -194,7 +204,7 @@ namespace Vignettes
         {
             public Size Size(VignetteEffect effect)
             {
-                return new Size(effect.AxisValue(effect._width, -1), effect.AxisValue(effect._height, -1));
+                return new Size(effect.InnerWidth, effect.InnerHeight);
             }
         }
 
@@ -221,12 +231,12 @@ namespace Vignettes
         {
             public double BandWidthX(VignetteEffect effect)
             {
-                return effect.AxisValue(effect._width, 1) - effect.InnerSize.Width;
+                return effect.OuterWidth - effect.InnerSize.Width;
             }
 
             public double BandWidthY(VignetteEffect effect)
             {
-                return effect.InnerSize.Height * (effect.AxisValue(effect._width, 1) / effect.InnerSize.Width - 1);
+                return effect.InnerSize.Height * (effect.OuterWidth / effect.InnerSize.Width - 1);
             }
         }
 
@@ -240,7 +250,7 @@ namespace Vignettes
             public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
             {
                 return
-                    new Rect(0, 0, effect.MajorAxisValue(step), effect.MinorAxisValue(step)).Contains(
+                    new Rect(0, 0, effect.XOffsetOf(step), effect.YOffsetOf(step)).Contains(
                         new Point(effect.XPrime(pixel), effect.YPrime(pixel)));
             }
         }
@@ -257,8 +267,8 @@ namespace Vignettes
             public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
             {
                 return
-                    Math.Pow(effect.XPrime(pixel)/effect.MajorAxisValue(step), _power) +
-                    Math.Pow(effect.YPrime(pixel)/effect.MinorAxisValue(step), _power) < 1;
+                    Math.Pow(effect.XPrime(pixel)/effect.XOffsetOf(step), _power) +
+                    Math.Pow(effect.YPrime(pixel)/effect.YOffsetOf(step), _power) < 1;
             }
         }
 
