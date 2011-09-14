@@ -25,7 +25,7 @@ namespace Vignettes
 
         public double CoveragePercent { private get; set; }
 
-        public int BandWidthInPixels { private get; set; }
+        public int BandWidthInPixels { get; set; }
 
         public int NumberOfGradationSteps { private get; set; }
 
@@ -36,6 +36,26 @@ namespace Vignettes
         public Color BorderColor { private get; set; } // We consider only R, G, B values here. Alpha value is ignored.
 
         public VignetteFigure Figure { private get; set; }
+
+        public double InnerWidth
+        {
+            get { return (_width * CoverageRatio - BandWidthInPixels) / 2; }
+        }
+
+        public double InnerHeight
+        {
+            get { return (_height * CoverageRatio - BandWidthInPixels) / 2; }
+        }
+
+        public double OuterWidth
+        {
+            get { return (_width * CoverageRatio + BandWidthInPixels) / 2; }
+        }
+
+        public Size InnerSize
+        {
+            get { return Figure.Size(this); }
+        }
 
         private double SinOrientation
         {
@@ -55,26 +75,6 @@ namespace Vignettes
         private double CoverageRatio
         {
             get { return CoveragePercent / 100.0; }
-        }
-
-        private double InnerWidth
-        {
-            get { return (_width*CoverageRatio - BandWidthInPixels)/2; }
-        }
-
-        private double InnerHeight
-        {
-            get { return (_height*CoverageRatio - BandWidthInPixels)/2; }
-        }
-
-        private double OuterWidth
-        {
-            get { return (_width*CoverageRatio + BandWidthInPixels)/2; }
-        }
-
-        private Size InnerSize
-        {
-            get { return Figure.Size(this); }
         }
 
         private double BandWidthX
@@ -126,12 +126,12 @@ namespace Vignettes
             return Figure.IsPixelInStep(this, i, step);
         }
 
-        private double YPrime(int i)
+        public double YPrime(int i)
         {
             return Math.Abs(RowMinusHalfHeight(i)*CosOrientation - ColumnMinusHalfWidth(i)*SinOrientation);
         }
 
-        private double XPrime(int i)
+        public double XPrime(int i)
         {
             return Math.Abs(RowMinusHalfHeight(i)*SinOrientation + ColumnMinusHalfWidth(i)*CosOrientation);
         }
@@ -164,12 +164,12 @@ namespace Vignettes
             return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
 
-        private double YOffsetOf(int step)
+        public double YOffsetOf(int step)
         {
             return Offset(step, InnerSize.Height, BandWidthY);
         }
 
-        private double XOffsetOf(int step)
+        public double XOffsetOf(int step)
         {
             return Offset(step, InnerSize.Width, BandWidthX);
         }
@@ -186,173 +186,173 @@ namespace Vignettes
             _height = height;
         }
 
-        public interface IHasSize
+    }
+    public interface IHasSize
+    {
+        Size Size(VignetteEffect effect);
+    }
+
+    class IdenticalAxes : IHasSize
+    {
+        public Size Size(VignetteEffect effect)
         {
-            Size Size(VignetteEffect effect);
+            double dimension = Math.Min(effect.InnerWidth, effect.InnerHeight);
+            return new Size(dimension, dimension);
+        }
+    }
+
+    class DifferentAxes : IHasSize
+    {
+        public Size Size(VignetteEffect effect)
+        {
+            return new Size(effect.InnerWidth, effect.InnerHeight);
+        }
+    }
+
+    public interface IHasBandWidth
+    {
+        double BandWidthX(VignetteEffect effect);
+        double BandWidthY(VignetteEffect effect);
+    }
+
+    class UniformBandWidth : IHasBandWidth
+    {
+        public double BandWidthX(VignetteEffect effect)
+        {
+            return effect.BandWidthInPixels;
         }
 
-        class IdenticalAxes : IHasSize
+        public double BandWidthY(VignetteEffect effect)
         {
-            public Size Size(VignetteEffect effect)
-            {
-                double dimension = Math.Min(effect.InnerWidth, effect.InnerHeight);
-                return new Size(dimension, dimension);
-            }
+            return effect.BandWidthInPixels;
+        }
+    }
+
+    class DiamondBandWidth : IHasBandWidth
+    {
+        public double BandWidthX(VignetteEffect effect)
+        {
+            return effect.OuterWidth - effect.InnerSize.Width;
         }
 
-        class DifferentAxes : IHasSize
+        public double BandWidthY(VignetteEffect effect)
         {
-            public Size Size(VignetteEffect effect)
-            {
-                return new Size(effect.InnerWidth, effect.InnerHeight);
-            }
+            return effect.InnerSize.Height * (effect.OuterWidth / effect.InnerSize.Width - 1);
+        }
+    }
+
+    public interface IHasSteps
+    {
+        bool IsPixelInStep(VignetteEffect effect, int pixel, int step);
+    }
+
+    class RectangularSteps : IHasSteps
+    {
+        public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
+        {
+            return
+                new Rect(0, 0, effect.XOffsetOf(step), effect.YOffsetOf(step)).Contains(
+                    new Point(effect.XPrime(pixel), effect.YPrime(pixel)));
+        }
+    }
+
+    abstract class NonRectangularSteps : IHasSteps
+    {
+        private readonly double _power;
+
+        protected NonRectangularSteps(double power)
+        {
+            _power = power;
         }
 
-        public interface IHasBandWidth
+        public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
         {
-            double BandWidthX(VignetteEffect effect);
-            double BandWidthY(VignetteEffect effect);
+            return
+                Math.Pow(effect.XPrime(pixel) / effect.XOffsetOf(step), _power) +
+                Math.Pow(effect.YPrime(pixel) / effect.YOffsetOf(step), _power) < 1;
+        }
+    }
+
+    class EllipticalSteps : NonRectangularSteps
+    {
+        public EllipticalSteps() : base(2)
+        {
+        }
+    }
+
+    class DiamondSteps : NonRectangularSteps
+    {
+        public DiamondSteps() : base(1)
+        {
+        }
+    }
+
+    public class VignetteFigure : IHasSize, IHasBandWidth, IHasSteps
+    {
+        private readonly IHasSize _hasSize;
+        private readonly IHasBandWidth _hasBandWidth;
+        private readonly IHasSteps _hasSteps;
+
+        protected VignetteFigure(IHasSize hasSize, IHasBandWidth hasBandWidth, IHasSteps hasSteps)
+        {
+            _hasSize = hasSize;
+            _hasBandWidth = hasBandWidth;
+            _hasSteps = hasSteps;
         }
 
-        class UniformBandWidth : IHasBandWidth
+        public Size Size(VignetteEffect effect)
         {
-            public double BandWidthX(VignetteEffect effect)
-            {
-                return effect.BandWidthInPixels;
-            }
-
-            public double BandWidthY(VignetteEffect effect)
-            {
-                return effect.BandWidthInPixels;
-            }
+            return _hasSize.Size(effect);
         }
 
-        class DiamondBandWidth : IHasBandWidth
+        public double BandWidthX(VignetteEffect effect)
         {
-            public double BandWidthX(VignetteEffect effect)
-            {
-                return effect.OuterWidth - effect.InnerSize.Width;
-            }
-
-            public double BandWidthY(VignetteEffect effect)
-            {
-                return effect.InnerSize.Height * (effect.OuterWidth / effect.InnerSize.Width - 1);
-            }
+            return _hasBandWidth.BandWidthX(effect);
         }
 
-        public interface IHasSteps
+        public double BandWidthY(VignetteEffect effect)
         {
-            bool IsPixelInStep(VignetteEffect effect, int pixel, int step);
+            return _hasBandWidth.BandWidthY(effect);
         }
 
-        class RectangularSteps : IHasSteps
+        public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
         {
-            public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
-            {
-                return
-                    new Rect(0, 0, effect.XOffsetOf(step), effect.YOffsetOf(step)).Contains(
-                        new Point(effect.XPrime(pixel), effect.YPrime(pixel)));
-            }
+            return _hasSteps.IsPixelInStep(effect, pixel, step);
         }
+    }
 
-        abstract class NonRectangularSteps : IHasSteps
+    public class Circle : VignetteFigure
+    {
+        public Circle() : base(new IdenticalAxes(), new UniformBandWidth(), new EllipticalSteps())
         {
-            private readonly double _power;
-
-            protected NonRectangularSteps(double power)
-            {
-                _power = power;
-            }
-
-            public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
-            {
-                return
-                    Math.Pow(effect.XPrime(pixel)/effect.XOffsetOf(step), _power) +
-                    Math.Pow(effect.YPrime(pixel)/effect.YOffsetOf(step), _power) < 1;
-            }
         }
+    }
 
-        class EllipticalSteps : NonRectangularSteps
+    public class Ellipse : VignetteFigure
+    {
+        public Ellipse() : base(new DifferentAxes(), new UniformBandWidth(), new EllipticalSteps())
         {
-            public EllipticalSteps() : base(2)
-            {
-            }
         }
+    }
 
-        class DiamondSteps : NonRectangularSteps
+    public class Diamond : VignetteFigure
+    {
+        public Diamond() : base(new DifferentAxes(), new DiamondBandWidth(), new DiamondSteps())
         {
-            public DiamondSteps() : base(1)
-            {
-            }
         }
+    }
 
-        public class VignetteFigure : IHasSize, IHasBandWidth, IHasSteps
+    public class Square : VignetteFigure
+    {
+        public Square() : base(new IdenticalAxes(), new UniformBandWidth(), new RectangularSteps())
         {
-            private readonly IHasSize _hasSize;
-            private readonly IHasBandWidth _hasBandWidth;
-            private readonly IHasSteps _hasSteps;
-
-            protected VignetteFigure(IHasSize hasSize, IHasBandWidth hasBandWidth, IHasSteps hasSteps)
-            {
-                _hasSize = hasSize;
-                _hasBandWidth = hasBandWidth;
-                _hasSteps = hasSteps;
-            }
-
-            public Size Size(VignetteEffect effect)
-            {
-                return _hasSize.Size(effect);
-            }
-
-            public double BandWidthX(VignetteEffect effect)
-            {
-                return _hasBandWidth.BandWidthX(effect);
-            }
-
-            public double BandWidthY(VignetteEffect effect)
-            {
-                return _hasBandWidth.BandWidthY(effect);
-            }
-
-            public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
-            {
-                return _hasSteps.IsPixelInStep(effect, pixel, step);
-            }
         }
+    }
 
-        public class Circle : VignetteFigure
+    public class Rectangle : VignetteFigure
+    {
+        public Rectangle() : base(new DifferentAxes(), new UniformBandWidth(), new RectangularSteps())
         {
-            public Circle() : base(new IdenticalAxes(), new UniformBandWidth(), new EllipticalSteps())
-            {
-            }
-        }
-
-        public class Ellipse : VignetteFigure
-        {
-            public Ellipse() : base(new DifferentAxes(), new UniformBandWidth(), new EllipticalSteps())
-            {
-            }
-        }
-
-        public class Diamond : VignetteFigure
-        {
-            public Diamond() : base(new DifferentAxes(), new DiamondBandWidth(), new DiamondSteps())
-            {
-            }
-        }
-
-        public class Square : VignetteFigure
-        {
-            public Square() : base(new IdenticalAxes(), new UniformBandWidth(), new RectangularSteps())
-            {
-            }
-        }
-
-        public class Rectangle : VignetteFigure
-        {
-            public Rectangle() : base(new DifferentAxes(), new UniformBandWidth(), new RectangularSteps())
-            {
-            }
         }
     }
 }

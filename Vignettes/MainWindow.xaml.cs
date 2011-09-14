@@ -33,7 +33,7 @@ namespace Vignettes
         private string _fileName;
 
         private VignetteEffect _vignette;
-        private VignetteEffect.VignetteFigure _shape;
+        private VignetteFigure _shape;
 
         // Magic numbers to represent the starting colour - predominantly blue
         private Color _borderColor = Color.FromRgb(20, 20, 240);
@@ -173,20 +173,20 @@ namespace Vignettes
             switch (comboTechnique.SelectedIndex)
             {
                 case 0:
-                    _shape = new VignetteEffect.Circle();
+                    _shape = new Circle();
                     sliderAngle.IsEnabled = false;
                     break;
                 case 1:
-                    _shape = new VignetteEffect.Ellipse();
+                    _shape = new Ellipse();
                     break;
                 case 2:
-                    _shape = new VignetteEffect.Diamond();
+                    _shape = new Diamond();
                     break;
                 case 3:
-                    _shape = new VignetteEffect.Square();
+                    _shape = new Square();
                     break;
                 default:
-                    _shape = new VignetteEffect.Rectangle();
+                    _shape = new Rectangle();
                     break;
             }
 
