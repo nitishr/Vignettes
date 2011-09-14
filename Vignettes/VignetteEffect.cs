@@ -59,12 +59,12 @@ namespace Vignettes
 
         private double BandWidthX
         {
-            get { return Figure.X(this); }
+            get { return Figure.BandWidthX(this); }
         }
 
         private double BandWidthY
         {
-            get { return Figure.Y(this); }
+            get { return Figure.BandWidthY(this); }
         }
 
         private Color ColorAt(int i)
@@ -200,18 +200,18 @@ namespace Vignettes
 
         public interface IHasBandWidth
         {
-            double X(VignetteEffect effect);
-            double Y(VignetteEffect effect);
+            double BandWidthX(VignetteEffect effect);
+            double BandWidthY(VignetteEffect effect);
         }
 
         class UniformBandWidth : IHasBandWidth
         {
-            public double X(VignetteEffect effect)
+            public double BandWidthX(VignetteEffect effect)
             {
                 return effect.BandWidthInPixels;
             }
 
-            public double Y(VignetteEffect effect)
+            public double BandWidthY(VignetteEffect effect)
             {
                 return effect.BandWidthInPixels;
             }
@@ -219,23 +219,23 @@ namespace Vignettes
 
         class DiamondBandWidth : IHasBandWidth
         {
-            public double X(VignetteEffect effect)
+            public double BandWidthX(VignetteEffect effect)
             {
                 return effect.AxisValue(effect._width, 1) - effect.InnerSize.Width;
             }
 
-            public double Y(VignetteEffect effect)
+            public double BandWidthY(VignetteEffect effect)
             {
                 return effect.InnerSize.Height * (effect.AxisValue(effect._width, 1) / effect.InnerSize.Width - 1);
             }
         }
 
-        public interface ISteps
+        public interface IHasSteps
         {
             bool IsPixelInStep(VignetteEffect effect, int pixel, int step);
         }
 
-        class RectangularSteps : ISteps
+        class RectangularSteps : IHasSteps
         {
             public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
             {
@@ -245,7 +245,7 @@ namespace Vignettes
             }
         }
 
-        abstract class NonRectangularSteps : ISteps
+        abstract class NonRectangularSteps : IHasSteps
         {
             private readonly double _power;
 
@@ -276,17 +276,17 @@ namespace Vignettes
             }
         }
 
-        public class VignetteFigure : IHasSize, IHasBandWidth, ISteps
+        public class VignetteFigure : IHasSize, IHasBandWidth, IHasSteps
         {
             private readonly IHasSize _hasSize;
             private readonly IHasBandWidth _hasBandWidth;
-            private readonly ISteps _steps;
+            private readonly IHasSteps _hasSteps;
 
-            protected VignetteFigure(IHasSize hasSize, IHasBandWidth hasBandWidth, ISteps steps)
+            protected VignetteFigure(IHasSize hasSize, IHasBandWidth hasBandWidth, IHasSteps hasSteps)
             {
                 _hasSize = hasSize;
                 _hasBandWidth = hasBandWidth;
-                _steps = steps;
+                _hasSteps = hasSteps;
             }
 
             public Size Size(VignetteEffect effect)
@@ -294,19 +294,19 @@ namespace Vignettes
                 return _hasSize.Size(effect);
             }
 
-            public double X(VignetteEffect effect)
+            public double BandWidthX(VignetteEffect effect)
             {
-                return _hasBandWidth.X(effect);
+                return _hasBandWidth.BandWidthX(effect);
             }
 
-            public double Y(VignetteEffect effect)
+            public double BandWidthY(VignetteEffect effect)
             {
-                return _hasBandWidth.Y(effect);
+                return _hasBandWidth.BandWidthY(effect);
             }
 
             public bool IsPixelInStep(VignetteEffect effect, int pixel, int step)
             {
-                return _steps.IsPixelInStep(effect, pixel, step);
+                return _hasSteps.IsPixelInStep(effect, pixel, step);
             }
         }
 
