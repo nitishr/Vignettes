@@ -17,7 +17,6 @@ namespace Vignettes
         private const int Dpi = 72;
         public const int BitsPerPixel = 24;
 
-        private List<Color> _pixels;
         private int _width;
         private int _height;
 
@@ -87,10 +86,10 @@ namespace Vignettes
             get { return Figure.BandWidthY(this); }
         }
 
-        private Color ColorAt(int i)
+        public Color ColorAt(int i, Color originalColor)
         {
             var weight = WeightAt(i);
-            return Color.Add(Color.Multiply(_pixels[i], weight), Color.Multiply(BorderColor, 1 - weight));
+            return Color.Add(Color.Multiply(originalColor, weight), Color.Multiply(BorderColor, 1 - weight));
         }
 
         // The weight functions given below form the crux of the code. It was a struggle after which 
@@ -148,22 +147,6 @@ namespace Vignettes
             return column - (1 + CenterXOffsetPercent/100.0)*_width*0.5;
         }
 
-        public BitmapSource CreateImage()
-        {
-            int stride = (_width*BitsPerPixel + 7)/8;
-            var pixelsToWrite = new byte[stride*_height];
-
-            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
-            {
-                Color color = ColorAt(i/3);
-                pixelsToWrite[i] = color.R;
-                pixelsToWrite[i + 1] = color.G;
-                pixelsToWrite[i + 2] = color.B;
-            }
-
-            return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
-        }
-
         public double YOffsetOf(int step)
         {
             return Offset(step, InnerSize.Height, BandWidthY);
@@ -181,11 +164,24 @@ namespace Vignettes
 
         public BitmapSource CreateImageSource(List<Color> pixels, int width, int height)
         {
-            _pixels = pixels;
             _width = width;
             _height = height;
-            return CreateImage();
+
+            int stride = (_width*BitsPerPixel + 7)/8;
+            var pixelsToWrite = new byte[stride*_height];
+
+            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
+            {
+                int i1 = i/3;
+                Color color = ColorAt(i1, pixels[i1]);
+                pixelsToWrite[i] = color.R;
+                pixelsToWrite[i + 1] = color.G;
+                pixelsToWrite[i + 2] = color.B;
+            }
+
+            return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
+
     }
     public interface IHasSize
     {
