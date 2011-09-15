@@ -157,13 +157,17 @@ namespace Vignettes
                                 BorderColor = _borderColor,
                                 Figure = Shape
                             };
-            _vignette.SetupParameters(_scaledPixels, _scaledWidth, _scaledHeight);
             ApplyEffect();
+        }
+
+        private void ApplyEffect(List<Color> pixels, int width, int height)
+        {
+            img.Source = _vignette.CreateImageSource(pixels, width, height);
         }
 
         private void ApplyEffect()
         {
-            img.Source = _vignette.CreateImage();
+            ApplyEffect(_scaledPixels, _scaledWidth, _scaledHeight);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -304,8 +308,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    vig.SetupParameters(_pixels, _width, _height);
-                    SaveImage(vig.CreateImage(), FileToSave(dlg));
+                    SaveImage(vig.CreateImageSource(_pixels, _width, _height), FileToSave(dlg));
                 }
             }
             catch (Exception)

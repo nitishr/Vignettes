@@ -179,13 +179,13 @@ namespace Vignettes
             return step*(bandWidth/NumberOfGradationSteps) + length;
         }
 
-        public void SetupParameters(List<Color> pixels, int width, int height)
+        public BitmapSource CreateImageSource(List<Color> pixels, int width, int height)
         {
             _pixels = pixels;
             _width = width;
             _height = height;
+            return CreateImage();
         }
-
     }
     public interface IHasSize
     {
