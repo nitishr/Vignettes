@@ -33,7 +33,6 @@ namespace Vignettes
         private string _fileName;
 
         private VignetteEffect _vignette;
-        private VignetteFigure _shape;
 
         // Magic numbers to represent the starting colour - predominantly blue
         private Color _borderColor = Color.FromRgb(20, 20, 240);
@@ -156,7 +155,7 @@ namespace Vignettes
                                 CenterXOffsetPercent = sliderOriginX.Value,
                                 CenterYOffsetPercent = sliderOriginY.Value,
                                 BorderColor = _borderColor,
-                                Figure = _shape
+                                Figure = Shape
                             };
             _vignette.SetupParameters(_scaledPixels, _scaledWidth, _scaledHeight);
             ApplyEffect();
@@ -168,31 +167,32 @@ namespace Vignettes
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {            
-            sliderAngle.IsEnabled = true;
-            switch (comboTechnique.SelectedIndex)
-            {
-                case 0:
-                    _shape = new Circle();
-                    sliderAngle.IsEnabled = false;
-                    break;
-                case 1:
-                    _shape = new Ellipse();
-                    break;
-                case 2:
-                    _shape = new Diamond();
-                    break;
-                case 3:
-                    _shape = new Square();
-                    break;
-                default:
-                    _shape = new Rectangle();
-                    break;
-            }
-
+        {
             if (_vignette == null) return;
-            _vignette.Figure = _shape;
+            VignetteFigure figure = Shape;
+            _vignette.Figure = figure;
+            sliderAngle.IsEnabled = !(figure is Circle);
             ApplyEffect();
+        }
+
+        private VignetteFigure Shape
+        {
+            get
+            {
+                switch (comboTechnique.SelectedIndex)
+                {
+                    case 0:
+                        return new Circle();
+                    case 1:
+                        return new Ellipse();
+                    case 2:
+                        return new Diamond();
+                    case 3:
+                        return new Square();
+                    default:
+                        return new Rectangle();
+                }
+            }
         }
 
         private void BnColourClick(object sender, RoutedEventArgs e)
@@ -300,7 +300,7 @@ namespace Vignettes
                                       CenterXOffsetPercent = sliderOriginX.Value,
                                       CenterYOffsetPercent = sliderOriginY.Value,
                                       BorderColor = _borderColor,
-                                      Figure = _shape,
+                                      Figure = Shape,
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
