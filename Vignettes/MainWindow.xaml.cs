@@ -154,10 +154,10 @@ namespace Vignettes
 
         private void ApplyEffect(List<Color> pixels, int width, int height)
         {
-            img.Source = CreateImageSource(_vignette, pixels, width, height);
+            img.Source = CreateImage(_vignette, pixels, width, height);
         }
 
-        public BitmapSource CreateImageSource(VignetteEffect vignette, List<Color> pixels, int width, int height)
+        public BitmapSource CreateImage(VignetteEffect vignette, List<Color> pixels, int width, int height)
         {
             int stride = (width * BitsPerPixel + 7) / 8;
             var pixelsToWrite = new byte[stride * height];
@@ -312,7 +312,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    SaveImage(CreateImageSource(vig, _pixels, _width, _height), FileToSave(dlg));
+                    SaveImage(CreateImage(vig, _pixels, _width, _height), FileToSave(dlg));
                 }
             }
             catch (Exception)
