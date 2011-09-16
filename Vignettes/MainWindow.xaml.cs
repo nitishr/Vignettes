@@ -59,11 +59,10 @@ namespace Vignettes
                 _pixels = PopulatePixels(image);
                 return true;
             }
-            MessageBox.Show("Sorry, I don't support this image format.");
             return false;
         }
 
-        private List<Color> PopulatePixels(BitmapSource image)
+        private static List<Color> PopulatePixels(BitmapSource image)
         {
             byte[] pixels = Pixels(image);
             int step = image.Format.BitsPerPixel / 8;
