@@ -56,30 +56,10 @@ namespace Vignettes
             {
                 _width = image.PixelWidth;
                 _height = image.PixelHeight;
-                _pixels = PopulatePixels(image);
+                _pixels = image.Pixels();
                 return true;
             }
             return false;
-        }
-
-        private static List<Color> PopulatePixels(BitmapSource image)
-        {
-            byte[] pixels = Pixels(image);
-            int step = image.Format.BitsPerPixel / 8;
-            var pixels8 = new List<Color>();
-            for (int i = 0; i < pixels.Count(); i += step)
-            {
-                pixels8.Add(Color.FromRgb(pixels[i + 2], pixels[i + 1], pixels[i]));
-            }
-            return pixels8;
-        }
-
-        private static byte[] Pixels(BitmapSource image)
-        {
-            var stride = (image.PixelWidth*image.Format.BitsPerPixel + 7)/8;
-            var pixels = new byte[stride*image.PixelHeight];
-            image.CopyPixels(pixels, stride, 0);
-            return pixels;
         }
 
         private BitmapSource ScaleImage(BitmapSource image)
@@ -88,7 +68,7 @@ namespace Vignettes
             var scaledImage = new TransformedBitmap(image, new ScaleTransform(_scaleFactor, _scaleFactor));
             _scaledWidth = scaledImage.PixelWidth;
             _scaledHeight = scaledImage.PixelHeight;
-            _scaledPixels = PopulatePixels(scaledImage);
+            _scaledPixels = scaledImage.Pixels();
             return scaledImage;
         }
 
@@ -359,6 +339,29 @@ namespace Vignettes
                 default:
                     return new BmpBitmapEncoder();
             }
+        }
+    }
+
+    public static class BitmapSourceExt
+    {
+        public static List<Color> Pixels(this BitmapSource image)
+        {
+            byte[] pixelData = PixelData(image);
+            int step = image.Format.BitsPerPixel / 8;
+            var pixels = new List<Color>();
+            for (int i = 0; i < pixelData.Count(); i += step)
+            {
+                pixels.Add(Color.FromRgb(pixelData[i + 2], pixelData[i + 1], pixelData[i]));
+            }
+            return pixels;
+        }
+
+        private static byte[] PixelData(BitmapSource image)
+        {
+            var stride = (image.PixelWidth * image.Format.BitsPerPixel + 7) / 8;
+            var pixelData = new byte[stride * image.PixelHeight];
+            image.CopyPixels(pixelData, stride, 0);
+            return pixelData;
         }
     }
 }
