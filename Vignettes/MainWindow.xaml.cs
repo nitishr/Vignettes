@@ -83,27 +83,14 @@ namespace Vignettes
             return pixels;
         }
 
-        void ScaleImage(BitmapSource image)
+        private BitmapSource ScaleImage(BitmapSource image)
         {
-            var scale = new ScaleTransform(_scaledWidth/(1.0*_width), _scaledHeight/(1.0*_height));
-            _scaleFactor = Math.Min(scale.ScaleX, scale.ScaleY);
-            var scaledImage = new TransformedBitmap(image, scale);
-            img.Source = scaledImage;
+            _scaleFactor = ViewportLength / Math.Max(image.Width, image.Height);
+            var scaledImage = new TransformedBitmap(image, new ScaleTransform(_scaleFactor, _scaleFactor));
+            _scaledWidth = scaledImage.PixelWidth;
+            _scaledHeight = scaledImage.PixelHeight;
             _scaledPixels = PopulatePixels(scaledImage);
-        }
-
-        private void ComputeScaledWidthAndHeight()
-        {
-            if (_width > _height)
-            {
-                _scaledWidth = ViewportLength;
-                _scaledHeight = _height * ViewportLength / _width;
-            }
-            else
-            {
-                _scaledHeight = ViewportLength;
-                _scaledWidth = _width * ViewportLength / _height;
-            }
+            return scaledImage;
         }
 
         private void BnOpenClick(object sender, RoutedEventArgs e)
@@ -126,8 +113,7 @@ namespace Vignettes
                     {
                         Title = "Vignette Effect: " + ofd.SafeFileName;
                         bnSaveImage.IsEnabled = true;
-                        ComputeScaledWidthAndHeight();
-                        ScaleImage(image);
+                        img.Source = ScaleImage(image);
                         ApplyVignette();
                     }
                     else
