@@ -21,7 +21,7 @@ namespace Vignettes
     {
         private const int Dpi = 72;
         private const int BitsPerPixel = 24;
-        private const int ViewportWidthHeight = 600;
+        private const int ViewportLength = 600;
 
         private List<Color> _pixels;
         private int _width;
@@ -31,7 +31,6 @@ namespace Vignettes
         private int _scaledWidth;
         private int _scaledHeight;
 
-        private BitmapSource _image;
         private string _fileName;
 
         private VignetteEffect _vignette;
@@ -48,17 +47,16 @@ namespace Vignettes
             comboTechnique.SelectedIndex = 1; // Select the ellipse shape
         }
 
-        private bool ReadImage(string fn, string fileNameOnly)
+        private bool ReadImage(BitmapSource image)
         {
-            _image = new BitmapImage(new Uri(fn, UriKind.RelativeOrAbsolute));
-            PixelFormat format = _image.Format;
+            PixelFormat format = image.Format;
 
-            if ((format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) && (format.BitsPerPixel == 24 || format.BitsPerPixel == 32))
+            if ((format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
+                (format.BitsPerPixel == 24 || format.BitsPerPixel == 32))
             {
-                Title = "Vignette Effect: " + fileNameOnly;
-                _width = _image.PixelWidth;
-                _height = _image.PixelHeight;
-                _pixels = PopulatePixels(_image);
+                _width = image.PixelWidth;
+                _height = image.PixelHeight;
+                _pixels = PopulatePixels(image);
                 return true;
             }
             MessageBox.Show("Sorry, I don't support this image format.");
@@ -68,7 +66,7 @@ namespace Vignettes
         private List<Color> PopulatePixels(BitmapSource image)
         {
             byte[] pixels = Pixels(image);
-            int step = _image.Format.BitsPerPixel / 8;
+            int step = image.Format.BitsPerPixel / 8;
             var pixels8 = new List<Color>();
             for (int i = 0; i < pixels.Count(); i += step)
             {
@@ -85,11 +83,11 @@ namespace Vignettes
             return pixels;
         }
 
-        void ScaleImage()
+        void ScaleImage(BitmapSource image)
         {
             var scale = new ScaleTransform(_scaledWidth/(1.0*_width), _scaledHeight/(1.0*_height));
             _scaleFactor = Math.Min(scale.ScaleX, scale.ScaleY);
-            var scaledImage = new TransformedBitmap(_image, scale);
+            var scaledImage = new TransformedBitmap(image, scale);
             img.Source = scaledImage;
             _scaledPixels = PopulatePixels(scaledImage);
         }
@@ -98,13 +96,13 @@ namespace Vignettes
         {
             if (_width > _height)
             {
-                _scaledWidth = ViewportWidthHeight;
-                _scaledHeight = _height * ViewportWidthHeight / _width;
+                _scaledWidth = ViewportLength;
+                _scaledHeight = _height * ViewportLength / _width;
             }
             else
             {
-                _scaledHeight = ViewportWidthHeight;
-                _scaledWidth = _width * ViewportWidthHeight / _height;
+                _scaledHeight = ViewportLength;
+                _scaledWidth = _width * ViewportLength / _height;
             }
         }
 
@@ -121,13 +119,15 @@ namespace Vignettes
             {
                 if (result == true)
                 {
-                    _fileName = ofd.FileName;
                     Mouse.OverrideCursor = Cursors.Wait;
-                    if (ReadImage(_fileName, ofd.SafeFileName))
+                    _fileName = ofd.FileName;
+                    var image = new BitmapImage(new Uri(_fileName, UriKind.RelativeOrAbsolute));
+                    if (ReadImage(image))
                     {
+                        Title = "Vignette Effect: " + ofd.SafeFileName;
                         bnSaveImage.IsEnabled = true;
                         ComputeScaledWidthAndHeight();
-                        ScaleImage();
+                        ScaleImage(image);
                         ApplyVignette();
                     }
                     else
