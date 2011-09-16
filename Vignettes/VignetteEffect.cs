@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows;
 using System.Linq;
-using System.Windows.Media.Imaging;
 
 // Program to "vignettify" an image, for circular, elliptical, diamond, rectangular
 //  and square-shaped vignettes.
@@ -14,9 +13,6 @@ namespace Vignettes
 {
     public class VignetteEffect
     {
-        private const int Dpi = 72;
-        public const int BitsPerPixel = 24;
-
         private int _width;
         private int _height;
 
@@ -86,7 +82,7 @@ namespace Vignettes
             get { return Figure.BandWidthY(this); }
         }
 
-        public Color ColorAt(int i, Color originalColor)
+        private Color ColorAt(int i, Color originalColor)
         {
             var weight = WeightAt(i);
             return Color.Add(Color.Multiply(originalColor, weight), Color.Multiply(BorderColor, 1 - weight));
@@ -162,27 +158,14 @@ namespace Vignettes
             return step*(bandWidth/NumberOfGradationSteps) + length;
         }
 
-        public BitmapSource CreateImageSource(List<Color> pixels, int width, int height)
+        public IList<Color> Apply(IList<Color> pixels, int width, int height)
         {
             _width = width;
             _height = height;
-
-            int stride = (_width*BitsPerPixel + 7)/8;
-            var pixelsToWrite = new byte[stride*_height];
-
-            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
-            {
-                int i1 = i/3;
-                Color color = ColorAt(i1, pixels[i1]);
-                pixelsToWrite[i] = color.R;
-                pixelsToWrite[i + 1] = color.G;
-                pixelsToWrite[i + 2] = color.B;
-            }
-
-            return BitmapSource.Create(_width, _height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
+            return pixels.Select((color, i) => ColorAt(i, color)).ToList();
         }
-
     }
+
     public interface IHasSize
     {
         Size Size(VignetteEffect effect);

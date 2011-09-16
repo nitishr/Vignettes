@@ -19,17 +19,19 @@ namespace Vignettes
 {
     public partial class MainWindow
     {
+        private const int Dpi = 72;
+        private const int BitsPerPixel = 24;
         private const int ViewportWidthHeight = 600;
 
         private List<Color> _pixels;
-        private List<Color> _scaledPixels;
-
-        private BitmapSource _image;
-
         private int _width;
         private int _height;
+
+        private List<Color> _scaledPixels;
         private int _scaledWidth;
         private int _scaledHeight;
+
+        private BitmapSource _image;
         private string _fileName;
 
         private VignetteEffect _vignette;
@@ -160,14 +162,31 @@ namespace Vignettes
             ApplyEffect();
         }
 
-        private void ApplyEffect(List<Color> pixels, int width, int height)
-        {
-            img.Source = _vignette.CreateImageSource(pixels, width, height);
-        }
-
         private void ApplyEffect()
         {
             ApplyEffect(_scaledPixels, _scaledWidth, _scaledHeight);
+        }
+
+        private void ApplyEffect(List<Color> pixels, int width, int height)
+        {
+            img.Source = CreateImageSource(_vignette, pixels, width, height);
+        }
+
+        public BitmapSource CreateImageSource(VignetteEffect vignette, List<Color> pixels, int width, int height)
+        {
+            int stride = (width * BitsPerPixel + 7) / 8;
+            var pixelsToWrite = new byte[stride * height];
+
+            IList<Color> colors = vignette.Apply(pixels, width, height);
+            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
+            {
+                Color color = colors[i / 3];
+                pixelsToWrite[i] = color.R;
+                pixelsToWrite[i + 1] = color.G;
+                pixelsToWrite[i + 2] = color.B;
+            }
+
+            return BitmapSource.Create(width, height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -308,7 +327,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    SaveImage(vig.CreateImageSource(_pixels, _width, _height), FileToSave(dlg));
+                    SaveImage(CreateImageSource(vig, _pixels, _width, _height), FileToSave(dlg));
                 }
             }
             catch (Exception)
