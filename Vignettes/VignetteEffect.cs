@@ -180,7 +180,11 @@ namespace Vignettes
 
         public static bool CanTransform(BitmapSource image)
         {
-            PixelFormat format = image.Format;
+            return IsCompatible(image.Format);
+        }
+
+        private static bool IsCompatible(PixelFormat format)
+        {
             return (format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
                    (format.BitsPerPixel == 24 || format.BitsPerPixel == 32);
         }
