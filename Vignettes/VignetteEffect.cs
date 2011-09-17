@@ -164,18 +164,18 @@ namespace Vignettes
         {
             _image = image;
             IList<Color> colors = image.Pixels().Select((color, i) => ColorAt(i, color)).ToList();
-            int stride = (image.PixelWidth * BitsPerPixel + 7) / 8;
-            var pixelsToWrite = new byte[stride * image.PixelHeight];
+            var stride = image.Stride(BitsPerPixel);
+            var pixelData = new byte[stride * image.PixelHeight];
 
-            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
+            for (int i = 0; i < pixelData.Count(); i += 3)
             {
                 Color color = colors[i / 3];
-                pixelsToWrite[i] = color.R;
-                pixelsToWrite[i + 1] = color.G;
-                pixelsToWrite[i + 2] = color.B;
+                pixelData[i] = color.R;
+                pixelData[i + 1] = color.G;
+                pixelData[i + 2] = color.B;
             }
 
-            return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
+            return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, PixelFormats.Rgb24, null, pixelData, stride);
         }
 
         public static bool CanTransform(BitmapSource image)

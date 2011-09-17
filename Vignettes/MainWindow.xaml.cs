@@ -308,10 +308,15 @@ namespace Vignettes
 
         private static byte[] PixelData(BitmapSource image)
         {
-            var stride = (image.PixelWidth * image.Format.BitsPerPixel + 7) / 8;
+            var stride = image.Stride(image.Format.BitsPerPixel);
             var pixelData = new byte[stride * image.PixelHeight];
             image.CopyPixels(pixelData, stride, 0);
             return pixelData;
+        }
+
+        public static int Stride(this BitmapSource image, int bitsPerPixel)
+        {
+            return (image.PixelWidth*bitsPerPixel + 7)/8;
         }
     }
 }
