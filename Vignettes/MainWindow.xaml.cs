@@ -37,17 +37,11 @@ namespace Vignettes
             comboTechnique.SelectedIndex = 1; // Select the ellipse shape
         }
 
-        private bool ReadImage(BitmapSource image)
+        private static bool ReadImage(BitmapSource image)
         {
             PixelFormat format = image.Format;
-
-            if ((format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
-                (format.BitsPerPixel == 24 || format.BitsPerPixel == 32))
-            {
-                _image = image;
-                return true;
-            }
-            return false;
+            return (format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
+                   (format.BitsPerPixel == 24 || format.BitsPerPixel == 32);
         }
 
         private BitmapSource ScaleImage(BitmapSource image)
@@ -72,12 +66,12 @@ namespace Vignettes
                 {
                     Mouse.OverrideCursor = Cursors.Wait;
                     _fileName = ofd.FileName;
-                    var image = new BitmapImage(new Uri(_fileName, UriKind.RelativeOrAbsolute));
-                    if (ReadImage(image))
+                    _image = new BitmapImage(new Uri(_fileName, UriKind.RelativeOrAbsolute));
+                    if (ReadImage(_image))
                     {
                         Title = "Vignette Effect: " + ofd.SafeFileName;
                         bnSaveImage.IsEnabled = true;
-                        img.Source = ScaleImage(image);
+                        img.Source = ScaleImage(_image);
                         ApplyVignette();
                     }
                     else
