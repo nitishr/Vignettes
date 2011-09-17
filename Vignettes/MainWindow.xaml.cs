@@ -19,21 +19,15 @@ namespace Vignettes
 {
     public partial class MainWindow
     {
-        private const int Dpi = 72;
-        private const int BitsPerPixel = 24;
         private const int ViewportLength = 600;
 
         private BitmapSource _image;
-
         private BitmapSource _scaledImage;
 
         private string _fileName;
-
         private VignetteEffect _vignette;
 
-        // Magic numbers to represent the starting colour - predominantly blue
         private Color _borderColor = Color.FromRgb(20, 20, 240);
-
         private double _scaleFactor = 1.0;
 
         public MainWindow()
@@ -120,24 +114,7 @@ namespace Vignettes
 
         private void ApplyEffect()
         {
-            img.Source = CreateImage(_vignette, _scaledImage);
-        }
-
-        public BitmapSource CreateImage(VignetteEffect vignette, BitmapSource image)
-        {
-            IList<Color> colors = vignette.Apply(image);
-            int stride = (image.PixelWidth * BitsPerPixel + 7) / 8;
-            var pixelsToWrite = new byte[stride * image.PixelHeight];
-
-            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
-            {
-                Color color = colors[i / 3];
-                pixelsToWrite[i] = color.R;
-                pixelsToWrite[i + 1] = color.G;
-                pixelsToWrite[i + 2] = color.B;
-            }
-
-            return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
+            img.Source = _vignette.Transform(_scaledImage);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -278,7 +255,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    SaveImage(CreateImage(vig, _image), FileToSave(dlg));
+                    SaveImage(vig.Transform(_image), FileToSave(dlg));
                 }
             }
             catch (Exception)

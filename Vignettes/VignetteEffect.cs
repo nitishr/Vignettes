@@ -14,6 +14,8 @@ namespace Vignettes
 {
     public class VignetteEffect
     {
+        private const int Dpi = 72;
+        private const int BitsPerPixel = 24;
         private BitmapSource _image;
 
         public double OrientationInDegrees { private get; set; } // This parameter is not of relevance for the Circle vignette.
@@ -158,10 +160,22 @@ namespace Vignettes
             return step*(bandWidth/NumberOfGradationSteps) + length;
         }
 
-        public IList<Color> Apply(BitmapSource image)
+        public BitmapSource Transform(BitmapSource image)
         {
             _image = image;
-            return image.Pixels().Select((color, i) => ColorAt(i, color)).ToList();
+            IList<Color> colors = image.Pixels().Select((color, i) => ColorAt(i, color)).ToList();
+            int stride = (image.PixelWidth * BitsPerPixel + 7) / 8;
+            var pixelsToWrite = new byte[stride * image.PixelHeight];
+
+            for (int i = 0; i < pixelsToWrite.Count(); i += 3)
+            {
+                Color color = colors[i / 3];
+                pixelsToWrite[i] = color.R;
+                pixelsToWrite[i + 1] = color.G;
+                pixelsToWrite[i + 2] = color.B;
+            }
+
+            return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
     }
 
