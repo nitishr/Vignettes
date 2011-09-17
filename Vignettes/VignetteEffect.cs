@@ -177,6 +177,13 @@ namespace Vignettes
 
             return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
+
+        public static bool CanTransform(BitmapSource image)
+        {
+            PixelFormat format = image.Format;
+            return (format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
+                   (format.BitsPerPixel == 24 || format.BitsPerPixel == 32);
+        }
     }
 
     public interface IHasSize

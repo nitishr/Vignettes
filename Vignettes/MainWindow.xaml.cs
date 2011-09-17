@@ -37,20 +37,6 @@ namespace Vignettes
             comboTechnique.SelectedIndex = 1; // Select the ellipse shape
         }
 
-        private static bool ReadImage(BitmapSource image)
-        {
-            PixelFormat format = image.Format;
-            return (format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
-                   (format.BitsPerPixel == 24 || format.BitsPerPixel == 32);
-        }
-
-        private BitmapSource ScaleImage(BitmapSource image)
-        {
-            _scaleFactor = ViewportLength / Math.Max(image.Width, image.Height);
-            _scaledImage = new TransformedBitmap(image, new ScaleTransform(_scaleFactor, _scaleFactor));
-            return _scaledImage;
-        }
-
         private void BnOpenClick(object sender, RoutedEventArgs e)
         {
             var ofd = new OpenFileDialog
@@ -67,11 +53,11 @@ namespace Vignettes
                     Mouse.OverrideCursor = Cursors.Wait;
                     _fileName = ofd.FileName;
                     _image = new BitmapImage(new Uri(_fileName, UriKind.RelativeOrAbsolute));
-                    if (ReadImage(_image))
+                    if (VignetteEffect.CanTransform(_image))
                     {
                         Title = "Vignette Effect: " + ofd.SafeFileName;
                         bnSaveImage.IsEnabled = true;
-                        img.Source = ScaleImage(_image);
+                        FitImageToViewport();
                         ApplyVignette();
                     }
                     else
@@ -88,6 +74,13 @@ namespace Vignettes
             {
                 Mouse.OverrideCursor = null;
             }
+        }
+
+        private void FitImageToViewport()
+        {
+            _scaleFactor = ViewportLength / Math.Max(_image.Width, _image.Height);
+            _scaledImage = new TransformedBitmap(_image, new ScaleTransform(_scaleFactor, _scaleFactor));
+            img.Source = _scaledImage;
         }
 
         private void ApplyVignette()
