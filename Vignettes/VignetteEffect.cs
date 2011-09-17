@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows;
 using System.Linq;
+using System.Windows.Media.Imaging;
 
 // Program to "vignettify" an image, for circular, elliptical, diamond, rectangular
 //  and square-shaped vignettes.
@@ -13,8 +14,7 @@ namespace Vignettes
 {
     public class VignetteEffect
     {
-        private int _width;
-        private int _height;
+        private BitmapSource _image;
 
         public double OrientationInDegrees { private get; set; } // This parameter is not of relevance for the Circle vignette.
 
@@ -34,17 +34,17 @@ namespace Vignettes
 
         public double InnerWidth
         {
-            get { return (_width * CoverageRatio - BandWidthInPixels) / 2; }
+            get { return (_image.PixelWidth * CoverageRatio - BandWidthInPixels) / 2; }
         }
 
         public double InnerHeight
         {
-            get { return (_height * CoverageRatio - BandWidthInPixels) / 2; }
+            get { return (_image.PixelHeight * CoverageRatio - BandWidthInPixels) / 2; }
         }
 
         public double OuterWidth
         {
-            get { return (_width * CoverageRatio + BandWidthInPixels) / 2; }
+            get { return (_image.PixelWidth * CoverageRatio + BandWidthInPixels) / 2; }
         }
 
         public Size InnerSize
@@ -133,14 +133,14 @@ namespace Vignettes
 
         private double RowMinusHalfHeight(int i)
         {
-            int row = i/_width;
-            return row - (1 + CenterYOffsetPercent/100.0)*_height*0.5;
+            int row = i/_image.PixelWidth;
+            return row - (1 + CenterYOffsetPercent/100.0)*_image.PixelHeight*0.5;
         }
 
         private double ColumnMinusHalfWidth(int i)
         {
-            int column = i%_width;
-            return column - (1 + CenterXOffsetPercent/100.0)*_width*0.5;
+            int column = i%_image.PixelWidth;
+            return column - (1 + CenterXOffsetPercent/100.0)*_image.PixelWidth*0.5;
         }
 
         public double YOffsetOf(int step)
@@ -158,11 +158,10 @@ namespace Vignettes
             return step*(bandWidth/NumberOfGradationSteps) + length;
         }
 
-        public IList<Color> Apply(IList<Color> pixels, int width, int height)
+        public IList<Color> Apply(BitmapSource image)
         {
-            _width = width;
-            _height = height;
-            return pixels.Select((color, i) => ColorAt(i, color)).ToList();
+            _image = image;
+            return image.Pixels().Select((color, i) => ColorAt(i, color)).ToList();
         }
     }
 

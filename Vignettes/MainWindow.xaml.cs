@@ -23,13 +23,9 @@ namespace Vignettes
         private const int BitsPerPixel = 24;
         private const int ViewportLength = 600;
 
-        private List<Color> _pixels;
-        private int _width;
-        private int _height;
+        private BitmapSource _image;
 
-        private List<Color> _scaledPixels;
-        private int _scaledWidth;
-        private int _scaledHeight;
+        private BitmapSource _scaledImage;
 
         private string _fileName;
 
@@ -54,9 +50,7 @@ namespace Vignettes
             if ((format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
                 (format.BitsPerPixel == 24 || format.BitsPerPixel == 32))
             {
-                _width = image.PixelWidth;
-                _height = image.PixelHeight;
-                _pixels = image.Pixels();
+                _image = image;
                 return true;
             }
             return false;
@@ -65,11 +59,8 @@ namespace Vignettes
         private BitmapSource ScaleImage(BitmapSource image)
         {
             _scaleFactor = ViewportLength / Math.Max(image.Width, image.Height);
-            var scaledImage = new TransformedBitmap(image, new ScaleTransform(_scaleFactor, _scaleFactor));
-            _scaledWidth = scaledImage.PixelWidth;
-            _scaledHeight = scaledImage.PixelHeight;
-            _scaledPixels = scaledImage.Pixels();
-            return scaledImage;
+            _scaledImage = new TransformedBitmap(image, new ScaleTransform(_scaleFactor, _scaleFactor));
+            return _scaledImage;
         }
 
         private void BnOpenClick(object sender, RoutedEventArgs e)
@@ -129,20 +120,15 @@ namespace Vignettes
 
         private void ApplyEffect()
         {
-            ApplyEffect(_scaledPixels, _scaledWidth, _scaledHeight);
+            img.Source = CreateImage(_vignette, _scaledImage);
         }
 
-        private void ApplyEffect(List<Color> pixels, int width, int height)
+        public BitmapSource CreateImage(VignetteEffect vignette, BitmapSource image)
         {
-            img.Source = CreateImage(_vignette, pixels, width, height);
-        }
+            IList<Color> colors = vignette.Apply(image);
+            int stride = (image.PixelWidth * BitsPerPixel + 7) / 8;
+            var pixelsToWrite = new byte[stride * image.PixelHeight];
 
-        public BitmapSource CreateImage(VignetteEffect vignette, List<Color> pixels, int width, int height)
-        {
-            int stride = (width * BitsPerPixel + 7) / 8;
-            var pixelsToWrite = new byte[stride * height];
-
-            IList<Color> colors = vignette.Apply(pixels, width, height);
             for (int i = 0; i < pixelsToWrite.Count(); i += 3)
             {
                 Color color = colors[i / 3];
@@ -151,7 +137,7 @@ namespace Vignettes
                 pixelsToWrite[i + 2] = color.B;
             }
 
-            return BitmapSource.Create(width, height, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
+            return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, PixelFormats.Rgb24, null, pixelsToWrite, stride);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -292,7 +278,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    SaveImage(CreateImage(vig, _pixels, _width, _height), FileToSave(dlg));
+                    SaveImage(CreateImage(vig, _image), FileToSave(dlg));
                 }
             }
             catch (Exception)
