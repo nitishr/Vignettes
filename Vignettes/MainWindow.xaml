@@ -22,34 +22,34 @@
                 <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
                Foreground="LightGoldenrodYellow">Orientation (degrees):</Label>
                 <Slider x:Name="sliderAngle" Margin="10 0 10 0" Minimum="0" Maximum="180" Value="45"
-                TickFrequency="18" TickPlacement="TopLeft" ValueChanged="SliderAngleValueChanged"
+                TickFrequency="18" TickPlacement="TopLeft" ValueChanged="SliderValueChanged"
                 ></Slider>
                 <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
                Foreground="LightGoldenrodYellow">Coverage:</Label>
                 <Slider x:Name="sliderPercent" Margin="10 0 10 0" Minimum="50" Maximum="120" Value="80"
-                TickFrequency="7" TickPlacement="TopLeft" ValueChanged="SliderPercentValueChanged"
+                TickFrequency="7" TickPlacement="TopLeft" ValueChanged="SliderValueChanged"
                 ></Slider>
                 <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
                Foreground="LightGoldenrodYellow">Width of Blend Zone:</Label>
                 <!--Width of the band in pixels-->
                 <Slider x:Name="sliderBand" Margin="10 0 10 0" Minimum="3" Maximum="200" Value="40"
-                TickFrequency="19.8" TickPlacement="TopLeft" ValueChanged="SliderBandValueChanged"
+                TickFrequency="19.8" TickPlacement="TopLeft" ValueChanged="SliderValueChanged"
                 ></Slider>
                 <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
                Foreground="LightGoldenrodYellow">Smoothness of Blend:</Label>
                 <!--Number of steps in the blend-->
                 <Slider x:Name="sliderSteps" Margin="10 0 10 0" Minimum="4" Maximum="100" Value="40"
-                TickFrequency="10" TickPlacement="TopLeft" ValueChanged="SliderStepsValueChanged"
+                TickFrequency="10" TickPlacement="TopLeft" ValueChanged="SliderValueChanged"
                 ></Slider>
                 <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
                Foreground="LightGoldenrodYellow">X origin:</Label>
                 <Slider x:Name="sliderOriginX" Margin="10 0 10 0" Minimum="-100" Maximum="100" Value="0"
-                TickFrequency="20" TickPlacement="TopLeft" ValueChanged="SliderOriginXValueChanged"
+                TickFrequency="20" TickPlacement="TopLeft" ValueChanged="SliderValueChanged"
                 ></Slider>
                 <Label Margin="0 2 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
                Foreground="LightGoldenrodYellow">Y origin:</Label>
                 <Slider x:Name="sliderOriginY" Margin="10 0 10 0" Minimum="-100" Maximum="100" Value="0"
-                TickFrequency="20" TickPlacement="TopLeft" ValueChanged="SliderOriginYValueChanged"
+                TickFrequency="20" TickPlacement="TopLeft" ValueChanged="SliderValueChanged"
                 ></Slider>
                 <Label Margin="0 5 0 0" HorizontalAlignment="Left" FontWeight="Bold" 
                Foreground="LightGoldenrodYellow">Vignette Color:</Label>

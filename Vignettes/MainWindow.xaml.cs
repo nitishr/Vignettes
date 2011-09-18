@@ -139,32 +139,7 @@ namespace Vignettes
             ApplyEffect();
         }
 
-        private void SliderAngleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            ApplyEffect();
-        }
-
-        private void SliderPercentValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            ApplyEffect();
-        }
-
-        private void SliderBandValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            ApplyEffect();
-        }
-
-        private void SliderOriginXValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            ApplyEffect();
-        }
-
-        private void SliderOriginYValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            ApplyEffect();
-        }
-
-        private void SliderStepsValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             ApplyEffect();
         }
