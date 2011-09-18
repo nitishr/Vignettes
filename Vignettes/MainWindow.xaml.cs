@@ -23,7 +23,6 @@ namespace Vignettes
         private BitmapSource _scaledImage;
 
         private string _fileName;
-        private VignetteEffect _vignette;
 
         private Color _borderColor = Color.FromRgb(20, 20, 240);
         private double _scaleFactor = 1.0;
@@ -80,32 +79,24 @@ namespace Vignettes
 
         private void ApplyVignette()
         {
-            _vignette = new VignetteEffect
-                            {
-                                OrientationInDegrees = sliderAngle.Value,
-                                CoveragePercent = sliderPercent.Value,
-                                BandWidthInPixels = Convert.ToInt32(sliderBand.Value),
-                                NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value),
-                                CenterXOffsetPercent = sliderOriginX.Value,
-                                CenterYOffsetPercent = sliderOriginY.Value,
-                                BorderColor = _borderColor,
-                                Figure = Shape
-                            };
-            ApplyEffect();
-        }
-
-        private void ApplyEffect()
-        {
-            img.Source = _vignette.Transform(_scaledImage);
+            if (_scaledImage == null) return;
+            img.Source = new VignetteEffect
+                             {
+                                 OrientationInDegrees = sliderAngle.Value,
+                                 CoveragePercent = sliderPercent.Value,
+                                 BandWidthInPixels = Convert.ToInt32(sliderBand.Value),
+                                 NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value),
+                                 CenterXOffsetPercent = sliderOriginX.Value,
+                                 CenterYOffsetPercent = sliderOriginY.Value,
+                                 BorderColor = _borderColor,
+                                 Figure = Shape
+                             }.Transform(_scaledImage);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_vignette == null) return;
-            VignetteFigure figure = Shape;
-            _vignette.Figure = figure;
-            sliderAngle.IsEnabled = !(figure is Circle);
-            ApplyEffect();
+            sliderAngle.IsEnabled = !(Shape is Circle);
+            ApplyVignette();
         }
 
         private VignetteFigure Shape
@@ -155,51 +146,37 @@ namespace Vignettes
             _borderColor = cPicker.SelectedColor;
             bnColour.Background = new SolidColorBrush(_borderColor);
 
-            if (_vignette == null) return;
-            _vignette.BorderColor = _borderColor;
-            ApplyEffect();
+            ApplyVignette();
         }
 
         private void SliderAngleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette == null) return;
-            _vignette.OrientationInDegrees = sliderAngle.Value;
-            ApplyEffect();
+            ApplyVignette();
         }
 
         private void SliderPercentValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette == null) return;
-            _vignette.CoveragePercent = sliderPercent.Value;
-            ApplyEffect();
+            ApplyVignette();
         }
 
         private void SliderBandValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette == null) return;
-            _vignette.BandWidthInPixels = Convert.ToInt32(sliderBand.Value);
-            ApplyEffect();
+            ApplyVignette();
         }
 
         private void SliderOriginXValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette == null) return;
-            _vignette.CenterXOffsetPercent = Convert.ToInt32(sliderOriginX.Value);
-            ApplyEffect();
+            ApplyVignette();
         }
 
         private void SliderOriginYValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette == null) return;
-            _vignette.CenterYOffsetPercent = Convert.ToInt32(sliderOriginY.Value);
-            ApplyEffect();
+            ApplyVignette();
         }
 
         private void SliderStepsValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_vignette == null) return;
-            _vignette.NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value);
-            ApplyEffect();
+            ApplyVignette();
         }
 
         private void BnSaveImageClick(object sender, RoutedEventArgs e)
@@ -210,26 +187,24 @@ namespace Vignettes
 
             try
             {
+                Mouse.OverrideCursor = Cursors.Wait;
                 // While all other parameters are percentages, and are independent of image 
                 // dimensions, two parameters - Width of the band, and Number of Steps need 
                 // to be scaled depending upon the image dimensions.
                 // Here, the variable scaleFactor comes in handy to perform such scaling.
                 // Though scaleFactor can never be zero, we enclose the entire saving code 
                 // within a try-catch block, just in case things go out of control.
-                var vig = new VignetteEffect
-                                {
-                                    OrientationInDegrees = sliderAngle.Value,
-                                    CoveragePercent = sliderPercent.Value,
-                                    BandWidthInPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
-                                    NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
-                                    CenterXOffsetPercent = sliderOriginX.Value,
-                                    CenterYOffsetPercent = sliderOriginY.Value,
-                                    BorderColor = _borderColor,
-                                    Figure = Shape,
-                                };
-
-                Mouse.OverrideCursor = Cursors.Wait;
-                SaveImage(vig.Transform(_image), FileToSave(dlg.FileName));
+                SaveImage(new VignetteEffect
+                              {
+                                  OrientationInDegrees = sliderAngle.Value,
+                                  CoveragePercent = sliderPercent.Value,
+                                  BandWidthInPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
+                                  NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
+                                  CenterXOffsetPercent = sliderOriginX.Value,
+                                  CenterYOffsetPercent = sliderOriginY.Value,
+                                  BorderColor = _borderColor,
+                                  Figure = Shape,
+                              }.Transform(_image), FileToSave(dlg.FileName));
             }
             catch (Exception)
             {
