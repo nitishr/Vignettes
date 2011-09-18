@@ -18,6 +18,7 @@ namespace Vignettes
     public partial class MainWindow
     {
         private const int ViewportLength = 600;
+        private const string FileFilter = "All Image Files(*.bmp;*.png;*.tif;*.jpg)|*.bmp;*.png;*.tif;*.jpg|24-Bit Bitmap(*.bmp)|*.bmp|PNG(*.png)|*.png|TIFF(*.tif)|*.tif|JPEG(*.jpg)|*.jpg";
 
         private BitmapSource _image;
         private BitmapSource _scaledImage;
@@ -36,11 +37,7 @@ namespace Vignettes
 
         private void BnOpenClick(object sender, RoutedEventArgs e)
         {
-            var ofd = new OpenFileDialog
-                          {
-                              Filter =
-                                  "All Image Files(*.bmp;*.png;*.tif;*.jpg)|*.bmp;*.png;*.tif;*.jpg|24-Bit Bitmap(*.bmp)|*.bmp|PNG(*.png)|*.png|TIFF(*.tif)|*.tif|JPEG(*.jpg)|*.jpg"
-                          };
+            var ofd = new OpenFileDialog {Filter = FileFilter};
             if(ofd.ShowDialog() != true) return;
 
             try
@@ -146,8 +143,7 @@ namespace Vignettes
 
         private void BnSaveImageClick(object sender, RoutedEventArgs e)
         {
-            var dlg = new SaveFileDialog
-                          {Filter = "PNG Images (.png)|*.png|JPG Images (.jpg)|*.jpg|BMP Images (.bmp)|*.bmp"};
+            var dlg = new SaveFileDialog {Filter = FileFilter};
             if(dlg.ShowDialog() != true) return;
 
             try
@@ -212,6 +208,8 @@ namespace Vignettes
             {
                 case ".png":
                     return new PngBitmapEncoder();
+                case ".tif":
+                    return new TiffBitmapEncoder();
                 case ".jpg":
                     return new JpegBitmapEncoder();
                 default:
