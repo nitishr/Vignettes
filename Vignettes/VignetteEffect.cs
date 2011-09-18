@@ -15,7 +15,7 @@ namespace Vignettes
     public class VignetteEffect
     {
         private const int Dpi = 72;
-        private const int BitsPerPixel = 24;
+        private static readonly PixelFormat OutputFormat = PixelFormats.Rgb24;
         private BitmapSource _image;
 
         public double OrientationInDegrees { private get; set; } // This parameter is not of relevance for the Circle vignette.
@@ -164,7 +164,7 @@ namespace Vignettes
         {
             _image = image;
             IList<Color> colors = image.Pixels().Select((color, i) => ColorAt(i, color)).ToList();
-            var stride = image.Stride(BitsPerPixel);
+            var stride = image.Stride(OutputFormat);
             var pixelData = new byte[stride * image.PixelHeight];
 
             for (int i = 0; i < pixelData.Count(); i += 3)
@@ -175,7 +175,7 @@ namespace Vignettes
                 pixelData[i + 2] = color.B;
             }
 
-            return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, PixelFormats.Rgb24, null, pixelData, stride);
+            return BitmapSource.Create(image.PixelWidth, image.PixelHeight, Dpi, Dpi, OutputFormat, null, pixelData, stride);
         }
 
         public static bool CanTransform(BitmapSource image)
@@ -187,6 +187,34 @@ namespace Vignettes
         {
             return (format == PixelFormats.Bgra32 || format == PixelFormats.Bgr32) &&
                    (format.BitsPerPixel == 24 || format.BitsPerPixel == 32);
+        }
+    }
+
+    public static class BitmapSourceExt
+    {
+        public static List<Color> Pixels(this BitmapSource image)
+        {
+            byte[] pixelData = PixelData(image);
+            int step = image.Format.BitsPerPixel / 8;
+            var pixels = new List<Color>();
+            for (int i = 0; i < pixelData.Count(); i += step)
+            {
+                pixels.Add(Color.FromRgb(pixelData[i + 2], pixelData[i + 1], pixelData[i]));
+            }
+            return pixels;
+        }
+
+        private static byte[] PixelData(BitmapSource image)
+        {
+            var stride = image.Stride(image.Format);
+            var pixelData = new byte[stride * image.PixelHeight];
+            image.CopyPixels(pixelData, stride, 0);
+            return pixelData;
+        }
+
+        public static int Stride(this BitmapSource image, PixelFormat pixelFormat)
+        {
+            return (image.PixelWidth * pixelFormat.BitsPerPixel + 7) / 8;
         }
     }
 

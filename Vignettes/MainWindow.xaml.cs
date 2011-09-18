@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
@@ -289,34 +287,6 @@ namespace Vignettes
                 default:
                     return new BmpBitmapEncoder();
             }
-        }
-    }
-
-    public static class BitmapSourceExt
-    {
-        public static List<Color> Pixels(this BitmapSource image)
-        {
-            byte[] pixelData = PixelData(image);
-            int step = image.Format.BitsPerPixel / 8;
-            var pixels = new List<Color>();
-            for (int i = 0; i < pixelData.Count(); i += step)
-            {
-                pixels.Add(Color.FromRgb(pixelData[i + 2], pixelData[i + 1], pixelData[i]));
-            }
-            return pixels;
-        }
-
-        private static byte[] PixelData(BitmapSource image)
-        {
-            var stride = image.Stride(image.Format.BitsPerPixel);
-            var pixelData = new byte[stride * image.PixelHeight];
-            image.CopyPixels(pixelData, stride, 0);
-            return pixelData;
-        }
-
-        public static int Stride(this BitmapSource image, int bitsPerPixel)
-        {
-            return (image.PixelWidth*bitsPerPixel + 7)/8;
         }
     }
 }
