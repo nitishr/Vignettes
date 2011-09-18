@@ -235,7 +235,7 @@ namespace Vignettes
                                   };
 
                     Mouse.OverrideCursor = Cursors.Wait;
-                    SaveImage(vig.Transform(_image), FileToSave(dlg));
+                    SaveImage(vig.Transform(_image), FileToSave(dlg.FileName));
                 }
             }
             catch (Exception)
@@ -247,18 +247,15 @@ namespace Vignettes
             }
         }
 
-        private string FileToSave(FileDialog dlg)
+        private string FileToSave(string fileName)
         {
             // I don't want the original file to be overwritten, since the vignetting operation
             // is a lossy one (where some pixels of the original image may be lost).
             // Therefore, if the user inadvertently selects the original filename for saving,
             // I create the new file name with an underscore _ appended to the filename.
-            return dlg.FileName == _fileName ? GetNewFileName(dlg.FileName) : dlg.FileName;
-        }
-
-        private static string GetNewFileName(string fileForSaving)
-        {
-            return Path.GetFileNameWithoutExtension(fileForSaving) + "_" + Path.GetExtension(fileForSaving);
+            return fileName == _fileName
+                       ? Path.GetFileNameWithoutExtension(fileName) + "_" + Path.GetExtension(fileName)
+                       : fileName;
         }
 
         private static void SaveImage(BitmapSource image, string fileName)
