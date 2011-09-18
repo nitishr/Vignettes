@@ -42,26 +42,23 @@ namespace Vignettes
                               Filter =
                                   "All Image Files(*.bmp;*.png;*.tif;*.jpg)|*.bmp;*.png;*.tif;*.jpg|24-Bit Bitmap(*.bmp)|*.bmp|PNG(*.png)|*.png|TIFF(*.tif)|*.tif|JPEG(*.jpg)|*.jpg"
                           };
-            bool? result = ofd.ShowDialog();
+            if(ofd.ShowDialog() != true) return;
 
             try
             {
-                if (result == true)
+                Mouse.OverrideCursor = Cursors.Wait;
+                _fileName = ofd.FileName;
+                _image = new BitmapImage(new Uri(_fileName, UriKind.RelativeOrAbsolute));
+                if (VignetteEffect.CanTransform(_image))
                 {
-                    Mouse.OverrideCursor = Cursors.Wait;
-                    _fileName = ofd.FileName;
-                    _image = new BitmapImage(new Uri(_fileName, UriKind.RelativeOrAbsolute));
-                    if (VignetteEffect.CanTransform(_image))
-                    {
-                        Title = "Vignette Effect: " + ofd.SafeFileName;
-                        bnSaveImage.IsEnabled = true;
-                        FitImageToViewport();
-                        ApplyVignette();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Sorry, I'm unable to open this image!");
-                    }
+                    Title = "Vignette Effect: " + ofd.SafeFileName;
+                    bnSaveImage.IsEnabled = true;
+                    FitImageToViewport();
+                    ApplyVignette();
+                }
+                else
+                {
+                    MessageBox.Show("Sorry, I'm unable to open this image!");
                 }
             }
             catch (Exception)
@@ -147,16 +144,14 @@ namespace Vignettes
                                   StartingColor = _borderColor,
                                   Owner = this
                               };
-
             // I deliberately set the height to be this, so as not to show the Opacity and other 
             // colour text boxes in the dialog. I currently don't have the facility to change the 
             // opacity of the image, and therefore I don't want users to change the opacity, and hence
             // report a bug saying that "opacity is not working". So, I don't show the opacity button at all
             // and further, I don't allow this colour picker dialog to be resized.
 
+            if (cPicker.ShowDialog() != true) return;
 
-            bool? dialogResult = cPicker.ShowDialog();
-            if (dialogResult == null || !((bool) dialogResult)) return;
             _borderColor = cPicker.SelectedColor;
             bnColour.Background = new SolidColorBrush(_borderColor);
 
