@@ -53,7 +53,7 @@ namespace Vignettes
                     Title = "Vignette Effect: " + ofd.SafeFileName;
                     bnSaveImage.IsEnabled = true;
                     FitImageToViewport();
-                    ApplyVignette();
+                    ApplyEffect();
                 }
                 else
                 {
@@ -77,26 +77,16 @@ namespace Vignettes
             img.Source = _scaledImage;
         }
 
-        private void ApplyVignette()
+        private void ApplyEffect()
         {
             if (_scaledImage == null) return;
-            img.Source = new VignetteEffect
-                             {
-                                 OrientationInDegrees = sliderAngle.Value,
-                                 CoveragePercent = sliderPercent.Value,
-                                 BandWidthInPixels = Convert.ToInt32(sliderBand.Value),
-                                 NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value),
-                                 CenterXOffsetPercent = sliderOriginX.Value,
-                                 CenterYOffsetPercent = sliderOriginY.Value,
-                                 BorderColor = _borderColor,
-                                 Figure = Shape
-                             }.Transform(_scaledImage);
+            img.Source = Transform(_scaledImage, 1);
         }
 
         private void ComboTechniqueSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             sliderAngle.IsEnabled = !(Shape is Circle);
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private VignetteFigure Shape
@@ -146,37 +136,37 @@ namespace Vignettes
             _borderColor = cPicker.SelectedColor;
             bnColour.Background = new SolidColorBrush(_borderColor);
 
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private void SliderAngleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private void SliderPercentValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private void SliderBandValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private void SliderOriginXValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private void SliderOriginYValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private void SliderStepsValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ApplyVignette();
+            ApplyEffect();
         }
 
         private void BnSaveImageClick(object sender, RoutedEventArgs e)
@@ -188,23 +178,9 @@ namespace Vignettes
             try
             {
                 Mouse.OverrideCursor = Cursors.Wait;
-                // While all other parameters are percentages, and are independent of image 
-                // dimensions, two parameters - Width of the band, and Number of Steps need 
-                // to be scaled depending upon the image dimensions.
-                // Here, the variable scaleFactor comes in handy to perform such scaling.
                 // Though scaleFactor can never be zero, we enclose the entire saving code 
                 // within a try-catch block, just in case things go out of control.
-                SaveImage(new VignetteEffect
-                              {
-                                  OrientationInDegrees = sliderAngle.Value,
-                                  CoveragePercent = sliderPercent.Value,
-                                  BandWidthInPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
-                                  NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
-                                  CenterXOffsetPercent = sliderOriginX.Value,
-                                  CenterYOffsetPercent = sliderOriginY.Value,
-                                  BorderColor = _borderColor,
-                                  Figure = Shape,
-                              }.Transform(_image), FileToSave(dlg.FileName));
+                SaveImage(Transform(_image, _scaleFactor), FileToSave(dlg.FileName));
             }
             catch (Exception)
             {
@@ -213,6 +189,25 @@ namespace Vignettes
             {
                 Mouse.OverrideCursor = null;
             }
+        }
+
+        // While all other parameters are percentages, and are independent of image 
+        // dimensions, two parameters - Width of the band, and Number of Steps need 
+        // to be scaled depending upon the image dimensions.
+        // Here, the variable scaleFactor comes in handy to perform such scaling.
+        private BitmapSource Transform(BitmapSource image, double scaleFactor)
+        {
+            return new VignetteEffect
+                       {
+                           OrientationInDegrees = sliderAngle.Value,
+                           CoveragePercent = sliderPercent.Value,
+                           BandWidthInPixels = Convert.ToInt32(sliderBand.Value/scaleFactor),
+                           NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/scaleFactor),
+                           CenterXOffsetPercent = sliderOriginX.Value,
+                           CenterYOffsetPercent = sliderOriginY.Value,
+                           BorderColor = _borderColor,
+                           Figure = Shape,
+                       }.Transform(image);
         }
 
         private string FileToSave(string fileName)
