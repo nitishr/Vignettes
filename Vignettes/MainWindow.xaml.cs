@@ -206,37 +206,30 @@ namespace Vignettes
         {
             var dlg = new SaveFileDialog
                           {Filter = "PNG Images (.png)|*.png|JPG Images (.jpg)|*.jpg|BMP Images (.bmp)|*.bmp"};
-
-            // Show save file dialog box
-            bool? result = dlg.ShowDialog();
+            if(dlg.ShowDialog() != true) return;
 
             try
             {
-                // Process save file dialog box results
-                if (result == true)
-                {
-                    // Save image
-                    // While all other parameters are percentages, and are independent of image 
-                    // dimensions, two parameters - Width of the band, and Number of Steps need 
-                    // to be scaled depending upon the image dimensions.
-                    // Here, the variable scaleFactor comes in handy to perform such scaling.
-                    // Though scaleFactor can never be zero, we enclose the entire saving code 
-                    // within a try-catch block, just in case things go out of control.
-                    var vig = new VignetteEffect
-                                  {
-                                      OrientationInDegrees = sliderAngle.Value,
-                                      CoveragePercent = sliderPercent.Value,
-                                      BandWidthInPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
-                                      NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
-                                      CenterXOffsetPercent = sliderOriginX.Value,
-                                      CenterYOffsetPercent = sliderOriginY.Value,
-                                      BorderColor = _borderColor,
-                                      Figure = Shape,
-                                  };
+                // While all other parameters are percentages, and are independent of image 
+                // dimensions, two parameters - Width of the band, and Number of Steps need 
+                // to be scaled depending upon the image dimensions.
+                // Here, the variable scaleFactor comes in handy to perform such scaling.
+                // Though scaleFactor can never be zero, we enclose the entire saving code 
+                // within a try-catch block, just in case things go out of control.
+                var vig = new VignetteEffect
+                                {
+                                    OrientationInDegrees = sliderAngle.Value,
+                                    CoveragePercent = sliderPercent.Value,
+                                    BandWidthInPixels = Convert.ToInt32(sliderBand.Value/_scaleFactor),
+                                    NumberOfGradationSteps = Convert.ToInt32(sliderSteps.Value/_scaleFactor),
+                                    CenterXOffsetPercent = sliderOriginX.Value,
+                                    CenterYOffsetPercent = sliderOriginY.Value,
+                                    BorderColor = _borderColor,
+                                    Figure = Shape,
+                                };
 
-                    Mouse.OverrideCursor = Cursors.Wait;
-                    SaveImage(vig.Transform(_image), FileToSave(dlg.FileName));
-                }
+                Mouse.OverrideCursor = Cursors.Wait;
+                SaveImage(vig.Transform(_image), FileToSave(dlg.FileName));
             }
             catch (Exception)
             {
